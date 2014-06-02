@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.ply;
+package org.uct.cs.simplify.ply.header;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,20 +6,18 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Ben on 2014-06-02.
- */
 public class PLYHeader
 {
 
     private static final int expectedHeaderLength = 1024;
 
     private PLYFormat format;
-    private ArrayList<PLYElement> elements;
+    private List<PLYElement> elements;
 
     public PLYHeader(File f) throws IOException
     {
@@ -46,7 +44,7 @@ public class PLYHeader
         return format;
     }
 
-    public ArrayList<PLYElement> getElements()
+    public List<PLYElement> getElements()
     {
         return elements;
     }
@@ -85,12 +83,13 @@ public class PLYHeader
 
         // read the list of elements from scanner
         this.elements = parseElements(headScan);
+
     }
 
-    public static ArrayList<PLYElement> parseElements(Scanner s)
+    public static List<PLYElement> parseElements(Scanner s)
     {
         // output object
-        ArrayList<PLYElement> out = new ArrayList<>();
+        List<PLYElement> out = new ArrayList<>();
 
         PLYElement current = null;
         String line;
@@ -108,7 +107,7 @@ public class PLYHeader
             // property line
             else if (line.startsWith("property"))
             {
-                if (current != null) current.addProperty(PLYProperty.FromString(line));
+                if (current != null) current.addProperty(PLYPropertyBase.FromString(line));
             }
         }
         if (current != null) out.add(current);

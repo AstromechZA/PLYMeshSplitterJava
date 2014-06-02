@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.ply.PLYElement;
-import org.uct.cs.simplify.ply.PLYHeader;
+import org.uct.cs.simplify.ply.header.PLYElement;
+import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -23,7 +23,7 @@ public class Main
             System.out.println(ph.getFormat());
             for (PLYElement e : ph.getElements())
             {
-                System.out.println(e.toString());
+                System.out.println(e);
                 e.getProperties().forEach(System.out::println);
             }
         }

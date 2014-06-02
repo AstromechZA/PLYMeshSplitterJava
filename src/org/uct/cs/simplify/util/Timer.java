@@ -1,8 +1,5 @@
 package org.uct.cs.simplify.util;
 
-/**
- * Created by Ben on 2014-06-02.
- */
 public class Timer implements AutoCloseable
 {
     private String text;
