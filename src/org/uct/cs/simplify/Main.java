@@ -1,8 +1,8 @@
 package org.uct.cs.simplify;
 
 import org.uct.cs.simplify.ply.header.PLYElement;
-import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYPropertyBase;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -18,18 +18,18 @@ public class Main
         try (Timer ignored = new Timer("Entire read"))
         {
 
-            PLYHeader ph = new PLYHeader(new File(filename));
+            PLYReader r = new PLYReader(new File(filename));
 
-            System.out.println(ph.getFormat());
-            for (PLYElement e : ph.getElements().values())
+            System.out.println(r.getHeader().getFormat());
+            for (PLYElement e : r.getHeader().getElements().values())
             {
-                System.out.println(e);
+                System.out.println("" + e + r.getPositionOfElement(e.getName()));
                 e.getProperties().forEach(System.out::println);
             }
 
-            System.out.println(ph.getDataOffset());
+            System.out.println(r.getHeader().getDataOffset());
             System.out.println(PLYPropertyBase.bytesInType(PLYPropertyBase.DataType.DOUBLE));
-            System.out.println(ph.getElement("face"));
+            System.out.println(r.getHeader().getElement("face"));
         }
         catch (IOException e)
         {
