@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.ply.reader;
 
 import org.uct.cs.simplify.ply.header.*;
+import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +20,21 @@ public class PLYReader
 
         this.elementPositions = calculateElementPositionsNaive();
 
-        new VertexReader(f, 310, 100, 20);
+        try (Timer t = new Timer("v reader"); VertexReader vr = new VertexReader(f, elementPositions.get("vertex"), this.header.getElement("vertex").getCount(), 20))
+        {
+            Vertex v;
+            int n = 0;
+            while (vr.hasNext())
+            {
+                n += 1;
+                v = vr.next();
+            }
+            System.out.println(n);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
     }
 

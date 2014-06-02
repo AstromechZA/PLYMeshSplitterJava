@@ -6,36 +6,75 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-public class VertexReader
+public class VertexReader implements AutoCloseable
 {
-    int cursor;
+    RandomAccessFile raf;
+    FileChannel fc;
 
-    public VertexReader(File f, int position, int count, int blockSize) throws IOException
+    int largeChunkSize;
+    int numChunks;
+    int remChunks;
+    int chunkIndex;
+
+    ByteBuffer chunk;
+
+    int numBlocks;
+    int blockIndex;
+    int blockSize;
+
+
+    public VertexReader(File f, long position, int count, int blockSize) throws IOException
     {
-        long numbytes = count * blockSize;
+        raf = new RandomAccessFile(f, "r");
+        fc = raf.getChannel();
 
-        int chunksize = (1024 / blockSize) * blockSize;
+        this.blockSize = blockSize;
 
-        try (RandomAccessFile raf = new RandomAccessFile(f, "r"))
-        {
-            try (FileChannel fc = raf.getChannel())
-            {
-                fc.position(position);
-                ByteBuffer buffer = ByteBuffer.allocate(chunksize);
-                while (fc.read(buffer) > 0)
-                {
-                    buffer.flip();
-                    int n = chunksize / blockSize;
-                    for (int i = 0; i < n; i++)
-                    {
-                        byte[] b = new byte[ blockSize ];
-                        buffer.get(b, 0, blockSize);
-                        Vertex v = new Vertex(b);
-                        System.out.println(v.x);
-                    }
-                    buffer.flip();
-                }
-            }
-        }
+        largeChunkSize = (1024 / blockSize) * blockSize;
+        numChunks = (count * blockSize) / largeChunkSize;
+        remChunks = (count * blockSize) % largeChunkSize;
+        chunkIndex = numChunks;
+
+        loadChunk();
+    }
+
+    private void loadChunk() throws IOException
+    {
+        if (chunkIndex < 0) throw new IOException("wdawdaw");
+
+        int n = (chunkIndex > 0) ? largeChunkSize : remChunks;
+
+        chunk = ByteBuffer.allocate(n);
+        n = fc.read(chunk);
+        chunk.flip();
+        chunkIndex--;
+
+        numBlocks = n / blockSize;
+        blockIndex = numBlocks;
+
+    }
+
+    public boolean hasNext()
+    {
+        return chunkIndex > 0 || blockIndex > 0;
+    }
+
+    public Vertex next() throws IOException
+    {
+        if (blockIndex == 0) loadChunk();
+
+        byte[] b = new byte[ blockSize ];
+        chunk.get(b, 0, blockSize);
+
+        blockIndex--;
+
+        return new Vertex(b);
+    }
+
+    @Override
+    public void close() throws Exception
+    {
+        fc.close();
+        raf.close();
     }
 }
