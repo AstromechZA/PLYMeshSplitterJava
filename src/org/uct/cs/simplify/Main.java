@@ -11,7 +11,7 @@ public class Main
 
     public static void main(String[] args)
     {
-        String filename = "C:\\Users\\Ben\\Desktop\\Chapel_of_Nossa_Senhora_de_Baluarte_ao.ply";
+        String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
 
         try (Timer ignored = new Timer("Entire read"))
         {
