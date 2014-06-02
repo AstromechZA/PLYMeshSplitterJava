@@ -19,6 +19,8 @@ public class PLYReader
 
         this.elementPositions = calculateElementPositionsNaive();
 
+        new VertexReader(f, 310, 100, 20);
+
     }
 
     private LinkedHashMap<String, Long> calculateElementPositionsNaive()
