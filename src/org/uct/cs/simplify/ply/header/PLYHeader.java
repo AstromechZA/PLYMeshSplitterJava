@@ -18,6 +18,7 @@ public class PLYHeader
 
     private PLYFormat format;
     private List<PLYElement> elements;
+    private int dataOffset;
 
     public PLYHeader(File f) throws IOException
     {
@@ -84,6 +85,7 @@ public class PLYHeader
         // read the list of elements from scanner
         this.elements = parseElements(headScan);
 
+        this.dataOffset = input.length();
     }
 
     public static List<PLYElement> parseElements(Scanner s)
@@ -113,6 +115,11 @@ public class PLYHeader
         if (current != null) out.add(current);
 
         return out;
+    }
+
+    public int getDataOffset()
+    {
+        return dataOffset;
     }
 
     public static enum PLYFormat

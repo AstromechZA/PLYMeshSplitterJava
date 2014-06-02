@@ -2,6 +2,7 @@ package org.uct.cs.simplify;
 
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.header.PLYPropertyBase;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -12,7 +13,6 @@ public class Main
 
     public static void main(String[] args)
     {
-        //String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
         String filename = "C:\\Users\\Ben\\Desktop\\Chapel_of_Nossa_Senhora_de_Baluarte_ao.ply";
 
         try (Timer ignored = new Timer("Entire read"))
@@ -26,6 +26,9 @@ public class Main
                 System.out.println(e);
                 e.getProperties().forEach(System.out::println);
             }
+
+            System.out.println(ph.getDataOffset());
+            System.out.println(PLYPropertyBase.bytesInType(PLYPropertyBase.DataType.DOUBLE));
         }
         catch (IOException e)
         {

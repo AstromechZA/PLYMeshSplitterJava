@@ -2,6 +2,7 @@ package org.uct.cs.simplify.ply.header;
 
 public class PLYPropertyBase
 {
+    private static int[] byteSize = { 1, 1, 2, 2, 4, 4, 4, 8 };
     private String name;
 
     public PLYPropertyBase(String name)
@@ -33,7 +34,10 @@ public class PLYPropertyBase
         return DataType.valueOf(input.trim().toUpperCase());
     }
 
-
+    public static int bytesInType(DataType dt)
+    {
+        return byteSize[ dt.ordinal() ];
+    }
     public enum DataType
     {
         CHAR,
