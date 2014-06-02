@@ -13,15 +13,17 @@ public class Main
 
     public static void main(String[] args)
     {
-        String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
+        String filename = "C:\\Users\\Ben\\Desktop\\Chapel_of_Nossa_Senhora_de_Baluarte_ao.ply";
+        //String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
 
         try (Timer ignored = new Timer("Entire read"))
         {
 
             PLYReader r = new PLYReader(new File(filename));
 
-            try (Timer t = new Timer("v reader");
-                 VertexReader vr = new VertexReader(r.getFile(), r.getPositionOfElement("vertex"), r.getHeader().getElement("vertex").getCount(), 20))
+            System.out.printf("%d vertices\n", r.getHeader().getElement("vertex").getCount());
+
+            try (VertexReader vr = new VertexReader(r.getFile(), r.getPositionOfElement("vertex"), r.getHeader().getElement("vertex").getCount(), 20))
             {
                 Vertex v;
                 int n = 0;
@@ -46,9 +48,9 @@ public class Main
                     minz = Math.min(minz, v.z);
                     maxz = Math.max(maxz, v.z);
                 }
-                System.out.printf("x: %f  %f  %f\n", minx, maxx, (minx + maxx) / 2);
-                System.out.printf("y: %f  %f  %f\n", miny, maxy, (miny + maxy) / 2);
-                System.out.printf("z: %f  %f  %f\n", minz, maxz, (minz + maxz) / 2);
+                System.out.printf("x: %f < %f @ %f\n", minx, maxx, (minx + maxx) / 2);
+                System.out.printf("y: %f < %f @ %f\n", miny, maxy, (miny + maxy) / 2);
+                System.out.printf("z: %f < %f @ %f\n", minz, maxz, (minz + maxz) / 2);
 
 
             }
