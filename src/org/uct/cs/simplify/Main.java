@@ -21,7 +21,7 @@ public class Main
             PLYHeader ph = new PLYHeader(new File(filename));
 
             System.out.println(ph.getFormat());
-            for (PLYElement e : ph.getElements())
+            for (PLYElement e : ph.getElements().values())
             {
                 System.out.println(e);
                 e.getProperties().forEach(System.out::println);
@@ -29,6 +29,7 @@ public class Main
 
             System.out.println(ph.getDataOffset());
             System.out.println(PLYPropertyBase.bytesInType(PLYPropertyBase.DataType.DOUBLE));
+            System.out.println(ph.getElement("face"));
         }
         catch (IOException e)
         {

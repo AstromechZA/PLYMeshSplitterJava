@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,7 +16,7 @@ public class PLYHeader
     private static final int expectedHeaderLength = 1024;
 
     private PLYFormat format;
-    private List<PLYElement> elements;
+    private LinkedHashMap<String, PLYElement> elements;
     private int dataOffset;
 
     public PLYHeader(File f) throws IOException
@@ -45,9 +44,14 @@ public class PLYHeader
         return format;
     }
 
-    public List<PLYElement> getElements()
+    public LinkedHashMap<String, PLYElement> getElements()
     {
         return elements;
+    }
+
+    public PLYElement getElement(String name)
+    {
+        return elements.get(name);
     }
 
     private static String isolateHeader(String input) throws BadHeaderException
@@ -88,10 +92,10 @@ public class PLYHeader
         this.dataOffset = input.length();
     }
 
-    public static List<PLYElement> parseElements(Scanner s)
+    public static LinkedHashMap<String, PLYElement> parseElements(Scanner s)
     {
         // output object
-        List<PLYElement> out = new ArrayList<>();
+        LinkedHashMap<String, PLYElement> out = new LinkedHashMap<>();
 
         PLYElement current = null;
         String line;
@@ -103,7 +107,7 @@ public class PLYHeader
             // element line shows the start of a new element block
             if (line.startsWith("element"))
             {
-                if (current != null) out.add(current);
+                if (current != null) out.put(current.getName(), current);
                 current = PLYElement.FromString(line);
             }
             // property line
@@ -112,7 +116,7 @@ public class PLYHeader
                 if (current != null) current.addProperty(PLYPropertyBase.FromString(line));
             }
         }
-        if (current != null) out.add(current);
+        if (current != null) out.put(current.getName(), current);
 
         return out;
     }
