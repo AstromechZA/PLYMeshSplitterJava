@@ -1,7 +1,5 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.ply.header.PLYElement;
-import org.uct.cs.simplify.ply.header.PLYPropertyBase;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Timer;
 
@@ -20,16 +18,6 @@ public class Main
 
             PLYReader r = new PLYReader(new File(filename));
 
-            System.out.println(r.getHeader().getFormat());
-            for (PLYElement e : r.getHeader().getElements().values())
-            {
-                System.out.println("" + e + r.getPositionOfElement(e.getName()));
-                e.getProperties().forEach(System.out::println);
-            }
-
-            System.out.println(r.getHeader().getDataOffset());
-            System.out.println(PLYPropertyBase.bytesInType(PLYPropertyBase.DataType.DOUBLE));
-            System.out.println(r.getHeader().getElement("face"));
         }
         catch (IOException e)
         {

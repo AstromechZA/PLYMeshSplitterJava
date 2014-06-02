@@ -28,6 +28,7 @@ public class PLYReader
             {
                 n += 1;
                 v = vr.next();
+                System.out.println(v.x);
             }
             System.out.println(n);
         }

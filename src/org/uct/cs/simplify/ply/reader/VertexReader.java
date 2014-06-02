@@ -35,6 +35,9 @@ public class VertexReader implements AutoCloseable
         remChunks = (count * blockSize) % largeChunkSize;
         chunkIndex = numChunks;
 
+        //skip to position
+        fc.position(position);
+
         loadChunk();
     }
 
