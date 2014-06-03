@@ -1,13 +1,12 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.img.ModelImager;
+import org.uct.cs.simplify.img.BluePrintGenerator;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
 import org.uct.cs.simplify.ply.reader.VertexReader;
 import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +67,7 @@ public class Main
 
             try
             {
-                BufferedImage bi = ModelImager.CreateImage(r, 1024, new Color(102, 102, 204), Color.white, 0.1f, ModelImager.Axis.X_Z);
+                BufferedImage bi = BluePrintGenerator.CreateImage(r, 1024, 0.1f, BluePrintGenerator.Axis.X_Z);
                 ImageIO.write(bi, "jpg", new File("C:\\Users\\Ben\\o.jpg"));
             }
             catch (Exception e)

@@ -10,8 +10,21 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.Arrays;
 
-public class ModelImager
+public class BluePrintGenerator
 {
+
+    public static Color defaultBackground = new Color(102, 102, 204);
+    public static Color defaultForeground = Color.white;
+
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment) throws Exception
+    {
+        return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, Axis.X_Y);
+    }
+
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment, Axis type) throws Exception
+    {
+        return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, type);
+    }
 
     public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws Exception
     {
