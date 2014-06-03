@@ -68,7 +68,7 @@ public class Main
 
             try
             {
-                BufferedImage bi = ModelImager.CreateImage(r, 1024, new Color(102, 102, 204), Color.white, 0.1f);
+                BufferedImage bi = ModelImager.CreateImage(r, 1024, new Color(102, 102, 204), Color.white, 0.1f, ModelImager.Axis.X_Z);
                 ImageIO.write(bi, "jpg", new File("C:\\Users\\Ben\\o.jpg"));
             }
             catch (Exception e)
