@@ -55,7 +55,8 @@ public class BluePrintGenerator
 
         int center = resolution / 2;
         float bigdim = (float) Math.max(r.getWidth(), r.getHeight());
-        float ratio = resolution / bigdim;
+        int border = 10;
+        float ratio = (resolution - border) / bigdim;
 
         try (VertexReader vr = new VertexReader(reader.getFile(), reader.getPositionOfElement("vertex"), reader.getHeader().getElement("vertex").getCount(), 20))
         {
