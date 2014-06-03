@@ -34,6 +34,7 @@ public class Main
                         minz = Float.MAX_VALUE,
                         maxz = -Float.MAX_VALUE;
 
+                long s = System.nanoTime();
                 while (vr.hasNext())
                 {
                     n += 1;
@@ -48,6 +49,8 @@ public class Main
                     minz = Math.min(minz, v.z);
                     maxz = Math.max(maxz, v.z);
                 }
+                long e = System.nanoTime();
+                System.out.printf("%f vertices per second.\n", (float) (e - s) / n);
                 System.out.printf("x: %f < %f @ %f\n", minx, maxx, (minx + maxx) / 2);
                 System.out.printf("y: %f < %f @ %f\n", miny, maxy, (miny + maxy) / 2);
                 System.out.printf("z: %f < %f @ %f\n", minz, maxz, (minz + maxz) / 2);
