@@ -7,6 +7,8 @@ import org.uct.cs.simplify.ply.reader.VertexReader;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.util.Arrays;
 
 public class ModelImager
 {
@@ -17,12 +19,16 @@ public class ModelImager
 
         Rectangle2D r = calculateBounds(reader);
 
-        Graphics g = bi.getGraphics();
+        int[] pixels = ((DataBufferInt) bi.getRaster().getDataBuffer()).getData();
         Color bg = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
-        Color fg = new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue(), (int) (alphaAdjustment * 255));
-        g.setColor(bg);
-        g.fillRect(0, 0, resolution, resolution);
-        g.setColor(fg);
+        Color fg = new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue(), 255);
+
+        int bgi = colourToInt(bg);
+        int fgi = colourToInt(fg);
+
+        Arrays.fill(pixels, bgi);
+
+        int w = bi.getWidth();
 
         int center = resolution / 2;
         float bigdim = (float) Math.max(r.getWidth(), r.getHeight());
@@ -41,10 +47,10 @@ public class ModelImager
                 int tx = center + (int) ((ix - r.getCenterX()) * ratio);
                 int ty = center + (int) ((iy - r.getCenterY()) * ratio);
 
-                g.fillRect(tx, ty, 1, 1);
+                int index = ty * w + tx;
+                pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
         }
-
         return bi;
     }
 
@@ -77,5 +83,26 @@ public class ModelImager
         }
     }
 
+    private static int colourToInt(Color c)
+    {
+        return (c.getAlpha() << 24) + (c.getRed() << 16) + (c.getGreen() << 8) + c.getBlue();
+    }
+
+    private static int blend(int bgi, int fgi, float amount)
+    {
+        int dr = (bgi >> 16) & 0xFF;
+        int dg = (bgi >> 8) & 0xFF;
+        int db = (bgi) & 0xFF;
+
+        int sr = (fgi >> 16) & 0xFF;
+        int sg = (fgi >> 8) & 0xFF;
+        int sb = (fgi) & 0xFF;
+
+        int rr = (int) (sr * amount + dr * (1 - amount)) & 0xFF;
+        int rg = (int) (sg * amount + dg * (1 - amount)) & 0xFF;
+        int rb = (int) (sb * amount + db * (1 - amount)) & 0xFF;
+
+        return 0xFF000000 + (rr << 16) + (rg << 8) + (rb);
+    }
 
 }
