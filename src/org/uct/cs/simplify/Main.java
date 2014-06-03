@@ -17,8 +17,8 @@ public class Main
 
     public static void main(String[] args)
     {
-        //String filename = "C:\\Users\\Ben\\Desktop\\Chapel_of_Nossa_Senhora_de_Baluarte_ao.ply";
-        String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
+        String filename = "C:\\Users\\Ben\\Desktop\\Chapel_of_Nossa_Senhora_de_Baluarte_ao.ply";
+        //String filename = "C:\\Users\\Ben\\Desktop\\Gede Palace _3_Mio.ply";
 
         try (Timer ignored = new Timer("Entire read"))
         {
@@ -69,7 +69,7 @@ public class Main
             try
             {
                 BufferedImage bi = ModelImager.CreateImage(r, 1024, new Color(102, 102, 204), Color.white, 0.1f);
-                ImageIO.write(bi, "png", new File("C:\\Users\\Ben\\o.png"));
+                ImageIO.write(bi, "jpg", new File("C:\\Users\\Ben\\o.jpg"));
             }
             catch (Exception e)
             {

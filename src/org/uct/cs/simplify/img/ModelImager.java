@@ -15,16 +15,14 @@ public class ModelImager
 
     public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws Exception
     {
-        BufferedImage bi = new BufferedImage(resolution, resolution, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage(resolution, resolution, BufferedImage.TYPE_INT_RGB);
 
         Rectangle2D r = calculateBounds(reader);
 
         int[] pixels = ((DataBufferInt) bi.getRaster().getDataBuffer()).getData();
-        Color bg = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);
-        Color fg = new Color(foreground.getRed(), foreground.getGreen(), foreground.getBlue(), 255);
 
-        int bgi = colourToInt(bg);
-        int fgi = colourToInt(fg);
+        int bgi = background.getRGB();
+        int fgi = foreground.getRGB();
 
         Arrays.fill(pixels, bgi);
 
@@ -83,13 +81,9 @@ public class ModelImager
         }
     }
 
-    private static int colourToInt(Color c)
-    {
-        return (c.getAlpha() << 24) + (c.getRed() << 16) + (c.getGreen() << 8) + c.getBlue();
-    }
-
     private static int blend(int bgi, int fgi, float amount)
     {
+        float namount = 1 - amount;
         int dr = (bgi >> 16) & 0xFF;
         int dg = (bgi >> 8) & 0xFF;
         int db = (bgi) & 0xFF;
@@ -98,11 +92,11 @@ public class ModelImager
         int sg = (fgi >> 8) & 0xFF;
         int sb = (fgi) & 0xFF;
 
-        int rr = (int) (sr * amount + dr * (1 - amount)) & 0xFF;
-        int rg = (int) (sg * amount + dg * (1 - amount)) & 0xFF;
-        int rb = (int) (sb * amount + db * (1 - amount)) & 0xFF;
+        int rr = (int) (sr * amount + dr * namount) & 0xFF;
+        int rg = (int) (sg * amount + dg * namount) & 0xFF;
+        int rb = (int) (sb * amount + db * namount) & 0xFF;
 
-        return 0xFF000000 + (rr << 16) + (rg << 8) + (rb);
+        return (rr << 16) + (rg << 8) + (rb);
     }
 
 }
