@@ -62,7 +62,7 @@ public class MemRecorder implements AutoCloseable
         {
             try
             {
-                while (!Thread.currentThread().isInterrupted())
+                do
                 {
                     long ms = System.currentTimeMillis();
                     Runtime r = Runtime.getRuntime();
@@ -72,6 +72,7 @@ public class MemRecorder implements AutoCloseable
 
                     Thread.sleep(parent.getInterval());
                 }
+                while (!Thread.currentThread().isInterrupted());
             }
             catch (InterruptedException e)
             {
