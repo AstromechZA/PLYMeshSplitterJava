@@ -11,30 +11,32 @@ public class PLYReader
     private File file;
     private PLYHeader header;
     private LinkedHashMap<String, Long> elementPositions;
+    private LinkedHashMap<String, Long> elementLengths;
 
     public PLYReader(File f) throws IOException
     {
         this.file = f;
         this.header = new PLYHeader(f);
 
-        this.elementPositions = calculateElementPositionsNaive();
-
-
+        calculateElementPositionsNaive();
     }
 
-    private LinkedHashMap<String, Long> calculateElementPositionsNaive()
+    private void calculateElementPositionsNaive()
     {
-        LinkedHashMap<String, Long> out = new LinkedHashMap<>();
+        this.elementPositions = new LinkedHashMap<>();
+        this.elementLengths = new LinkedHashMap<>();
 
         long fileSize = this.file.length();
         // current cursor in file
         long cursor = this.header.getDataOffset();
 
+        PLYElement last = null;
+
         for (PLYElement e : this.header.getElements().values())
         {
             if (cursor == -1) throw new RuntimeException("Element positions cannot be calculated naively!");
 
-            out.put(e.getName(), cursor);
+            this.elementPositions.put(e.getName(), cursor);
 
             long itemSize = 0;
 
@@ -57,18 +59,30 @@ public class PLYReader
             }
             else
             {
-                cursor += itemSize * e.getCount();
+                long l = itemSize * e.getCount();
+                cursor += l;
+                this.elementLengths.put(e.getName(), l);
             }
 
-
+            last = e;
         }
 
-        return out;
+        if (last != null && this.elementPositions.containsKey(last.getName()))
+        {
+            long l = fileSize - this.elementPositions.get(last.getName());
+            this.elementLengths.put(last.getName(), l);
+        }
+
     }
 
     public long getPositionOfElement(String n)
     {
         return this.elementPositions.get(n);
+    }
+
+    public long getLengthOfElement(String n)
+    {
+        return this.elementLengths.get(n);
     }
 
     public PLYHeader getHeader()
@@ -81,4 +95,5 @@ public class PLYReader
     {
         return file;
     }
+
 }
