@@ -11,6 +11,11 @@ public class Face
         this.vertices = vertexList;
     }
 
+    public List<Integer> getVertices()
+    {
+        return this.vertices;
+    }
+
     public int getNumVertices()
     {
         return this.vertices.size();

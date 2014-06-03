@@ -24,11 +24,6 @@ public class Main
 
             try (MemoryMappedVertexReader mmvr = new MemoryMappedVertexReader(r.getFile(), p, c, 20))
             {
-                for (int i = 0; i < c; i++)
-                {
-                    Vertex n = mmvr.get(0);
-                }
-
                 int fc = r.getHeader().getElement("face").getCount();
                 long fp = r.getPositionOfElement("face");
                 long fl = r.getLengthOfElement("face");
@@ -39,6 +34,10 @@ public class Main
                     while (fr.hasNext())
                     {
                         face = fr.next();
+                        for (Integer i : face.getVertices())
+                        {
+                            Vertex v = mmvr.get(i);
+                        }
                     }
                 }
             }
