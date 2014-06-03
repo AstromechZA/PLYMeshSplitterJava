@@ -39,11 +39,8 @@ public class ModelImager
             {
                 v = vr.next();
 
-                float ix = v.x;
-                float iy = v.y;
-
-                int tx = (int) (center + (ix - r.getCenterX()) * ratio);
-                int ty = (int) (center + (iy - r.getCenterY()) * ratio);
+                int tx = (int) (center + (v.x - r.getCenterX()) * ratio);
+                int ty = (int) (center - (v.y - r.getCenterY()) * ratio);
 
                 int index = ty * w + tx;
                 pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
