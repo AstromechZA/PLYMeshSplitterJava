@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class BluePrintGenerator
@@ -16,27 +17,27 @@ public class BluePrintGenerator
     public static Color defaultBackground = new Color(102, 102, 204);
     public static Color defaultForeground = Color.white;
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment) throws Exception
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment) throws IOException
     {
         return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, Axis.X_Y);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment, Axis type) throws Exception
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment, Axis type) throws IOException
     {
         return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, type);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws Exception
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, Axis.X_Y);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws Exception
+    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type);
     }
 
-    private static BufferedImage makeBufferedImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws Exception
+    private static BufferedImage makeBufferedImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
     {
         IAxisValueGetter avg = parseAVG(type);
 
@@ -82,7 +83,7 @@ public class BluePrintGenerator
         return new YZAxisValueGetter();
     }
 
-    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg) throws Exception
+    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg) throws IOException
     {
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getPositionOfElement("vertex");

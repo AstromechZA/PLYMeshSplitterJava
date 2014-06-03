@@ -75,7 +75,7 @@ public class VertexReader implements AutoCloseable
     }
 
     @Override
-    public void close() throws Exception
+    public void close() throws IOException
     {
         fc.close();
         raf.close();
