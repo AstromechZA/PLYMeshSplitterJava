@@ -7,9 +7,10 @@ import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class MemoryMappedFaceReader implements AutoCloseable
+public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 {
     int index = 0;
     int count;

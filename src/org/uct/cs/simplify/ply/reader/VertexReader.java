@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 
-public class VertexReader implements AutoCloseable
+public class VertexReader implements AutoCloseable, Iterator<Vertex>
 {
     RandomAccessFile raf;
     FileChannel fc;
@@ -62,9 +63,16 @@ public class VertexReader implements AutoCloseable
         return chunkIndex > 0 || blockIndex > 0;
     }
 
-    public Vertex next() throws IOException
+    public Vertex next()
     {
-        if (blockIndex == 0) loadChunk();
+        try
+        {
+            if (blockIndex == 0) loadChunk();
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
 
         byte[] b = new byte[ blockSize ];
         chunk.get(b, 0, blockSize);
