@@ -3,7 +3,6 @@ package org.uct.cs.simplify.img;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
-import org.uct.cs.simplify.ply.reader.VertexReader;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -92,9 +91,8 @@ public class BluePrintGenerator
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();
 
-        try (VertexReader vr = new VertexReader(reader.getFile(), p, c, 20))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, 20))
         {
-            Vertex v;
             int n = 0;
             float minx = Float.MAX_VALUE,
                     maxx = -Float.MAX_VALUE,
@@ -102,10 +100,11 @@ public class BluePrintGenerator
                     maxy = -Float.MAX_VALUE;
             float pr, se;
 
-            while (vr.hasNext())
+            Vertex v;
+            for (int i = 0; i < c; i++)
             {
+                v = vr.get(i);
                 n += 1;
-                v = vr.next();
                 pr = avg.getPrimaryAxisValue(v);
                 se = avg.getSecondaryAxisValue(v);
 
