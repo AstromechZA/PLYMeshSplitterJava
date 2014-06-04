@@ -76,7 +76,7 @@ public class ImprovedPLYReader
                 }
                 else
                 {
-                    long elementSize = calculateSizeOfElement(e, buffer);
+                    long elementSize = calculateSizeOfListElement(e, buffer);
                     this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
@@ -87,7 +87,7 @@ public class ImprovedPLYReader
 
     }
 
-    private long calculateSizeOfElement(PLYElement e, MappedByteBuffer buffer)
+    private long calculateSizeOfListElement(PLYElement e, MappedByteBuffer buffer)
     {
         long total = 0;
 
