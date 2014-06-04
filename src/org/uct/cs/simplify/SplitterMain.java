@@ -9,7 +9,7 @@ import org.uct.cs.simplify.util.Timer;
 import java.io.File;
 import java.io.IOException;
 
-public class Main
+public class SplitterMain
 {
 
     public static void main(String[] args)
