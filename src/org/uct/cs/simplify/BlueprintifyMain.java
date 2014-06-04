@@ -67,11 +67,9 @@ public class BlueprintifyMain
         o4.setType(Float.class);
         options.addOption(o4);
 
-        CommandLine cmd;
         try
         {
-            cmd = clp.parse(options, args);
-            return cmd;
+            return clp.parse(options, args);
         }
         catch (ParseException e)
         {
