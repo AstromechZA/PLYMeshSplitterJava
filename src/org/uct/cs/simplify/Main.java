@@ -25,6 +25,8 @@ public class Main
             PLYHeader header = new PLYHeader(file);
             ImprovedPLYReader r = new ImprovedPLYReader(header, file);
 
+            System.out.println(r.getElementDimension("vertex").getFirst());
+            System.out.println(r.getElementDimension("face").getFirst());
 
 
         }

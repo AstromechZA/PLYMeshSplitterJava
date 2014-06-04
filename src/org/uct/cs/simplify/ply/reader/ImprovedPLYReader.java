@@ -39,16 +39,17 @@ public class ImprovedPLYReader
     {
         this.elementDimensions.clear();
 
-        long position = header.getDataOffset();
-        long payloadSize = file.length() - position;
+        long dataOffset = header.getDataOffset();
+        long payloadSize = file.length() - dataOffset;
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fc = raf.getChannel())
         {
-            MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, position, payloadSize);
+            MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, dataOffset, payloadSize);
 
             int cursor = 0;
 
-            PLYElement[] elements = header.getElements().values().toArray(new PLYElement[]{ });
+            PLYElement[] elements = new PLYElement[ header.getElements().size() ];
+            header.getElements().values().toArray(elements);
             int numElements = elements.length;
 
             for (int i = 0; i < numElements; i++)
@@ -62,13 +63,13 @@ public class ImprovedPLYReader
                 if (i == numElements - 1)
                 {
                     long elementSize = payloadSize - cursor;
-                    this.elementDimensions.put(e.getName(), new Pair<>(elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
                     break;
                 }
                 else if (e.getItemSize() != null)
                 {
                     long elementSize = e.getCount() * e.getItemSize();
-                    this.elementDimensions.put(e.getName(), new Pair<>(elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
@@ -76,7 +77,7 @@ public class ImprovedPLYReader
                 else
                 {
                     long elementSize = calculateSizeOfElement(e, buffer);
-                    this.elementDimensions.put(e.getName(), new Pair<>(elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
