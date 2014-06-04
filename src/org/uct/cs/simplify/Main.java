@@ -21,6 +21,7 @@ public class Main
             // this scans the target file and works out start and end ranges
             PLYReader r = new PLYReader(new File(cmd.getOptionValue("f")));
 
+
         }
         catch (IOException | InterruptedException e)
         {
@@ -28,6 +29,14 @@ public class Main
         }
     }
 
+    /**
+     * Parses the given string array as an options array and returns a CommandLine instance
+     * containing the results. If required options were missing or an error occured, it will print
+     * usage to standard out and System.exit(1).
+     *
+     * @param args String[] containing program arguments
+     * @return CommandLine instance containing results
+     */
     private static CommandLine getCommandLine(String[] args)
     {
         CommandLineParser clp = new BasicParser();
