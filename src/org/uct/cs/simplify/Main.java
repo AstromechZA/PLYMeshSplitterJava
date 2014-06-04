@@ -1,7 +1,8 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.util.MemRecorder;
 import org.uct.cs.simplify.util.Timer;
 
@@ -17,9 +18,13 @@ public class Main
 
         try (MemRecorder m = new MemRecorder(new File("C:\\Users\\Ben\\o.dat"), 50); Timer ignored = new Timer("Entire read"))
         {
+            File file = new File(cmd.getOptionValue("f"));
+
             // == construct & setup PLYReader
             // this scans the target file and works out start and end ranges
-            PLYReader r = new PLYReader(new File(cmd.getOptionValue("f")));
+            PLYHeader header = new PLYHeader(file);
+            ImprovedPLYReader r = new ImprovedPLYReader(header, file);
+
 
 
         }

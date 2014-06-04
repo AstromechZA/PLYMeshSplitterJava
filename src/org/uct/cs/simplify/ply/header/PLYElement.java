@@ -12,13 +12,14 @@ public class PLYElement
 {
     private String name;
     private int count;
+    private Integer itemSize;
     private List<PLYPropertyBase> properties;
 
     public PLYElement(String name, int count)
     {
         this.name = name;
         this.count = count;
-
+        this.itemSize = 0;
         properties = new ArrayList<>();
     }
 
@@ -32,6 +33,17 @@ public class PLYElement
     public void addProperty(PLYPropertyBase p)
     {
         properties.add(p);
+        if (this.itemSize != null)
+        {
+            if (p instanceof PLYListProperty)
+            {
+                this.itemSize = null;
+            }
+            else if (p instanceof PLYProperty)
+            {
+                this.itemSize += ((PLYProperty) p).getTypeReader().bytesAtATime();
+            }
+        }
     }
 
     public String getName()
@@ -42,6 +54,11 @@ public class PLYElement
     public int getCount()
     {
         return count;
+    }
+
+    public Integer getItemSize()
+    {
+        return itemSize;
     }
 
     public List<PLYPropertyBase> getProperties()

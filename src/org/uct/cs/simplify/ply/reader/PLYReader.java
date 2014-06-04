@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.ply.reader;
 
+import org.uct.cs.simplify.ply.datatypes.IDataTypeReader;
 import org.uct.cs.simplify.ply.header.*;
 
 import java.io.File;
@@ -47,9 +48,9 @@ public class PLYReader
                     itemSize = -1;
                     break;
                 }
-                else
+                else if (p instanceof PLYProperty)
                 {
-                    itemSize += PLYPropertyBase.bytesInType(((PLYProperty) p).getType());
+                    itemSize += IDataTypeReader.getReaderForType(((PLYProperty) p).getType()).bytesAtATime();
                 }
             }
 
