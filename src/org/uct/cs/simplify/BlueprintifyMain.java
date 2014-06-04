@@ -2,7 +2,8 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.img.BluePrintGenerator;
-import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
@@ -29,7 +30,8 @@ public class BlueprintifyMain
                 throw new IOException("Could not create output directory " + outputDir);
 
             File inputFile = new File(filename);
-            PLYReader r = new PLYReader(inputFile);
+            PLYHeader header = new PLYHeader(inputFile);
+            ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
 
             // process input model to find output name
             File outputFile = new File(outputDir, inputFile.getName() + ".png");

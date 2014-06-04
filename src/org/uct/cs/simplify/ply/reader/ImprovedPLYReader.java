@@ -26,6 +26,16 @@ public class ImprovedPLYReader
         positionScan();
     }
 
+    public File getFile()
+    {
+        return this.file;
+    }
+
+    public PLYHeader getHeader()
+    {
+        return this.header;
+    }
+
     public Pair<Long, Long> getElementDimension(String n)
     {
         return elementDimensions.get(n);

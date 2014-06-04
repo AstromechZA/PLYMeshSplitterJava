@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.img;
 
-import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
 import org.uct.cs.simplify.ply.reader.VertexReader;
 
@@ -17,27 +18,27 @@ public class BluePrintGenerator
     public static Color defaultBackground = new Color(102, 102, 204);
     public static Color defaultForeground = Color.white;
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment) throws IOException
+    public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, float alphaAdjustment) throws IOException
     {
         return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, Axis.X_Y);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, float alphaAdjustment, Axis type) throws IOException
+    public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, float alphaAdjustment, Axis type) throws IOException
     {
         return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, type);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws IOException
+    public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, Axis.X_Y);
     }
 
-    public static BufferedImage CreateImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
+    public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type);
     }
 
-    private static BufferedImage makeBufferedImage(PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
+    private static BufferedImage makeBufferedImage(ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, Axis type) throws IOException
     {
         IAxisValueGetter avg = parseAVG(type);
 
@@ -59,12 +60,15 @@ public class BluePrintGenerator
         int border = 10;
         float ratio = (resolution - border) / bigdim;
 
-        try (VertexReader vr = new VertexReader(reader.getFile(), reader.getPositionOfElement("vertex"), reader.getHeader().getElement("vertex").getCount(), 20))
+        long position = reader.getElementDimension("vertex").getFirst();
+
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), position, reader.getHeader().getElement("vertex").getCount(), 20))
         {
+            int c = vr.getCount();
             Vertex v;
-            while (vr.hasNext())
+            for (int i = 0; i < c; i++)
             {
-                v = vr.next();
+                v = vr.get(i);
 
                 int tx = (int) (center + (avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio);
                 int ty = (int) (center - (avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio);
@@ -83,10 +87,10 @@ public class BluePrintGenerator
         return new YZAxisValueGetter();
     }
 
-    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg) throws IOException
+    private static Rectangle2D calculateBounds(ImprovedPLYReader reader, IAxisValueGetter avg) throws IOException
     {
         int c = reader.getHeader().getElement("vertex").getCount();
-        long p = reader.getPositionOfElement("vertex");
+        long p = reader.getElementDimension("vertex").getFirst();
 
         try (VertexReader vr = new VertexReader(reader.getFile(), p, c, 20))
         {
