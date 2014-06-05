@@ -13,6 +13,9 @@ import java.io.IOException;
 
 public class BlueprintifyMain
 {
+
+    private static final String format = "png";
+
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
@@ -34,10 +37,10 @@ public class BlueprintifyMain
             ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
 
             // process input model to find output name
-            File outputFile = new File(outputDir, inputFile.getName() + ".png");
+            File outputFile = new File(outputDir, inputFile.getName() + "." + format);
 
             BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod);
-            ImageIO.write(bi, "png", outputFile);
+            ImageIO.write(bi, format, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);
         }
