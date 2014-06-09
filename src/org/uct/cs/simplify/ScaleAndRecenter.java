@@ -6,6 +6,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
+import org.uct.cs.simplify.util.MemRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -37,93 +38,97 @@ public class ScaleAndRecenter
                 throw new IOException("Could not create output directory " + outputDir);
             File outputFile = new File(outputDir, inputFile.getName() + "_rescaled_" + rescaleToSize + ".ply");
 
-
-            // == construct & setup PLYReader
-            // this scans the target file and works out start and end ranges
-            PLYHeader header = new PLYHeader(inputFile);
-            ImprovedPLYReader reader = new ImprovedPLYReader(header, inputFile);
-
-            // first have to identify bounds in order to work out ranges and center
-            BoundingBox bb = BoundsFinder.getBoundingBox(reader);
-            Point3D center = new Point3D(
-                    (bb.getMinX() + bb.getMaxX()) / 2.0f,
-                    (bb.getMinY() + bb.getMaxY()) / 2.0f,
-                    (bb.getMinZ() + bb.getMaxZ()) / 2.0f);
-
-            // mesh size is the maximum axis
-            double meshHalfSize = Math.abs(Math.max(Math.max(bb.getMaxX() - center.getX(), bb.getMaxY() - center.getY()), bb.getMaxZ() - center.getZ()));
-            double scale = (rescaleToSize / 2.0) / meshHalfSize;
-            Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
-
-            // debug
-            System.out.println("Input File: " + inputFile);
-            System.out.println("Output File: " + outputFile);
-            System.out.printf("X: %f → %f\n", bb.getMinX(), bb.getMaxX());
-            System.out.printf("Y: %f → %f\n", bb.getMinY(), bb.getMaxY());
-            System.out.printf("Z: %f → %f\n", bb.getMinZ(), bb.getMaxZ());
-            System.out.printf("Center: %f, %f, %f\n", center.getX(), center.getY(), center.getZ());
-            System.out.printf("Scale ratio: %f\n", scale);
-
-            try (RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r"))
+            // memory logger
+            try (MemRecorder mrec = new MemRecorder(new File(outputDir, "memlog.dat"), 100))
             {
-                try (FileChannel fcIN = rafIN.getChannel())
+
+                // == construct & setup PLYReader
+                // this scans the target file and works out start and end ranges
+                PLYHeader header = new PLYHeader(inputFile);
+                ImprovedPLYReader reader = new ImprovedPLYReader(header, inputFile);
+
+                // first have to identify bounds in order to work out ranges and center
+                BoundingBox bb = BoundsFinder.getBoundingBox(reader);
+                Point3D center = new Point3D(
+                        (bb.getMinX() + bb.getMaxX()) / 2.0f,
+                        (bb.getMinY() + bb.getMaxY()) / 2.0f,
+                        (bb.getMinZ() + bb.getMaxZ()) / 2.0f);
+
+                // mesh size is the maximum axis
+                double meshHalfSize = Math.abs(Math.max(Math.max(bb.getMaxX() - center.getX(), bb.getMaxY() - center.getY()), bb.getMaxZ() - center.getZ()));
+                double scale = (rescaleToSize / 2.0) / meshHalfSize;
+                Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
+
+                // debug
+                System.out.println("Input File: " + inputFile);
+                System.out.println("Output File: " + outputFile);
+                System.out.printf("X: %f → %f\n", bb.getMinX(), bb.getMaxX());
+                System.out.printf("Y: %f → %f\n", bb.getMinY(), bb.getMaxY());
+                System.out.printf("Z: %f → %f\n", bb.getMinZ(), bb.getMaxZ());
+                System.out.printf("Center: %f, %f, %f\n", center.getX(), center.getY(), center.getZ());
+                System.out.printf("Scale ratio: %f\n", scale);
+
+                try (RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r"))
                 {
-                    try (RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw"))
+                    try (FileChannel fcIN = rafIN.getChannel())
                     {
-                        try (FileChannel fcOUT = rafOUT.getChannel())
+                        try (RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw"))
                         {
-                            // copy beginning
-                            long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
-                            long vertexElementLength = reader.getElementDimension("vertex").getSecond();
-                            copyNBytes(fcIN, fcOUT, vertexElementBegin);
-
-                            int blockSize = reader.getHeader().getElement("vertex").getItemSize();
-                            int numVertices = reader.getHeader().getElement("vertex").getCount();
-
-                            ByteBuffer blockBuffer = ByteBuffer.allocateDirect(blockSize);
-                            ByteBuffer blockBuffer2 = ByteBuffer.allocateDirect(blockSize);
-                            blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                            blockBuffer2.order(ByteOrder.LITTLE_ENDIAN);
-
-                            int percentN = numVertices / 100;
-                            int tenPercentN = numVertices / 10;
-                            System.out.printf("Progress: (each dot indicates %d vertices)\n", percentN);
-
-                            float x, y, z;
-                            for (int n = 0; n < numVertices; n++)
+                            try (FileChannel fcOUT = rafOUT.getChannel())
                             {
-                                if (n % percentN == 0) System.out.print(".");
-                                if ((n + 1) % tenPercentN == 0) System.out.print(" ");
+                                // copy beginning
+                                long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
+                                long vertexElementLength = reader.getElementDimension("vertex").getSecond();
+                                copyNBytes(fcIN, fcOUT, vertexElementBegin);
 
-                                fcIN.read(blockBuffer);
-                                blockBuffer.flip();
-                                x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
-                                y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
-                                z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
+                                int blockSize = reader.getHeader().getElement("vertex").getItemSize();
+                                int numVertices = reader.getHeader().getElement("vertex").getCount();
 
-                                blockBuffer2.putFloat(x);
-                                blockBuffer2.putFloat(y);
-                                blockBuffer2.putFloat(z);
+                                ByteBuffer blockBuffer = ByteBuffer.allocateDirect(blockSize);
+                                ByteBuffer blockBuffer2 = ByteBuffer.allocateDirect(blockSize);
+                                blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                                blockBuffer2.order(ByteOrder.LITTLE_ENDIAN);
 
-                                blockBuffer2.put(blockBuffer);
-                                blockBuffer2.flip();
+                                int percentN = numVertices / 100;
+                                int tenPercentN = numVertices / 10;
+                                System.out.printf("Progress: (each dot indicates %d vertices)\n", percentN);
 
-                                fcOUT.write(blockBuffer2);
-                                blockBuffer.clear();
-                                blockBuffer2.clear();
+                                float x, y, z;
+                                for (int n = 0; n < numVertices; n++)
+                                {
+                                    if (n % percentN == 0) System.out.print(".");
+                                    if ((n + 1) % tenPercentN == 0) System.out.print(" ");
+
+                                    fcIN.read(blockBuffer);
+                                    blockBuffer.flip();
+                                    x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
+                                    y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
+                                    z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
+
+                                    blockBuffer2.putFloat(x);
+                                    blockBuffer2.putFloat(y);
+                                    blockBuffer2.putFloat(z);
+
+                                    blockBuffer2.put(blockBuffer);
+                                    blockBuffer2.flip();
+
+                                    fcOUT.write(blockBuffer2);
+                                    blockBuffer.clear();
+                                    blockBuffer2.clear();
+                                }
+
+                                // copy remainder
+                                long fileRemainder = inputFile.length() - vertexElementBegin - vertexElementLength;
+                                copyNBytes(fcIN, fcOUT, fileRemainder);
+
+                                System.out.println();
                             }
-
-                            // copy remainder
-                            long fileRemainder = inputFile.length() - vertexElementBegin - vertexElementLength;
-                            copyNBytes(fcIN, fcOUT, fileRemainder);
-
-                            System.out.println();
                         }
                     }
                 }
             }
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
         }
