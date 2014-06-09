@@ -98,15 +98,28 @@ public class ScaleAndRecenter
                             int numVertices = reader.getHeader().getElement("vertex").getCount();
 
                             ByteBuffer blockBuffer = ByteBuffer.allocate(blockSize);
+                            ByteBuffer blockBuffer2 = ByteBuffer.allocate(blockSize);
                             blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                            blockBuffer2.order(ByteOrder.LITTLE_ENDIAN);
 
                             for (int n = 0; n < numVertices; n++)
                             {
                                 fcIN.read(blockBuffer);
                                 blockBuffer.flip();
+                                float x = blockBuffer.getFloat();
+                                float y = blockBuffer.getFloat();
+                                float z = blockBuffer.getFloat();
 
-                                fcOUT.write(blockBuffer);
+                                blockBuffer2.putFloat(x);
+                                blockBuffer2.putFloat(y);
+                                blockBuffer2.putFloat(z);
+
+                                blockBuffer2.put(blockBuffer);
+                                blockBuffer2.flip();
+
+                                fcOUT.write(blockBuffer2);
                                 blockBuffer.clear();
+                                blockBuffer2.clear();
                             }
 
                             // copy remainder
