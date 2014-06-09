@@ -56,8 +56,8 @@ public class ScaleAndRecenter
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
             // debug
-            System.out.println("InputFile: " + inputFile);
-            System.out.println("OutputFile: " + outputFile);
+            System.out.println("Input File: " + inputFile);
+            System.out.println("Output File: " + outputFile);
             System.out.printf("X: %f → %f\n", bb.getMinX(), bb.getMaxX());
             System.out.printf("Y: %f → %f\n", bb.getMinY(), bb.getMaxY());
             System.out.printf("Z: %f → %f\n", bb.getMinZ(), bb.getMaxZ());
@@ -87,6 +87,7 @@ public class ScaleAndRecenter
 
                             int percentN = numVertices / 100;
                             int tenPercentN = numVertices / 10;
+                            System.out.printf("Progress: (each dot indicates %d vertices)\n", percentN);
 
                             float x, y, z;
                             for (int n = 0; n < numVertices; n++)
@@ -119,10 +120,8 @@ public class ScaleAndRecenter
                             System.out.println();
                         }
                     }
-
                 }
             }
-
         }
         catch (IOException e)
         {
