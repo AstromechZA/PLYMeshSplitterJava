@@ -52,7 +52,7 @@ public class ScaleAndRecenter
 
             // mesh size is the maximum axis
             double meshHalfSize = Math.abs(Math.max(Math.max(bb.getMaxX() - center.getX(), bb.getMaxY() - center.getY()), bb.getMaxZ() - center.getZ()));
-            double scale = (double) (rescaleToSize) / meshHalfSize;
+            double scale = (rescaleToSize / 2.0) / meshHalfSize;
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
             // debug
@@ -106,9 +106,9 @@ public class ScaleAndRecenter
                             {
                                 fcIN.read(blockBuffer);
                                 blockBuffer.flip();
-                                float x = blockBuffer.getFloat();
-                                float y = blockBuffer.getFloat();
-                                float z = blockBuffer.getFloat();
+                                float x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
+                                float y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
+                                float z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
 
                                 blockBuffer2.putFloat(x);
                                 blockBuffer2.putFloat(y);
