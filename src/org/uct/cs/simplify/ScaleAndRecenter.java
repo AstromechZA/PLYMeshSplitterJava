@@ -27,7 +27,7 @@ public class ScaleAndRecenter
         // checking
         if (rescaleToSize < 2) throw new IllegalArgumentException("Rescale size must not be smaller than 2 units");
 
-        try (Timer ignored = new Timer("Processing"))
+        try (Timer ignored = new Timer("Processed"))
         {
             File inputFile = new File(filename);
 
@@ -58,33 +58,16 @@ public class ScaleAndRecenter
             // debug
             System.out.println("InputFile: " + inputFile);
             System.out.println("OutputFile: " + outputFile);
-            System.out.printf("%f → %f\n", bb.getMinX(), bb.getMaxX());
-            System.out.printf("%f → %f\n", bb.getMinY(), bb.getMaxY());
-            System.out.printf("%f → %f\n", bb.getMinZ(), bb.getMaxZ());
-            System.out.printf("center: %f, %f, %f\n", center.getX(), center.getY(), center.getZ());
-            System.out.printf("rescale ratio: %f\n", scale);
-
-            // now we need to
-            // 1) navigate to vertex element
-            // 2) for each vertex
-            //      3) read x,y,z floats
-            //      4) transform x,y,z
-            //      5) rewrite
-            //      6) skip ahead
-
-            // copy first (dataoffset) bytes to destination
-            // for n in vertex_count
-            //     read block of bytes
-            //     transform xyz
-            //     write back into block
-            //     write block to destination
-            // write remaining bytes to destination
+            System.out.printf("X: %f → %f\n", bb.getMinX(), bb.getMaxX());
+            System.out.printf("Y: %f → %f\n", bb.getMinY(), bb.getMaxY());
+            System.out.printf("Z: %f → %f\n", bb.getMinZ(), bb.getMaxZ());
+            System.out.printf("Center: %f, %f, %f\n", center.getX(), center.getY(), center.getZ());
+            System.out.printf("Scale ratio: %f\n", scale);
 
             try (RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r"))
             {
                 try (FileChannel fcIN = rafIN.getChannel())
                 {
-
                     try (RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw"))
                     {
                         try (FileChannel fcOUT = rafOUT.getChannel())
@@ -97,18 +80,25 @@ public class ScaleAndRecenter
                             int blockSize = reader.getHeader().getElement("vertex").getItemSize();
                             int numVertices = reader.getHeader().getElement("vertex").getCount();
 
-                            ByteBuffer blockBuffer = ByteBuffer.allocate(blockSize);
-                            ByteBuffer blockBuffer2 = ByteBuffer.allocate(blockSize);
+                            ByteBuffer blockBuffer = ByteBuffer.allocateDirect(blockSize);
+                            ByteBuffer blockBuffer2 = ByteBuffer.allocateDirect(blockSize);
                             blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
                             blockBuffer2.order(ByteOrder.LITTLE_ENDIAN);
 
+                            int percentN = numVertices / 100;
+                            int tenPercentN = numVertices / 10;
+
+                            float x, y, z;
                             for (int n = 0; n < numVertices; n++)
                             {
+                                if (n % percentN == 0) System.out.print(".");
+                                if ((n + 1) % tenPercentN == 0) System.out.print(" ");
+
                                 fcIN.read(blockBuffer);
                                 blockBuffer.flip();
-                                float x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
-                                float y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
-                                float z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
+                                x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
+                                y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
+                                z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
 
                                 blockBuffer2.putFloat(x);
                                 blockBuffer2.putFloat(y);
@@ -126,6 +116,7 @@ public class ScaleAndRecenter
                             long fileRemainder = inputFile.length() - vertexElementBegin - vertexElementLength;
                             copyNBytes(fcIN, fcOUT, fileRemainder);
 
+                            System.out.println();
                         }
                     }
 
