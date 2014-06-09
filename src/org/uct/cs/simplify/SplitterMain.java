@@ -1,8 +1,10 @@
 package org.uct.cs.simplify;
 
+import javafx.geometry.BoundingBox;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.MemRecorder;
 import org.uct.cs.simplify.util.Timer;
 
@@ -25,9 +27,20 @@ public class SplitterMain
             PLYHeader header = new PLYHeader(file);
             ImprovedPLYReader r = new ImprovedPLYReader(header, file);
 
-            System.out.println(r.getElementDimension("vertex").getFirst());
-            System.out.println(r.getElementDimension("face").getFirst());
+            // first have to identify bounds in order to work out splitting plains
+            BoundingBox bb = BoundsFinder.getBoundingBox(r);
 
+            // debug
+            System.out.printf("%f → %f\n", bb.getMinX(), bb.getMaxX());
+            System.out.printf("%f → %f\n", bb.getMinY(), bb.getMaxY());
+            System.out.printf("%f → %f\n", bb.getMinZ(), bb.getMaxZ());
+
+            // we could rescale here...
+            // basically center the mesh back on 0,0,0
+            // and scale to fit in a cube of 256/512/1024
+            // this should probably be done as a prescaling measure
+
+            // split bb into 8ths..
 
         }
         catch (IOException | InterruptedException e)
