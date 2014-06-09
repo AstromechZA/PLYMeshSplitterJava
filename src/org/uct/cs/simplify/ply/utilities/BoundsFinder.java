@@ -29,7 +29,9 @@ public class BoundsFinder
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, 20))
+        int blockSize = reader.getHeader().getElement("vertex").getItemSize();
+
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, blockSize))
         {
             int n = 0;
             float minx = Float.MAX_VALUE,

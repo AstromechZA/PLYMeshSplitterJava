@@ -25,12 +25,19 @@ public class ScaleAndRecenter
 
         try (Timer ignored = new Timer("Processing"))
         {
-            File file = new File(filename);
+            File inputFile = new File(filename);
+
+            // output file stuff
+            File outputDir = new File(new File(outputDirectory).getCanonicalPath());
+            if (!outputDir.exists() && !outputDir.mkdirs())
+                throw new IOException("Could not create output directory " + outputDir);
+            File outputFile = new File(outputDir, inputFile.getName() + "_rescaled_" + rescaleToSize + ".ply");
+
 
             // == construct & setup PLYReader
             // this scans the target file and works out start and end ranges
-            PLYHeader header = new PLYHeader(file);
-            ImprovedPLYReader reader = new ImprovedPLYReader(header, file);
+            PLYHeader header = new PLYHeader(inputFile);
+            ImprovedPLYReader reader = new ImprovedPLYReader(header, inputFile);
 
             // first have to identify bounds in order to work out ranges and center
             BoundingBox bb = BoundsFinder.getBoundingBox(reader);
@@ -45,6 +52,8 @@ public class ScaleAndRecenter
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
             // debug
+            System.out.println("InputFile: " + inputFile);
+            System.out.println("OutputFile: " + outputFile);
             System.out.printf("%f → %f\n", bb.getMinX(), bb.getMaxX());
             System.out.printf("%f → %f\n", bb.getMinY(), bb.getMaxY());
             System.out.printf("%f → %f\n", bb.getMinZ(), bb.getMaxZ());
@@ -59,7 +68,14 @@ public class ScaleAndRecenter
             //      5) rewrite
             //      6) skip ahead
 
-            
+            // copy first (dataoffset) bytes to destination
+            // for n in vertex_count
+            //     read block of bytes
+            //     transform xyz
+            //     write back into block
+            //     write block to destination
+            // write remaining bytes to destination
+
         }
         catch (IOException e)
         {
