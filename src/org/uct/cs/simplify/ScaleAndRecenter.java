@@ -10,6 +10,10 @@ import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 
 public class ScaleAndRecenter
 {
@@ -76,12 +80,74 @@ public class ScaleAndRecenter
             //     write block to destination
             // write remaining bytes to destination
 
+            try (RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r"))
+            {
+                try (FileChannel fcIN = rafIN.getChannel())
+                {
+
+                    try (RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw"))
+                    {
+                        try (FileChannel fcOUT = rafOUT.getChannel())
+                        {
+                            // copy beginning
+                            long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
+                            long vertexElementLength = reader.getElementDimension("vertex").getSecond();
+                            copyNBytes(fcIN, fcOUT, vertexElementBegin);
+
+                            int blockSize = reader.getHeader().getElement("vertex").getItemSize();
+                            int numVertices = reader.getHeader().getElement("vertex").getCount();
+
+                            ByteBuffer blockBuffer = ByteBuffer.allocate(blockSize);
+                            blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+                            for (int n = 0; n < numVertices; n++)
+                            {
+                                fcIN.read(blockBuffer);
+                                blockBuffer.flip();
+
+                                fcOUT.write(blockBuffer);
+                                blockBuffer.clear();
+                            }
+
+                            // copy remainder
+                            long fileRemainder = inputFile.length() - vertexElementBegin - vertexElementLength;
+                            copyNBytes(fcIN, fcOUT, fileRemainder);
+
+                        }
+                    }
+
+                }
+            }
+
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
 
+    }
+
+    private static void copyNBytes(FileChannel input, FileChannel output, long n) throws IOException
+    {
+        if (n == 0) return;
+
+        int bufsize = 4096;
+        long div = n / bufsize;
+        int rem = (int) (n % bufsize);
+
+        ByteBuffer temp = ByteBuffer.allocate(bufsize);
+        for (long i = 0; i < div; i++)
+        {
+            input.read(temp);
+            temp.flip();
+            while (temp.hasRemaining()) output.write(temp);
+            temp.clear();
+        }
+
+        temp = ByteBuffer.allocate(rem);
+        input.read(temp);
+        temp.flip();
+        while (temp.hasRemaining()) output.write(temp);
     }
 
     private static CommandLine parseArgs(String[] args)
