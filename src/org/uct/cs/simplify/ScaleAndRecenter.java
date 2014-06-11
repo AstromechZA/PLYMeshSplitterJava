@@ -84,10 +84,10 @@ public class ScaleAndRecenter
                                 int blockSize = reader.getHeader().getElement("vertex").getItemSize();
                                 int numVertices = reader.getHeader().getElement("vertex").getCount();
 
-                                ByteBuffer blockBuffer = ByteBuffer.allocateDirect(blockSize);
-                                ByteBuffer blockBuffer2 = ByteBuffer.allocateDirect(blockSize);
-                                blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                                blockBuffer2.order(ByteOrder.LITTLE_ENDIAN);
+                                ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(blockSize);
+                                ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(blockSize);
+                                blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
+                                blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
 
                                 int percentN = numVertices / 100;
                                 int tenPercentN = numVertices / 10;
@@ -99,22 +99,23 @@ public class ScaleAndRecenter
                                     if (n % percentN == 0) System.out.print(".");
                                     if ((n + 1) % tenPercentN == 0) System.out.print(" ");
 
-                                    fcIN.read(blockBuffer);
-                                    blockBuffer.flip();
-                                    x = (float) ((blockBuffer.getFloat() + translate.getX()) * scale);
-                                    y = (float) ((blockBuffer.getFloat() + translate.getY()) * scale);
-                                    z = (float) ((blockBuffer.getFloat() + translate.getZ()) * scale);
+                                    fcIN.read(blockBufferIN);
+                                    blockBufferIN.flip();
+                                    x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
+                                    y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
+                                    z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
 
-                                    blockBuffer2.putFloat(x);
-                                    blockBuffer2.putFloat(y);
-                                    blockBuffer2.putFloat(z);
+                                    blockBufferOUT.putFloat(x);
+                                    blockBufferOUT.putFloat(y);
+                                    blockBufferOUT.putFloat(z);
 
-                                    blockBuffer2.put(blockBuffer);
-                                    blockBuffer2.flip();
+                                    blockBufferOUT.put(blockBufferIN);
+                                    blockBufferOUT.flip();
 
-                                    fcOUT.write(blockBuffer2);
-                                    blockBuffer.clear();
-                                    blockBuffer2.clear();
+                                    fcOUT.write(blockBufferOUT);
+
+                                    blockBufferIN.clear();
+                                    blockBufferOUT.clear();
                                 }
 
                                 // copy remainder
@@ -152,10 +153,13 @@ public class ScaleAndRecenter
             temp.clear();
         }
 
-        temp = ByteBuffer.allocate(rem);
-        input.read(temp);
-        temp.flip();
-        while (temp.hasRemaining()) output.write(temp);
+        if (rem > 0)
+        {
+            temp = ByteBuffer.allocate(rem);
+            input.read(temp);
+            temp.flip();
+            while (temp.hasRemaining()) output.write(temp);
+        }
     }
 
     private static CommandLine parseArgs(String[] args)
