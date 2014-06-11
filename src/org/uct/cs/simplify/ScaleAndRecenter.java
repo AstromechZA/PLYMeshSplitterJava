@@ -36,14 +36,14 @@ public class ScaleAndRecenter
             File outputDir = new File(new File(outputDirectory).getCanonicalPath());
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
-            File outputFile = new File(outputDir, getFilenameWithoutExt(inputFile.getName()) + "_rescaled_" + rescaleToSize + ".ply");
+            File outputFile = new File(outputDir, String.format("%s_rescaled_%d.ply", getFilenameWithoutExt(inputFile.getName()), rescaleToSize));
 
             // memory logger
             MemRecorder mRecorder = null;
             if (cmd.hasOption("memlog"))
             {
-                File memFile = new File(outputDir, "memlog_" + System.currentTimeMillis() + ".dat");
-                System.out.printf("Logging memory usage to %s\n", memFile);
+                File memFile = new File(outputDir, String.format("memlog_%d.dat", System.currentTimeMillis()));
+                System.out.printf("Logging memory usage to %s%n", memFile);
                 mRecorder = new MemRecorder(memFile, 100);
             }
 
@@ -65,13 +65,13 @@ public class ScaleAndRecenter
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
             // debug
-            System.out.println("Input File: " + inputFile);
-            System.out.println("Output File: " + outputFile);
-            System.out.printf("X: %f → %f\n", bb.getMinX(), bb.getMaxX());
-            System.out.printf("Y: %f → %f\n", bb.getMinY(), bb.getMaxY());
-            System.out.printf("Z: %f → %f\n", bb.getMinZ(), bb.getMaxZ());
-            System.out.printf("Center: %f, %f, %f\n", center.getX(), center.getY(), center.getZ());
-            System.out.printf("Scale ratio: %f\n", scale);
+            System.out.printf("Input File: %s%n", inputFile);
+            System.out.printf("Output File: %s%n", outputFile);
+            System.out.printf("X: %f → %f%n", bb.getMinX(), bb.getMaxX());
+            System.out.printf("Y: %f → %f%n", bb.getMinY(), bb.getMaxY());
+            System.out.printf("Z: %f → %f%n", bb.getMinZ(), bb.getMaxZ());
+            System.out.printf("Center: %f, %f, %f%n", center.getX(), center.getY(), center.getZ());
+            System.out.printf("Scale ratio: %f%n", scale);
 
             try (RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r"))
             {
@@ -96,7 +96,7 @@ public class ScaleAndRecenter
 
                             int percentN = numVertices / 100;
                             int tenPercentN = numVertices / 10;
-                            System.out.printf("Progress: (each dot indicates %d vertices)\n", percentN);
+                            System.out.printf("Progress: (each dot indicates %d vertices)%n", percentN);
 
                             float x, y, z;
                             for (int n = 0; n < numVertices; n++)
