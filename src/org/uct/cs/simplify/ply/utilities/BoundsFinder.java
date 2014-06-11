@@ -40,7 +40,6 @@ public class BoundsFinder
                     maxy = -Float.MAX_VALUE,
                     minz = Float.MAX_VALUE,
                     maxz = -Float.MAX_VALUE;
-            float pr, se;
 
             Vertex v;
             for (int i = 0; i < c; i += nth)

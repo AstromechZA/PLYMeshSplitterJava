@@ -18,7 +18,7 @@ import java.nio.channels.FileChannel;
 
 public class ScaleAndRecenter
 {
-    public static void main(String[] args) throws ParseException
+    public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
         int rescaleToSize = (cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : 1024);
