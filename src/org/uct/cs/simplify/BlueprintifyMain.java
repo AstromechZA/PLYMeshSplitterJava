@@ -11,8 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static org.uct.cs.simplify.img.BluePrintGenerator.Axis.X_Z;
-
 public class BlueprintifyMain
 {
     private static final int DEFAULT_RESOLUTION = 1024;
@@ -39,13 +37,14 @@ public class BlueprintifyMain
             PLYHeader header = new PLYHeader(inputFile);
             ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
 
-            // process input model to find output name
-            File outputFile = new File(outputDir, inputFile.getName() + "." + OUTPUT_FORMAT);
+            for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
+            {
+                File outputFile = new File(outputDir, inputFile.getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
+                BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, axis);
+                ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
-            BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, X_Z);
-            ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
-
-            System.out.println("Saved blueprint to " + outputFile);
+                System.out.println("Saved blueprint to " + outputFile);
+            }
         }
         catch (ParseException | IOException e)
         {
