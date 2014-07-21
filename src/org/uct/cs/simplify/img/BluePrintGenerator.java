@@ -61,7 +61,7 @@ public class BluePrintGenerator
         float ratio = (resolution - border) / bigdim;
 
         long position = reader.getElementDimension("vertex").getFirst();
-        int vsize = reader.getElementDimension("vertex").getSecond().intValue();
+        int vsize = reader.getHeader().getElement("vertex").getItemSize();
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), position, reader.getHeader().getElement("vertex").getCount(), vsize))
         {
@@ -92,7 +92,7 @@ public class BluePrintGenerator
     {
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();
-        int vsize = reader.getElementDimension("vertex").getSecond().intValue();
+        int vsize = reader.getHeader().getElement("vertex").getItemSize();
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, vsize))
         {

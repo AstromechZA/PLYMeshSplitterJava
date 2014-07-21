@@ -11,6 +11,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import static org.uct.cs.simplify.img.BluePrintGenerator.Axis.X_Z;
+
 public class BlueprintifyMain
 {
     private static final int DEFAULT_RESOLUTION = 1024;
@@ -40,7 +42,7 @@ public class BlueprintifyMain
             // process input model to find output name
             File outputFile = new File(outputDir, inputFile.getName() + "." + OUTPUT_FORMAT);
 
-            BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod);
+            BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, X_Z);
             ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);
