@@ -2,11 +2,14 @@ package org.uct.cs.simplify.util;
 
 public class Timer implements AutoCloseable
 {
-    private String text;
-    private long starttime;
+    private static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
+
+    private final String text;
+    private final long starttime;
 
     public Timer()
     {
+        this.text = "Timer";
         this.starttime = System.nanoTime();
     }
 
@@ -24,13 +27,9 @@ public class Timer implements AutoCloseable
     @Override
     public void close()
     {
-        if (this.text == null) return;
-
         long elapsed = System.nanoTime() - this.starttime;
-        float micro = elapsed / 1000f;
-        float milli = micro / 1000f;
-        float sec = milli / 1000f;
-        System.out.printf("%s : %f seconds\n", this.text, sec);
+        float seconds = elapsed / (float)NANOSECONDS_PER_SECOND;
+        System.out.printf("%s : %f seconds\n", this.text, seconds);
     }
 
 

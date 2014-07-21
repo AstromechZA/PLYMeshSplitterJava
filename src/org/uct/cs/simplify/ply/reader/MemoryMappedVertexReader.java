@@ -8,11 +8,11 @@ import java.nio.channels.FileChannel;
 
 public class MemoryMappedVertexReader implements AutoCloseable
 {
-    private int blockSize;
+    private final int blockSize;
+    private final int count;
     private MappedByteBuffer buffer;
     private RandomAccessFile raf;
     private FileChannel fc;
-    private int count;
 
     public MemoryMappedVertexReader(File f, long position, int count, int blockSize) throws IOException
     {
@@ -20,22 +20,22 @@ public class MemoryMappedVertexReader implements AutoCloseable
         this.blockSize = blockSize;
 
         this.raf = new RandomAccessFile(f, "r");
-        this.fc = raf.getChannel();
+        this.fc = this.raf.getChannel();
 
-        this.buffer = fc.map(FileChannel.MapMode.READ_ONLY, position, count * blockSize);
+        this.buffer = this.fc.map(FileChannel.MapMode.READ_ONLY, position, count * blockSize);
     }
 
     public int getCount()
     {
-        return count;
+        return this.count;
     }
 
     public Vertex get(int i)
     {
-        int index = i * blockSize;
-        buffer.position(index);
-        byte[] b = new byte[ blockSize ];
-        buffer.get(b, 0, blockSize);
+        int index = i * this.blockSize;
+        this.buffer.position(index);
+        byte[] b = new byte[this.blockSize];
+        this.buffer.get(b, 0, this.blockSize);
         return new Vertex(b);
     }
 

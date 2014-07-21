@@ -4,7 +4,7 @@ import static org.uct.cs.simplify.ply.datatypes.DataTypes.parseDataType;
 
 public class PLYPropertyBase
 {
-    private String name;
+    private final String name;
 
     public PLYPropertyBase(String name)
     {

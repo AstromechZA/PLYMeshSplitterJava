@@ -4,10 +4,12 @@ import java.nio.ByteBuffer;
 
 public class ucharDataTypeReader implements IDataTypeReader
 {
+    private static final int BYTE = 0xFF;
+
     @Override
     public double read(ByteBuffer b)
     {
-        return ((short) b.get() & 0xFF);
+        return ((short) b.get() & BYTE);
     }
 
     @Override

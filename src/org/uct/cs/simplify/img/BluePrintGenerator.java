@@ -14,17 +14,18 @@ import java.util.Arrays;
 public class BluePrintGenerator
 {
 
-    public static Color defaultBackground = new Color(102, 102, 204);
-    public static Color defaultForeground = Color.white;
+    private static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2*100);
+    private static final Color DEFAULT_FOREGROUND = Color.white;
+    private static final int BYTE = 0xFF;
 
     public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, float alphaAdjustment) throws IOException
     {
-        return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, Axis.X_Y);
+        return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, Axis.X_Y);
     }
 
     public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, float alphaAdjustment, Axis type) throws IOException
     {
-        return makeBufferedImage(reader, resolution, defaultBackground, defaultForeground, alphaAdjustment, type);
+        return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
     }
 
     public static BufferedImage CreateImage(ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment) throws IOException
@@ -60,8 +61,9 @@ public class BluePrintGenerator
         float ratio = (resolution - border) / bigdim;
 
         long position = reader.getElementDimension("vertex").getFirst();
+        int vsize = reader.getElementDimension("vertex").getSecond().intValue();
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), position, reader.getHeader().getElement("vertex").getCount(), 20))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), position, reader.getHeader().getElement("vertex").getCount(), vsize))
         {
             int c = vr.getCount();
             Vertex v;
@@ -90,10 +92,10 @@ public class BluePrintGenerator
     {
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();
+        int vsize = reader.getElementDimension("vertex").getSecond().intValue();
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, 20))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, vsize))
         {
-            int n = 0;
             float minx = Float.MAX_VALUE,
                     maxx = -Float.MAX_VALUE,
                     miny = Float.MAX_VALUE,
@@ -104,7 +106,6 @@ public class BluePrintGenerator
             for (int i = 0; i < c; i++)
             {
                 v = vr.get(i);
-                n += 1;
                 pr = avg.getPrimaryAxisValue(v);
                 se = avg.getSecondaryAxisValue(v);
 
@@ -121,19 +122,19 @@ public class BluePrintGenerator
     private static int blend(int bgi, int fgi, float amount)
     {
         float namount = 1 - amount;
-        int dr = (bgi >> 16) & 0xFF;
-        int dg = (bgi >> 8) & 0xFF;
-        int db = (bgi) & 0xFF;
+        int dr = (bgi >> (8*2)) & BYTE;
+        int dg = (bgi >> 8) & BYTE;
+        int db = (bgi) & BYTE;
 
-        int sr = (fgi >> 16) & 0xFF;
-        int sg = (fgi >> 8) & 0xFF;
-        int sb = (fgi) & 0xFF;
+        int sr = (fgi >> (8*2)) & BYTE;
+        int sg = (fgi >> 8) & BYTE;
+        int sb = (fgi) & BYTE;
 
-        int rr = (int) (sr * amount + dr * namount) & 0xFF;
-        int rg = (int) (sg * amount + dg * namount) & 0xFF;
-        int rb = (int) (sb * amount + db * namount) & 0xFF;
+        int rr = (int) (sr * amount + dr * namount) & BYTE;
+        int rg = (int) (sg * amount + dg * namount) & BYTE;
+        int rb = (int) (sb * amount + db * namount) & BYTE;
 
-        return (rr << 16) + (rg << 8) + (rb);
+        return (rr << (8*2)) + (rg << 8) + (rb);
     }
 
     public enum Axis

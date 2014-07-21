@@ -18,10 +18,13 @@ import java.nio.channels.FileChannel;
 
 public class ScaleAndRecenter
 {
+    private static final int DEFAULT_RESCALE_SIZE = 1024;
+    private static final int COPYBYTES_BUF_SIZE = 4096;
+
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
-        int rescaleToSize = (cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : 1024);
+        int rescaleToSize = (cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE);
         String filename = cmd.getOptionValue("filename");
         String outputDirectory = cmd.getOptionValue("output");
 
@@ -55,13 +58,13 @@ public class ScaleAndRecenter
             // first have to identify bounds in order to work out ranges and center
             BoundingBox bb = BoundsFinder.getBoundingBox(reader);
             Point3D center = new Point3D(
-                    (bb.getMinX() + bb.getMaxX()) / 2.0f,
-                    (bb.getMinY() + bb.getMaxY()) / 2.0f,
-                    (bb.getMinZ() + bb.getMaxZ()) / 2.0f);
+                    (bb.getMinX() + bb.getMaxX()) / 2,
+                    (bb.getMinY() + bb.getMaxY()) / 2,
+                    (bb.getMinZ() + bb.getMaxZ()) / 2);
 
             // mesh size is the maximum axis
             double meshHalfSize = Math.abs(Math.max(Math.max(bb.getMaxX() - center.getX(), bb.getMaxY() - center.getY()), bb.getMaxZ() - center.getZ()));
-            double scale = (rescaleToSize / 2.0) / meshHalfSize;
+            double scale = rescaleToSize / (2 * meshHalfSize);
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
             // debug
@@ -146,7 +149,7 @@ public class ScaleAndRecenter
     {
         if (n == 0) return;
 
-        int bufsize = 4096;
+        int bufsize = COPYBYTES_BUF_SIZE;
         long div = n / bufsize;
         int rem = (int) (n % bufsize);
 

@@ -10,17 +10,17 @@ import java.util.List;
  */
 public class PLYElement
 {
-    private String name;
-    private int count;
+    private final String name;
+    private final int count;
+    private final List<PLYPropertyBase> properties;
     private Integer itemSize;
-    private List<PLYPropertyBase> properties;
 
     public PLYElement(String name, int count)
     {
         this.name = name;
         this.count = count;
         this.itemSize = 0;
-        properties = new ArrayList<>();
+        this.properties = new ArrayList<>();
     }
 
     public static PLYElement FromString(String s)
@@ -32,7 +32,7 @@ public class PLYElement
 
     public void addProperty(PLYPropertyBase p)
     {
-        properties.add(p);
+        this.properties.add(p);
         if (this.itemSize != null)
         {
             if (p instanceof PLYListProperty)
@@ -48,28 +48,28 @@ public class PLYElement
 
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     public int getCount()
     {
-        return count;
+        return this.count;
     }
 
     public Integer getItemSize()
     {
-        return itemSize;
+        return this.itemSize;
     }
 
     public List<PLYPropertyBase> getProperties()
     {
-        return properties;
+        return this.properties;
     }
 
     @Override
     public String toString()
     {
-        return "PLYElement(" + name + ")[" + count + "]";
+        return "PLYElement(" + this.name + ")[" + this.count + "]";
     }
 
 }

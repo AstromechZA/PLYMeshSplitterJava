@@ -6,8 +6,8 @@ import org.uct.cs.simplify.ply.datatypes.IDataTypeReader;
 
 public class PLYProperty extends PLYPropertyBase
 {
-    private DataTypes.DataType type;
-    private IDataTypeReader typeReader;
+    private final DataTypes.DataType type;
+    private final IDataTypeReader typeReader;
 
     public PLYProperty(String name, DataTypes.DataType type)
     {

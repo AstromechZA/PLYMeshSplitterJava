@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Face
 {
-    private List<Integer> vertices;
+    private final List<Integer> vertices;
 
     public Face(List<Integer> vertexList)
     {

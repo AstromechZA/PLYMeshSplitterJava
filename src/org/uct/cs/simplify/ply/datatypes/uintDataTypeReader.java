@@ -4,10 +4,12 @@ import java.nio.ByteBuffer;
 
 public class uintDataTypeReader implements IDataTypeReader
 {
+    private static final long LONG = 0xFFFFFFFFL;
+
     @Override
     public double read(ByteBuffer b)
     {
-        return ((long) b.getInt() & 0xFFFFFFFFL);
+        return ((long) b.getInt() & LONG);
     }
 
     @Override

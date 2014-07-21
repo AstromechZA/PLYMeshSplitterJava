@@ -9,12 +9,24 @@ import java.util.List;
 
 public class MemRecorder implements AutoCloseable
 {
+    private static final int DEFAULT_INTERVAL_MS = 50;
+
     private File file;
     private int intervalMs;
     private Thread backgroundThread;
     private List<Pair<Long, Long>> recordings;
 
+    public MemRecorder(File f)
+    {
+        this.construct(f, DEFAULT_INTERVAL_MS);
+    }
+
     public MemRecorder(File f, int intervalMs)
+    {
+        this.construct(f, intervalMs);
+    }
+
+    private void construct(File f, int intervalMs)
     {
         this.file = f;
         this.intervalMs = intervalMs;
@@ -40,17 +52,17 @@ public class MemRecorder implements AutoCloseable
 
     public int getInterval()
     {
-        return intervalMs;
+        return this.intervalMs;
     }
 
     private void add(long ms, long used)
     {
-        recordings.add(new Pair<>(ms, used));
+        this.recordings.add(new Pair<>(ms, used));
     }
 
     private static class MemRecorderThread implements Runnable
     {
-        private MemRecorder parent;
+        private final MemRecorder parent;
 
         public MemRecorderThread(MemRecorder mr)
         {
@@ -70,7 +82,7 @@ public class MemRecorder implements AutoCloseable
 
                     this.parent.add(ms, used);
 
-                    Thread.sleep(parent.getInterval());
+                    Thread.sleep(this.parent.getInterval());
                 }
                 while (!Thread.currentThread().isInterrupted());
             }

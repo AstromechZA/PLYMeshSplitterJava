@@ -18,7 +18,7 @@ public class SplitterMain
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (MemRecorder m = new MemRecorder(new File("C:\\Users\\Ben\\o.dat"), 50); Timer ignored = new Timer("Entire read"))
+        try (MemRecorder m = new MemRecorder(new File("o.dat")); Timer ignored = new Timer("Entire read"))
         {
             File file = new File(cmd.getOptionValue("f"));
 

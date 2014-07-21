@@ -12,9 +12,10 @@ import java.util.List;
 
 public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 {
-    int index = 0;
-    int count;
+    private static final int BYTE = 0xFF;
 
+    private int index;
+    private final int count;
     private RandomAccessFile raf;
     private FileChannel fc;
     private MappedByteBuffer buffer;
@@ -23,33 +24,33 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     {
         this.count = count;
         this.raf = new RandomAccessFile(file, "r");
-        this.fc = raf.getChannel();
-        this.buffer = fc.map(FileChannel.MapMode.READ_ONLY, position, length);
+        this.fc = this.raf.getChannel();
+        this.buffer = this.fc.map(FileChannel.MapMode.READ_ONLY, position, length);
         this.buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     public boolean hasNext()
     {
-        return index < (count - 1);
+        return this.index < (this.count - 1);
     }
 
     public Face next()
     {
-        int vertexCount = buffer.get() & 0xFF;
+        int vertexCount = this.buffer.get() & BYTE;
         List<Integer> vertexList = new ArrayList<>();
         for (int i = 0; i < vertexCount; i++)
         {
-            vertexList.add(buffer.getInt());
+            vertexList.add(this.buffer.getInt());
         }
-        index += 1;
+        this.index += 1;
         return new Face(vertexList);
     }
 
     @Override
     public void close() throws IOException
     {
-        buffer.clear();
-        fc.close();
-        raf.close();
+        this.buffer.clear();
+        this.fc.close();
+        this.raf.close();
     }
 }

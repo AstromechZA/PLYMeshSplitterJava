@@ -41,17 +41,17 @@ public class PLYHeader
 
     public PLYFormat getFormat()
     {
-        return format;
+        return this.format;
     }
 
     public LinkedHashMap<String, PLYElement> getElements()
     {
-        return elements;
+        return this.elements;
     }
 
     public PLYElement getElement(String name)
     {
-        return elements.get(name);
+        return this.elements.get(name);
     }
 
     private static String isolateHeader(String input) throws BadHeaderException
@@ -123,7 +123,7 @@ public class PLYHeader
 
     public int getDataOffset()
     {
-        return dataOffset;
+        return this.dataOffset;
     }
 
     public static enum PLYFormat

@@ -13,9 +13,9 @@ import java.util.LinkedHashMap;
 public class ImprovedPLYReader
 {
 
-    private File file;
-    private PLYHeader header;
-    private LinkedHashMap<String, Pair<Long, Long>> elementDimensions;
+    private final File file;
+    private final PLYHeader header;
+    private final LinkedHashMap<String, Pair<Long, Long>> elementDimensions;
 
     public ImprovedPLYReader(PLYHeader h, File f) throws IOException
     {
@@ -23,7 +23,7 @@ public class ImprovedPLYReader
         this.file = f;
         this.elementDimensions = new LinkedHashMap<>();
 
-        positionScan();
+        this.positionScan();
     }
 
     public File getFile()
@@ -38,7 +38,7 @@ public class ImprovedPLYReader
 
     public Pair<Long, Long> getElementDimension(String n)
     {
-        return elementDimensions.get(n);
+        return this.elementDimensions.get(n);
     }
 
     /**
@@ -49,17 +49,17 @@ public class ImprovedPLYReader
     {
         this.elementDimensions.clear();
 
-        long dataOffset = header.getDataOffset();
-        long payloadSize = file.length() - dataOffset;
+        long dataOffset = this.header.getDataOffset();
+        long payloadSize = this.file.length() - dataOffset;
 
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fc = raf.getChannel())
+        try (RandomAccessFile raf = new RandomAccessFile(this.file, "r"); FileChannel fc = raf.getChannel())
         {
             MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, dataOffset, payloadSize);
 
             int cursor = 0;
 
-            PLYElement[] elements = new PLYElement[ header.getElements().size() ];
-            header.getElements().values().toArray(elements);
+            PLYElement[] elements = new PLYElement[this.header.getElements().size() ];
+            this.header.getElements().values().toArray(elements);
             int numElements = elements.length;
 
             for (int i = 0; i < numElements; i++)
@@ -97,7 +97,7 @@ public class ImprovedPLYReader
 
     }
 
-    private long calculateSizeOfListElement(PLYElement e, MappedByteBuffer buffer)
+    private static long calculateSizeOfListElement(PLYElement e, MappedByteBuffer buffer)
     {
         long total = 0;
 

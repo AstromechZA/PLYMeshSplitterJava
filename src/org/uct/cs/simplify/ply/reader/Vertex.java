@@ -5,14 +5,14 @@ import java.nio.ByteOrder;
 
 public class Vertex
 {
-    public float x;
-    public float y;
-    public float z;
+    public final float x;
+    public final float y;
+    public final float z;
     //    public int r;
 //    public int g;
 //    public int b;
 //    public int a;
-    public byte[] data;
+    public final byte[] data;
 
     public Vertex(byte[] input)
     {

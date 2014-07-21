@@ -13,8 +13,9 @@ import java.io.IOException;
 
 public class BlueprintifyMain
 {
-
-    private static final String format = "png";
+    private static final int DEFAULT_RESOLUTION = 1024;
+    private static final float DEFAULT_ALPHA_MOD = 0.1f;
+    private static final String OUTPUT_FORMAT = "png";
 
     public static void main(String[] args)
     {
@@ -22,8 +23,8 @@ public class BlueprintifyMain
         try (Timer ignored = new Timer("Elapsed:"))
         {
             // process arguments
-            int resolution = (cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : 1024);
-            float alphamod = (cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : 0.1f);
+            int resolution = (cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION);
+            float alphamod = (cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD);
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
 
@@ -37,10 +38,10 @@ public class BlueprintifyMain
             ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
 
             // process input model to find output name
-            File outputFile = new File(outputDir, inputFile.getName() + "." + format);
+            File outputFile = new File(outputDir, inputFile.getName() + "." + OUTPUT_FORMAT);
 
             BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod);
-            ImageIO.write(bi, format, outputFile);
+            ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);
         }
