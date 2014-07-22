@@ -85,7 +85,7 @@ public class ScaleAndRecenter
 
                         int percentN = numVertices / 100;
                         int tenPercentN = numVertices / 10;
-                        System.out.printf("Progress: (each dot indicates %d vertices)%n", percentN);
+                        System.out.printf("Progress: (each dot indicates %d vertices [total: %d])%n", percentN, numVertices);
 
                         float x, y, z;
                         for (int n = 0; n < numVertices; n++)

@@ -3,6 +3,9 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
+import org.uct.cs.simplify.ply.reader.Vertex;
+import org.uct.cs.simplify.ply.utilities.Octet;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -33,7 +36,23 @@ public class Splitter
         // now switch to rescaled version
         reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
 
+        int num_vertices = reader.getHeader().getElement("vertex").getCount();
+        long offset_vertices = reader.getElementDimension("vertex").getFirst();
+        int vertex_block_size = reader.getHeader().getElement("vertex").getItemSize();
 
+        Octet.OctetIndex[] memberships = new Octet.OctetIndex[num_vertices];
+
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), offset_vertices, num_vertices, vertex_block_size))
+        {
+            int c = vr.getCount();
+            Vertex v;
+            for (int i = 0; i < c; i++)
+            {
+                //v = vr.get(i);
+
+                memberships[i] = Octet.OctetIndex.XYZ;
+            }
+        }
 
 
     }

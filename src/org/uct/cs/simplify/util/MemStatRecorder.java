@@ -7,8 +7,8 @@ public class MemStatRecorder implements AutoCloseable
 {
     private static final int DEFAULT_INTERVAL_MS = 50;
 
-    private static final long KILOBYTE = 2^10;
-    private static final long MEGABYTE = 2^10 * KILOBYTE;
+    private static final long KILOBYTE = 1024;
+    private static final long MEGABYTE = 1024 * KILOBYTE;
 
     private int intervalMs;
     private List<Pair<Long, Long>> recordings;

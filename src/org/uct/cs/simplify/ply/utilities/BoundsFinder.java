@@ -28,7 +28,6 @@ public class BoundsFinder
     {
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();
-
         int blockSize = reader.getHeader().getElement("vertex").getItemSize();
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, blockSize))
