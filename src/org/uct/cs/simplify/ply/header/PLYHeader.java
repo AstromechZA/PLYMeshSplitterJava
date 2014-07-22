@@ -18,10 +18,12 @@ public class PLYHeader
     private PLYFormat format;
     private LinkedHashMap<String, PLYElement> elements;
     private int dataOffset;
+    private final File file;
 
     public PLYHeader(File f) throws IOException
     {
-        try (RandomAccessFile raf = new RandomAccessFile(f, "r"))
+        this.file = f;
+        try (RandomAccessFile raf = new RandomAccessFile(this.file, "r"))
         {
             FileChannel inChannel = raf.getChannel();
             ByteBuffer buffer = ByteBuffer.allocate(expectedHeaderLength);
@@ -36,7 +38,13 @@ public class PLYHeader
 
     public PLYHeader(String headerContent)
     {
+        this.file = null;
         this.constructFromString(headerContent);
+    }
+
+    public File getFile()
+    {
+        return this.file;
     }
 
     public PLYFormat getFormat()

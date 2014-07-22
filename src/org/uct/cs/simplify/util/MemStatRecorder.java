@@ -7,8 +7,8 @@ public class MemStatRecorder implements AutoCloseable
 {
     private static final int DEFAULT_INTERVAL_MS = 50;
 
-    private static final long KILOBYTE = 1024;
-    private static final long MEGABYTE = 1024 * KILOBYTE;
+    private static final long KILOBYTE = 2^10;
+    private static final long MEGABYTE = 2^10 * KILOBYTE;
 
     private int intervalMs;
     private List<Pair<Long, Long>> recordings;
@@ -78,7 +78,7 @@ public class MemStatRecorder implements AutoCloseable
 
     private void add(long ms, long used)
     {
-        this.recordings.add(new Pair<Long,Long>(ms, used));
+        this.recordings.add(new Pair<>(ms, used));
     }
 
     private static class MemRecorderThread implements Runnable

@@ -18,35 +18,31 @@ public class Blueprintify
     private static final float DEFAULT_ALPHA_MOD = 0.1f;
     private static final String OUTPUT_FORMAT = "png";
 
-    public static boolean run(File inputFile, File outputDir, int resolution, float alphamod)
+    public static void run(File inputFile, File outputDir, int resolution, float alphamod) throws IOException
     {
-        try(Timer ignored = new Timer("Elapsed"); MemStatRecorder m = new MemStatRecorder())
+        ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
+        
+        run(reader, outputDir, resolution, alphamod);
+    }
+
+    public static void run(ImprovedPLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
+    {
+
+        for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
         {
-            PLYHeader header = new PLYHeader(inputFile);
-            ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
+            File outputFile = new File(outputDir, reader.getFile().getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
+            BufferedImage bi = BluePrintGenerator.CreateImage(reader, resolution, alphamod, axis);
+            ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
-            for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
-            {
-                File outputFile = new File(outputDir, inputFile.getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
-                BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, axis);
-                ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
-
-                System.out.println("Saved blueprint to " + outputFile);
-            }
-
-            return true;
+            System.out.println("Saved blueprint to " + outputFile);
         }
-        catch (InterruptedException | IOException e)
-        {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
-        try
+
+        try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
         {
             int resolution = (
                     cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
@@ -66,7 +62,7 @@ public class Blueprintify
 
             run(inputFile, outputDir, resolution, alphamod);
         }
-        catch (ParseException | IOException e)
+        catch (ParseException | IOException | InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -82,7 +78,7 @@ public class Blueprintify
         o1.setRequired(true);
         options.addOption(o1);
 
-        Option o2 = new Option("o", "output", true, "Destination directory of blueprint");
+        Option o2 = new Option("o", "output", true, "Destination directory of blueprints");
         o2.setRequired(true);
         options.addOption(o2);
 

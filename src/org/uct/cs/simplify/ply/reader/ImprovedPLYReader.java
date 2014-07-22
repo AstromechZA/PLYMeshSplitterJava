@@ -17,10 +17,10 @@ public class ImprovedPLYReader
     private final PLYHeader header;
     private final LinkedHashMap<String, Pair<Long, Long>> elementDimensions;
 
-    public ImprovedPLYReader(PLYHeader h, File f) throws IOException
+    public ImprovedPLYReader(PLYHeader h) throws IOException
     {
         this.header = h;
-        this.file = f;
+        this.file = h.getFile();
         this.elementDimensions = new LinkedHashMap<>();
 
         this.positionScan();
