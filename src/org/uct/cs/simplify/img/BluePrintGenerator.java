@@ -60,10 +60,7 @@ public class BluePrintGenerator
         int border = 10;
         float ratio = (resolution - border) / bigdim;
 
-        long position = reader.getElementDimension("vertex").getFirst();
-        int vsize = reader.getHeader().getElement("vertex").getItemSize();
-
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), position, reader.getHeader().getElement("vertex").getCount(), vsize))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             int c = vr.getCount();
             Vertex v;
@@ -90,11 +87,7 @@ public class BluePrintGenerator
 
     private static Rectangle2D calculateBounds(ImprovedPLYReader reader, IAxisValueGetter avg) throws IOException
     {
-        int c = reader.getHeader().getElement("vertex").getCount();
-        long p = reader.getElementDimension("vertex").getFirst();
-        int vsize = reader.getHeader().getElement("vertex").getItemSize();
-
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, vsize))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
                     maxx = -Float.MAX_VALUE,
@@ -103,6 +96,7 @@ public class BluePrintGenerator
             float pr, se;
 
             Vertex v;
+            int c = vr.getCount();
             for (int i = 0; i < c; i++)
             {
                 v = vr.get(i);

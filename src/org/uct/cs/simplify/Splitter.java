@@ -5,13 +5,15 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
-import org.uct.cs.simplify.ply.utilities.Octet;
+import org.uct.cs.simplify.ply.utilities.BoundsFinder;
+import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class Splitter
 {
@@ -36,25 +38,40 @@ public class Splitter
         // now switch to rescaled version
         reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
 
-        int num_vertices = reader.getHeader().getElement("vertex").getCount();
-        long offset_vertices = reader.getElementDimension("vertex").getFirst();
-        int vertex_block_size = reader.getHeader().getElement("vertex").getItemSize();
+        // calculate vertex memberships
+        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
+        int num_vertices = memberships.length;
 
-        Octet.OctetIndex[] memberships = new Octet.OctetIndex[num_vertices];
-
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), offset_vertices, num_vertices, vertex_block_size))
+        OctetFinder.Octet current = OctetFinder.Octet.XYZ;
+        HashMap<Integer, Integer> new_vertex_index = new HashMap<>();
+        int current_index = 0;
+        for(int i=0;i<num_vertices;i++)
         {
-            int c = vr.getCount();
-            Vertex v;
-            for (int i = 0; i < c; i++)
+            if (memberships[i] == current)
             {
-                //v = vr.get(i);
-
-                memberships[i] = Octet.OctetIndex.XYZ;
+                new_vertex_index.put(i, current_index);
+                current_index += 1;
             }
         }
 
+    }
 
+    private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
+    {
+        OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
+
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        {
+            int c = vr.getCount();
+            OctetFinder.Octet[] memberships = new OctetFinder.Octet[c];
+            Vertex v;
+            for (int i = 0; i < c; i++)
+            {
+                v = vr.get(i);
+                memberships[i] = ofinder.getOctet(v.x, v.y, v.z);
+            }
+            return memberships;
+        }
     }
 
     public static void main(String[] args)

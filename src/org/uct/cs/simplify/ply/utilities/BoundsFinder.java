@@ -26,13 +26,8 @@ public class BoundsFinder
 
     private static BoundingBox getBoundingBoxInner(ImprovedPLYReader reader, int nth) throws IOException
     {
-        int c = reader.getHeader().getElement("vertex").getCount();
-        long p = reader.getElementDimension("vertex").getFirst();
-        int blockSize = reader.getHeader().getElement("vertex").getItemSize();
-
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader.getFile(), p, c, blockSize))
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            int n = 0;
             float minx = Float.MAX_VALUE,
                     maxx = -Float.MAX_VALUE,
                     miny = Float.MAX_VALUE,
@@ -41,10 +36,10 @@ public class BoundsFinder
                     maxz = -Float.MAX_VALUE;
 
             Vertex v;
+            int c = vr.getCount();
             for (int i = 0; i < c; i += nth)
             {
                 v = vr.get(i);
-                n += 1;
 
                 minx = Math.min(minx, v.x);
                 maxx = Math.max(maxx, v.x);
