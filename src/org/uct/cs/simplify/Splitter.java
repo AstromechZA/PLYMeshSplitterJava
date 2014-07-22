@@ -5,7 +5,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
-import org.uct.cs.simplify.util.MemRecorder;
+import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class Splitter
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (MemRecorder m = new MemRecorder(new File("o.dat")); Timer ignored = new Timer("Entire read"))
+        try (Timer ignored = new Timer("Entire read"); MemStatRecorder m = new MemStatRecorder())
         {
             File file = new File(cmd.getOptionValue("f"));
 

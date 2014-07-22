@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.img.BluePrintGenerator;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
@@ -17,10 +18,35 @@ public class Blueprintify
     private static final float DEFAULT_ALPHA_MOD = 0.1f;
     private static final String OUTPUT_FORMAT = "png";
 
+    public static boolean run(File inputFile, File outputDir, int resolution, float alphamod)
+    {
+        try(Timer ignored = new Timer("Elapsed"); MemStatRecorder m = new MemStatRecorder())
+        {
+            PLYHeader header = new PLYHeader(inputFile);
+            ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
+
+            for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
+            {
+                File outputFile = new File(outputDir, inputFile.getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
+                BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, axis);
+                ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
+
+                System.out.println("Saved blueprint to " + outputFile);
+            }
+
+            return true;
+        }
+        catch (InterruptedException | IOException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
-        try (Timer ignored = new Timer("Elapsed:"))
+        try
         {
             int resolution = (
                     cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
@@ -37,17 +63,8 @@ public class Blueprintify
                 throw new IOException("Could not create output directory " + outputDir);
 
             File inputFile = new File(filename);
-            PLYHeader header = new PLYHeader(inputFile);
-            ImprovedPLYReader r = new ImprovedPLYReader(header, inputFile);
 
-            for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
-            {
-                File outputFile = new File(outputDir, inputFile.getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
-                BufferedImage bi = BluePrintGenerator.CreateImage(r, resolution, alphamod, axis);
-                ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
-
-                System.out.println("Saved blueprint to " + outputFile);
-            }
+            run(inputFile, outputDir, resolution, alphamod);
         }
         catch (ParseException | IOException e)
         {

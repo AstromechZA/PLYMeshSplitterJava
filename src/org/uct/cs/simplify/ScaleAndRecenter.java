@@ -6,7 +6,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
-import org.uct.cs.simplify.util.MemRecorder;
+import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -33,7 +33,7 @@ public class ScaleAndRecenter
         // checking
         if (rescaleToSize < 2) throw new IllegalArgumentException("Rescale size must not be smaller than 2 units");
 
-        try (Timer ignored = new Timer("Processed"))
+        try (Timer ignored = new Timer("Processed"); MemStatRecorder m = new MemStatRecorder())
         {
             File inputFile = new File(filename);
 
@@ -45,15 +45,6 @@ public class ScaleAndRecenter
                     String.format("%s_rescaled_%d.ply", getFilenameWithoutExt(inputFile.getName()), rescaleToSize)
             );
 
-            // memory logger
-            MemRecorder mRecorder = null;
-            if (cmd.hasOption("memlog"))
-            {
-                File memFile = new File(outputDir, String.format("memlog_%d.dat", System.currentTimeMillis()));
-                System.out.printf("Logging memory usage to %s%n", memFile);
-                mRecorder = new MemRecorder(memFile, 100);
-            }
-
             // == construct & setup PLYReader
             // this scans the target file and works out start and end ranges
             PLYHeader header = new PLYHeader(inputFile);
@@ -64,7 +55,8 @@ public class ScaleAndRecenter
             Point3D center = new Point3D(
                     (bb.getMinX() + bb.getMaxX()) / 2,
                     (bb.getMinY() + bb.getMaxY()) / 2,
-                    (bb.getMinZ() + bb.getMaxZ()) / 2);
+                    (bb.getMinZ() + bb.getMaxZ()) / 2
+            );
 
             // mesh size is the maximum axis
             double meshHalfSize = Math.abs(
@@ -147,8 +139,6 @@ public class ScaleAndRecenter
                     }
                 }
             }
-
-            if (mRecorder != null) mRecorder.close();
         }
         catch (IOException | InterruptedException e)
         {
