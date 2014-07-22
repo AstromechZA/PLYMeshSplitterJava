@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class BlueprintifyMain
+public class Blueprintify
 {
     private static final int DEFAULT_RESOLUTION = 1024;
     private static final float DEFAULT_ALPHA_MOD = 0.1f;
