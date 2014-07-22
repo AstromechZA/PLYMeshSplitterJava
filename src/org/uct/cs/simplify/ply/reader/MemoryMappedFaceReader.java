@@ -15,12 +15,30 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     private static final int BYTE = 0xFF;
 
     private int index;
-    private final int count;
+    private int count;
     private RandomAccessFile raf;
     private FileChannel fc;
     private MappedByteBuffer buffer;
 
-    public MemoryMappedFaceReader(File file, long position, int count, long length) throws IOException
+    public MemoryMappedFaceReader(ImprovedPLYReader reader, String faceElementName) throws IOException
+    {
+        int c = reader.getHeader().getElement(faceElementName).getCount();
+        long p = reader.getElementDimension(faceElementName).getFirst();
+        long l = reader.getElementDimension(faceElementName).getSecond();
+
+        this.construct(reader.getFile(), p, c, l);
+    }
+
+    public MemoryMappedFaceReader(ImprovedPLYReader reader) throws IOException
+    {
+        int c = reader.getHeader().getElement("face").getCount();
+        long p = reader.getElementDimension("face").getFirst();
+        long l = reader.getElementDimension("face").getSecond();
+
+        this.construct(reader.getFile(), p, c, l);
+    }
+
+    private void construct(File file, long position, int count, long length) throws IOException
     {
         this.count = count;
         this.raf = new RandomAccessFile(file, "r");

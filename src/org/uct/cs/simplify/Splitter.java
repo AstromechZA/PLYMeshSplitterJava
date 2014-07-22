@@ -2,9 +2,7 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
-import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
-import org.uct.cs.simplify.ply.reader.Vertex;
+import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
@@ -40,19 +38,47 @@ public class Splitter
 
         // calculate vertex memberships
         OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
-        int num_vertices = memberships.length;
 
         OctetFinder.Octet current = OctetFinder.Octet.XYZ;
-        HashMap<Integer, Integer> new_vertex_index = new HashMap<>();
-        int current_index = 0;
-        for(int i=0;i<num_vertices;i++)
+        HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
+
+        try(MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
         {
-            if (memberships[i] == current)
+            Face f;
+            int current_vertex_index = 0;
+            while (fr.hasNext())
             {
-                new_vertex_index.put(i, current_index);
-                current_index += 1;
+                f = fr.next();
+
+                boolean inside = false;
+                for (int i : f.getVertices())
+                {
+                    if (memberships[i] == current)
+                    {
+                        inside = true;
+                        break;
+                    }
+                }
+
+                if (inside)
+                {
+                    for (int i : f.getVertices())
+                    {
+                        if (!new_vertex_indexes.containsKey(i))
+                        {
+                            new_vertex_indexes.put(i, current_vertex_index);
+                            current_vertex_index += 1;
+                        }
+                    }
+                    // write face to file1
+                }
             }
         }
+
+        // write header to file2
+        // write new_vertexes to file2
+        // write file1 to file2
+        // doone
 
     }
 
