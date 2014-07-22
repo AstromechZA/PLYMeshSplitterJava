@@ -24,7 +24,9 @@ public class ScaleAndRecenter
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);
-        int rescaleToSize = (cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE);
+        int rescaleToSize = (
+                cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE
+        );
         String filename = cmd.getOptionValue("filename");
         String outputDirectory = cmd.getOptionValue("output");
 
@@ -39,7 +41,9 @@ public class ScaleAndRecenter
             File outputDir = new File(new File(outputDirectory).getCanonicalPath());
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
-            File outputFile = new File(outputDir, String.format("%s_rescaled_%d.ply", getFilenameWithoutExt(inputFile.getName()), rescaleToSize));
+            File outputFile = new File(outputDir,
+                    String.format("%s_rescaled_%d.ply", getFilenameWithoutExt(inputFile.getName()), rescaleToSize)
+            );
 
             // memory logger
             MemRecorder mRecorder = null;
@@ -63,7 +67,15 @@ public class ScaleAndRecenter
                     (bb.getMinZ() + bb.getMaxZ()) / 2);
 
             // mesh size is the maximum axis
-            double meshHalfSize = Math.abs(Math.max(Math.max(bb.getMaxX() - center.getX(), bb.getMaxY() - center.getY()), bb.getMaxZ() - center.getZ()));
+            double meshHalfSize = Math.abs(
+                Math.max(
+                    Math.max(
+                            bb.getMaxX() - center.getX(),
+                            bb.getMaxY() - center.getY()
+                    ),
+                    bb.getMaxZ() - center.getZ()
+                )
+            );
             double scale = rescaleToSize / (2 * meshHalfSize);
             Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 

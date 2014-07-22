@@ -22,9 +22,12 @@ public class BlueprintifyMain
         CommandLine cmd = parseArgs(args);
         try (Timer ignored = new Timer("Elapsed:"))
         {
-            // process arguments
-            int resolution = (cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION);
-            float alphamod = (cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD);
+            int resolution = (
+                    cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
+            );
+            float alphamod = (
+                    cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD
+            );
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
 
@@ -66,11 +69,13 @@ public class BlueprintifyMain
         o2.setRequired(true);
         options.addOption(o2);
 
-        Option o3 = new Option("r", "resolution", true, "Resolution of image to output (default 1024)");
+        Option o3 = new Option("r", "resolution", true,
+                String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION));
         o3.setType(Short.class);
         options.addOption(o3);
 
-        Option o4 = new Option("a", "alphamod", true, "Translucency of applied pixels (default 0.1f)");
+        Option o4 = new Option("a", "alphamod", true,
+                String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD));
         o4.setType(Float.class);
         options.addOption(o4);
 
