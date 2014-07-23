@@ -28,7 +28,7 @@ public class PLYProperty extends PLYPropertyBase
 
     public String toString()
     {
-        return String.format("PLYProperty(%s %s)", this.getType(), this.getName());
+        return String.format("property %s %s", this.getType(), this.getName());
     }
 
 

@@ -69,7 +69,14 @@ public class PLYElement
     @Override
     public String toString()
     {
-        return "PLYElement(" + this.name + ")[" + this.count + "]";
+        StringBuilder sb = new StringBuilder(100);
+        sb.append(String.format("element %s %d %n", this.name, this.count));
+        for(PLYPropertyBase p : this.properties)
+        {
+            sb.append(p.toString());
+            sb.append('\n');
+        }
+        return sb.toString();
     }
 
 }

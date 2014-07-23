@@ -16,13 +16,25 @@ public class DataTypes
 
     public enum DataType
     {
-        CHAR,
-        UCHAR,
-        SHORT,
-        USHORT,
-        INT,
-        UINT,
-        FLOAT,
-        DOUBLE
+        CHAR("char"),
+        UCHAR("uchar"),
+        SHORT("short"),
+        USHORT("ushort"),
+        INT("int"),
+        UINT("uint"),
+        FLOAT("float"),
+        DOUBLE("double");
+
+        private final String name;
+
+        DataType(String name)
+        {
+            this.name = name;
+        }
+
+        public String toString()
+        {
+            return this.name;
+        }
     }
 }

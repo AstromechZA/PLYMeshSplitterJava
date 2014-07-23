@@ -27,7 +27,7 @@ public class PLYListProperty extends PLYProperty
 
     public String toString()
     {
-        return String.format("PLYListProperty(%s %s)[%s]", this.getType(), this.getName(), this.getLengthType());
+        return String.format("property list %s %s %s", this.getLengthType(), this.getType(), this.getName());
     }
 
 }

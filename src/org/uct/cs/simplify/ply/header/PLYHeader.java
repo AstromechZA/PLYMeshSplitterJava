@@ -134,6 +134,20 @@ public class PLYHeader
         return this.dataOffset;
     }
 
+
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder(1000);
+        sb.append(String.format("ply%n"));
+        sb.append(String.format("format binary_little_endian 1.0%n"));
+        for (PLYElement e : this.elements.values())
+        {
+            sb.append(e.toString());
+        }
+        sb.append("end_header");
+        return sb.toString();
+    }
+
     public static enum PLYFormat
     {
         ASCII, BIG_ENDIAN, LITTLE_ENDIAN

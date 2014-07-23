@@ -84,7 +84,9 @@ public class Splitter
                     }
                 }
             }
-            
+
+            System.out.println(reader.getHeader().toString());
+
             // write header to file2
             // write new_vertexes to file2
             // write file1 to file2
