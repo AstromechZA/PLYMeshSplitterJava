@@ -55,12 +55,9 @@ public class ScaleAndRecenter
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
         // debug
+        System.out.println("Rescaling and Centering...");
         System.out.printf("Input File: %s%n", reader.getFile());
         System.out.printf("Output File: %s%n", outputFile);
-        System.out.printf("X: %f → %f%n", bb.getMinX(), bb.getMaxX());
-        System.out.printf("Y: %f → %f%n", bb.getMinY(), bb.getMaxY());
-        System.out.printf("Z: %f → %f%n", bb.getMinZ(), bb.getMaxZ());
-        System.out.printf("Center: %f, %f, %f%n", center.getX(), center.getY(), center.getZ());
         System.out.printf("Scale ratio: %f%n", scale);
 
         try (RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r"))

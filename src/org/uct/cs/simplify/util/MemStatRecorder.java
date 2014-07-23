@@ -7,9 +7,6 @@ public class MemStatRecorder implements AutoCloseable
 {
     private static final int DEFAULT_INTERVAL_MS = 50;
 
-    private static final long KILOBYTE = 1024;
-    private static final long MEGABYTE = 1024 * KILOBYTE;
-
     private int intervalMs;
     private List<Pair<Long, Long>> recordings;
     private Thread backgroundThread;
@@ -33,14 +30,6 @@ public class MemStatRecorder implements AutoCloseable
         this.backgroundThread.start();
     }
 
-    private static String convertToByteUnit(double bytes)
-    {
-        if (bytes > MEGABYTE) return String.format("%.2f MB", bytes / MEGABYTE);
-        if (bytes > KILOBYTE) return String.format("%.2f KB", bytes / KILOBYTE);
-        return String.format("%.2f B", bytes);
-    }
-
-
     @Override
     public void close() throws InterruptedException
     {
@@ -63,11 +52,11 @@ public class MemStatRecorder implements AutoCloseable
 
         double average = total / (double)this.recordings.size();
 
-        System.out.printf("Mem : Start :   %s%n", convertToByteUnit(start));
-        System.out.printf("Mem : Min :     %s%n", convertToByteUnit(min));
-        System.out.printf("Mem : Average : %s%n", convertToByteUnit(average));
-        System.out.printf("Mem : Max :     %s%n", convertToByteUnit(max));
-        System.out.printf("Mem : End :     %s%n", convertToByteUnit(end));
+        System.out.printf("Mem : Start :   %s%n", Useful.convertToByteUnit(start));
+        System.out.printf("Mem : Min :     %s%n", Useful.convertToByteUnit(min));
+        System.out.printf("Mem : Average : %s%n", Useful.convertToByteUnit(average));
+        System.out.printf("Mem : Max :     %s%n", Useful.convertToByteUnit(max));
+        System.out.printf("Mem : End :     %s%n", Useful.convertToByteUnit(end));
     }
 
     public int getInterval()

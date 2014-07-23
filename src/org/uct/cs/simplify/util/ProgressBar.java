@@ -7,7 +7,7 @@ public class ProgressBar implements AutoCloseable
     private final String title;
     private final char progressChar;
     private final int maxTicks;
-    private final float tickDistance;
+    private final long startTime;
     private int progressTicks;
     private int position;
 
@@ -23,8 +23,8 @@ public class ProgressBar implements AutoCloseable
         this.progressChar = progressChar;
         this.maxTicks = maxTicks;
         this.position = 0;
-        this.tickDistance = this.maxTicks / (float)100;
         this.progressTicks = 0;
+        this.startTime = System.nanoTime();
         this.printTitle();
     }
 
@@ -57,6 +57,10 @@ public class ProgressBar implements AutoCloseable
     @Override
     public void close()
     {
-        System.out.println();
+        String timestr = Useful.formatTime(System.nanoTime() - this.startTime);
+        timestr = String.format(" ( %s ) ", timestr);
+        char[] pad = new char[ 100 - timestr.length() - 3 ];
+        Arrays.fill(pad, '=');
+        System.out.printf("%n%s%s===%n", new String(pad), timestr);
     }
 }

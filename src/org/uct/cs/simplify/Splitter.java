@@ -30,16 +30,13 @@ public class Splitter
                 String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_RESCALE_SIZE)
         );
 
-        System.out.println("Rescaling and Centering...");
-
         ScaleAndRecenter.run(reader, scaledFile, DEFAULT_RESCALE_SIZE);
-
-        System.out.println("Done.");
 
         // now switch to rescaled version
         reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
 
-        try(Timer ignored = new Timer("Split")) {
+        try (Timer ignored = new Timer("Split"))
+        {
 
             // calculate vertex memberships
             OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
