@@ -30,13 +30,9 @@ public class ProgressBar implements AutoCloseable
 
     private void printTitle()
     {
-        int l = 100;
-        l -= this.title.length()+4;
-        char[] pad = new char[l/2];
+        char[] pad = new char[ 100 - this.title.length() - 7 ];
         Arrays.fill(pad, '=');
-        String padding = new String(pad);
-        String last = ((this.title.length() % 2 == 0) ? "" : "=");
-        System.out.printf("%s  %s  %s%s%n", padding, this.title, padding, last);
+        System.out.printf("===  %s  %s%n", this.title, new String(pad));
     }
 
     public void tick()

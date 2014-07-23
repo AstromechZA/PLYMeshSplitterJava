@@ -47,6 +47,7 @@ public class Splitter
 
         for (OctetFinder.Octet current : OctetFinder.Octet.values())
         {
+            System.out.println();
             File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
             LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
@@ -65,29 +66,33 @@ public class Splitter
                 {
                     try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
                     {
-                        int c = vr.getCount();
                         Vertex v;
                         ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * 4 ]);
                         bb.order(ByteOrder.LITTLE_ENDIAN);
-                        for (int i : new_vertex_indices.keySet())
+                        try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", current), new_vertex_indices.size()))
                         {
-                            v = vr.get(i);
-                            bb.putFloat(v.x);
-                            bb.putFloat(v.y);
-                            bb.putFloat(v.z);
-
-                            bb.flip();
-                            bostream.write(bb.array());
-                            bb.flip();
-                            bb.clear();
-
-                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                            for (int i : new_vertex_indices.keySet())
                             {
-                                fostream.write(bostream.toByteArray());
-                                bostream.reset();
+                                pb.tick();
+                                v = vr.get(i);
+                                bb.putFloat(v.x);
+                                bb.putFloat(v.y);
+                                bb.putFloat(v.z);
+
+                                bb.flip();
+                                bostream.write(bb.array());
+                                bb.flip();
+                                bb.clear();
+
+                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                                {
+                                    fostream.write(bostream.toByteArray());
+                                    bostream.reset();
+                                }
                             }
+                            if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+
                         }
-                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
                     }
                 }
 
@@ -123,7 +128,7 @@ public class Splitter
     ) throws IOException
     {
         int num_faces_in_octet = 0;
-        try (ProgressBar progress = new ProgressBar("Scanning vertices", reader.getHeader().getElement("face").getCount()))
+        try (ProgressBar progress = new ProgressBar(String.format("%s : Scanning & Writing Faces", current), reader.getHeader().getElement("face").getCount()))
         {
             try (MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader))
             {
