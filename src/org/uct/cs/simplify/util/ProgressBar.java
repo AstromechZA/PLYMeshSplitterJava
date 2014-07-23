@@ -57,6 +57,14 @@ public class ProgressBar implements AutoCloseable
     @Override
     public void close()
     {
+        int toPrint = 100 - this.position;
+        if (toPrint > 0)
+        {
+            char[] chars = new char[ toPrint ];
+            Arrays.fill(chars, this.progressChar);
+
+            System.out.print(chars);
+        }
         String timestr = Useful.formatTime(System.nanoTime() - this.startTime);
         timestr = String.format(" ( %s ) ", timestr);
         char[] pad = new char[ 100 - timestr.length() - 3 ];

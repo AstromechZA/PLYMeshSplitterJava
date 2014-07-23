@@ -6,6 +6,7 @@ import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
@@ -35,77 +36,77 @@ public class Splitter
         // now switch to rescaled version
         reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
 
-        try (Timer ignored = new Timer("Split"))
+        // calculate vertex memberships
+        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
+
+        OctetFinder.Octet current = OctetFinder.Octet.XYZ;
+        HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
+
+        File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
+
+        try (ProgressBar pb = new ProgressBar("Scanning vertices", reader.getHeader().getElement("face").getCount()))
         {
+            try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
+            {
+                try (RandomAccessFile rafOUT = new RandomAccessFile(octetFaceFile, "rw"))
+                {
 
-            // calculate vertex memberships
-            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
-
-            OctetFinder.Octet current = OctetFinder.Octet.XYZ;
-            HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
-
-            File octetFaceFile = new File(outputDir,
-                    String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current)
-            );
-
-            try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader)) {
-                try (RandomAccessFile rafOUT = new RandomAccessFile(octetFaceFile, "rw")) {
-
-                    Face f;
+                    Face face;
                     int current_vertex_index = 1;
-                    while (fr.hasNext()) {
-                        f = fr.next();
+                    while (fr.hasNext())
+                    {
+                        pb.tick();
+                        face = fr.next();
 
-                        boolean inside = false;
-                        for (int i : f.getVertices()) {
-                            if (memberships[i] == current) {
-                                inside = true;
-                                break;
-                            }
-                        }
-
-                        if (inside) {
-
-                            ByteBuffer buffer = ByteBuffer.allocate(1 + 4 * f.getNumVertices());
+                        if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
+                        {
+                            ByteBuffer buffer = ByteBuffer.allocate(1 + 4 * face.getNumVertices());
                             buffer.order(ByteOrder.LITTLE_ENDIAN);
-                            buffer.put((byte) f.getNumVertices());
-                            for (int i : f.getVertices()) {
-                                if (!new_vertex_indexes.containsKey(i)) {
-                                    new_vertex_indexes.put(i, current_vertex_index);
+                            buffer.put((byte) face.getNumVertices());
+                            for (int v : face.getVertices())
+                            {
+                                if (!new_vertex_indexes.containsKey(v))
+                                {
+                                    new_vertex_indexes.put(v, current_vertex_index);
                                     current_vertex_index += 1;
                                 }
-                                buffer.putInt(new_vertex_indexes.get(i));
+                                buffer.putInt(new_vertex_indexes.get(v));
                             }
                             rafOUT.write(buffer.array());
                         }
                     }
                 }
             }
-
-            System.out.println(reader.getHeader().toString());
-
-            // write header to file2
-            // write new_vertexes to file2
-            // write file1 to file2
-            // doone
         }
+
+        System.out.println(reader.getHeader());
+
+        // write header to file2
+        // write new_vertexes to file2
+        // write file1 to file2
+        // doone
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
     {
+
         OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            int c = vr.getCount();
-            OctetFinder.Octet[] memberships = new OctetFinder.Octet[c];
-            Vertex v;
-            for (int i = 0; i < c; i++)
+            try (ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount()))
             {
-                v = vr.get(i);
-                memberships[i] = ofinder.getOctet(v.x, v.y, v.z);
+                int c = vr.getCount();
+                OctetFinder.Octet[] memberships = new OctetFinder.Octet[ c ];
+                Vertex v;
+                for (int i = 0; i < c; i++)
+                {
+                    pb.tick();
+                    v = vr.get(i);
+                    memberships[ i ] = ofinder.getOctet(v.x, v.y, v.z);
+                }
+                return memberships;
             }
-            return memberships;
         }
     }
 

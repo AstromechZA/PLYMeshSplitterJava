@@ -23,7 +23,6 @@ public class Timer implements AutoCloseable
         return System.nanoTime() - this.starttime;
     }
 
-
     @Override
     public void close()
     {
