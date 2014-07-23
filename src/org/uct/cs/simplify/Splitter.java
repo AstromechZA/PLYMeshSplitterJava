@@ -100,13 +100,7 @@ public class Splitter
                 }
 
             }
-
-            System.out.println(newHeader);
         }
-        // write header to file2
-        // write new_vertexes to file2
-        // write file1 to file2
-        // doone
     }
 
     private static PLYHeader constructNewHeader(int num_faces, int num_vertices)
@@ -141,7 +135,7 @@ public class Splitter
                     try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
                     {
                         Face face;
-                        int current_vertex_index = 1;
+                        int current_vertex_index = 0;
                         while (faceReader.hasNext())
                         {
                             progress.tick();
