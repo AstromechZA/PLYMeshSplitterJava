@@ -7,6 +7,7 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
@@ -83,40 +84,37 @@ public class ScaleAndRecenter
                         blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
                         blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
 
-                        int percentN = numVertices / 100;
-                        int tenPercentN = numVertices / 10;
-                        System.out.printf("Progress: (each dot indicates %d vertices [total: %d])%n", percentN, numVertices);
-
-                        float x, y, z;
-                        for (int n = 0; n < numVertices; n++)
+                        try(ProgressBar progress = new ProgressBar("Rescaling", numVertices))
                         {
-                            if (n % percentN == 0) System.out.print(".");
-                            if ((n + 1) % tenPercentN == 0) System.out.print(" ");
 
-                            fcIN.read(blockBufferIN);
-                            blockBufferIN.flip();
-                            x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
-                            y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
-                            z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
+                            float x, y, z;
+                            for (int n = 0; n < numVertices; n++)
+                            {
+                                fcIN.read(blockBufferIN);
+                                blockBufferIN.flip();
+                                x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
+                                y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
+                                z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
 
-                            blockBufferOUT.putFloat(x);
-                            blockBufferOUT.putFloat(y);
-                            blockBufferOUT.putFloat(z);
+                                blockBufferOUT.putFloat(x);
+                                blockBufferOUT.putFloat(y);
+                                blockBufferOUT.putFloat(z);
 
-                            blockBufferOUT.put(blockBufferIN);
-                            blockBufferOUT.flip();
+                                blockBufferOUT.put(blockBufferIN);
+                                blockBufferOUT.flip();
 
-                            fcOUT.write(blockBufferOUT);
+                                fcOUT.write(blockBufferOUT);
 
-                            blockBufferIN.clear();
-                            blockBufferOUT.clear();
+                                blockBufferIN.clear();
+                                blockBufferOUT.clear();
+
+                                progress.tick();
+                            }
                         }
 
                         // copy remainder
                         long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
                         copyNBytes(fcIN, fcOUT, fileRemainder);
-
-                        System.out.println();
                     }
                 }
             }
