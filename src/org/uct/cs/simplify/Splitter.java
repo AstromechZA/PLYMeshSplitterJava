@@ -10,6 +10,7 @@ import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 
 public class Splitter
 {
-
+    private static final int DEFAULT_BYTEOSBUF_SIZE = 2048;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir) throws IOException
@@ -50,7 +51,7 @@ public class Splitter
             {
                 try (RandomAccessFile rafOUT = new RandomAccessFile(octetFaceFile, "rw"))
                 {
-
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
                     Face face;
                     int current_vertex_index = 1;
                     while (fr.hasNext())
@@ -72,8 +73,18 @@ public class Splitter
                                 }
                                 buffer.putInt(new_vertex_indexes.get(v));
                             }
-                            rafOUT.write(buffer.array());
+                            baos.write(buffer.array());
                         }
+                        if (baos.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                        {
+                            rafOUT.write(baos.toByteArray());
+                            baos.reset();
+                        }
+                    }
+                    if (baos.size() > 0)
+                    {
+                        rafOUT.write(baos.toByteArray());
+                        baos.reset();
                     }
                 }
             }
