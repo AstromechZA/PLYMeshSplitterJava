@@ -45,18 +45,18 @@ public class Splitter
         // calculate vertex memberships
         OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
 
-        OctetFinder.Octet current = OctetFinder.Octet.XYZ;
+        for (OctetFinder.Octet current : OctetFinder.Octet.values())
+        {
+            File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-        File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
+            Map<Integer, Integer> new_vertex_indices = new HashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
+            int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
+            int num_vertices = new_vertex_indices.size();
 
-        Map<Integer, Integer> new_vertex_indices = new HashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
-        int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
-        int num_vertices = new_vertex_indices.size();
-
-        // construct new header
-        PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
-        System.out.println(newHeader);
-
+            // construct new header
+            PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+            System.out.println(newHeader);
+        }
         // write header to file2
         // write new_vertexes to file2
         // write file1 to file2
@@ -139,7 +139,6 @@ public class Splitter
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
     {
-
         OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
@@ -148,12 +147,19 @@ public class Splitter
             {
                 int c = vr.getCount();
                 OctetFinder.Octet[] memberships = new OctetFinder.Octet[ c ];
+                int[] octetCounts = new int[ 8 ];
                 Vertex v;
                 for (int i = 0; i < c; i++)
                 {
                     pb.tick();
                     v = vr.get(i);
-                    memberships[ i ] = ofinder.getOctet(v.x, v.y, v.z);
+                    OctetFinder.Octet o = ofinder.getOctet(v.x, v.y, v.z);
+                    memberships[ i ] = o;
+                    octetCounts[ o.ordinal() ] += 1;
+                }
+                for (int octetCount : octetCounts)
+                {
+                    System.out.println(octetCount);
                 }
                 return memberships;
             }
