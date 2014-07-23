@@ -63,12 +63,11 @@ public class MemStatRecorder implements AutoCloseable
 
         double average = total / (double)this.recordings.size();
 
-        System.out.printf("%nMem Stats%n============%n");
-        System.out.printf("Start: %s%n", convertToByteUnit(start));
-        System.out.printf("Min: %s%n", convertToByteUnit(min));
-        System.out.printf("Average: %s%n", convertToByteUnit(average));
-        System.out.printf("Max: %s%n", convertToByteUnit(max));
-        System.out.printf("End: %s%n", convertToByteUnit(end));
+        System.out.printf("Mem : Start :   %s%n", convertToByteUnit(start));
+        System.out.printf("Mem : Min :     %s%n", convertToByteUnit(min));
+        System.out.printf("Mem : Average : %s%n", convertToByteUnit(average));
+        System.out.printf("Mem : Max :     %s%n", convertToByteUnit(max));
+        System.out.printf("Mem : End :     %s%n", convertToByteUnit(end));
     }
 
     public int getInterval()

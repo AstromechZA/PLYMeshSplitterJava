@@ -29,19 +29,18 @@ public class Timer implements AutoCloseable
 
     private static String formatTime(long ns)
     {
-        if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f m", ns / (double) NANOSECONDS_PER_MINUTE);
-        if (ns > NANOSECONDS_PER_SECOND) return String.format("%.2f s", ns / (double) NANOSECONDS_PER_SECOND);
-        if (ns > NANOSECONDS_PER_MILLISECONDS) return String.format("%.2f ms", ns / (double) NANOSECONDS_PER_MILLISECONDS);
-        if (ns > NANOSECONDS_PER_MICROSECOND) return String.format("%.2f us", ns / (double) NANOSECONDS_PER_MICROSECOND);
-        return String.format("%d ns", ns);
+        if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f minute", ns / (double) NANOSECONDS_PER_MINUTE);
+        if (ns > NANOSECONDS_PER_SECOND) return String.format("%.2f seconds", ns / (double) NANOSECONDS_PER_SECOND);
+        if (ns > NANOSECONDS_PER_MILLISECONDS) return String.format("%.2f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);
+        if (ns > NANOSECONDS_PER_MICROSECOND) return String.format("%.2f microseconds", ns / (double) NANOSECONDS_PER_MICROSECOND);
+        return String.format("%d nanoseconds", ns);
     }
 
     @Override
     public void close()
     {
         long elapsed = System.nanoTime() - this.starttime;
-        System.out.printf("%nTimer%n=========%n");
-        System.out.printf("%s : %s%n", this.text, formatTime(elapsed));
+        System.out.printf("Timer : %s : %s%n", this.text, formatTime(elapsed));
     }
 
 

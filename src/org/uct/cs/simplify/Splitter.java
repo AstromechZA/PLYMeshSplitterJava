@@ -11,6 +11,9 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 
 public class Splitter
@@ -36,50 +39,57 @@ public class Splitter
         // now switch to rescaled version
         reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
 
-        // calculate vertex memberships
-        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
+        try(Timer ignored = new Timer("Split")) {
 
-        OctetFinder.Octet current = OctetFinder.Octet.XYZ;
-        HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
+            // calculate vertex memberships
+            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
 
-        try(MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
-        {
-            Face f;
-            int current_vertex_index = 0;
-            while (fr.hasNext())
-            {
-                f = fr.next();
+            OctetFinder.Octet current = OctetFinder.Octet.XYZ;
+            HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
 
-                boolean inside = false;
-                for (int i : f.getVertices())
-                {
-                    if (memberships[i] == current)
-                    {
-                        inside = true;
-                        break;
-                    }
-                }
+            File octetFaceFile = new File(outputDir,
+                    String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current)
+            );
 
-                if (inside)
-                {
-                    for (int i : f.getVertices())
-                    {
-                        if (!new_vertex_indexes.containsKey(i))
-                        {
-                            new_vertex_indexes.put(i, current_vertex_index);
-                            current_vertex_index += 1;
+            try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader)) {
+                try (RandomAccessFile rafOUT = new RandomAccessFile(octetFaceFile, "rw")) {
+
+                    Face f;
+                    int current_vertex_index = 1;
+                    while (fr.hasNext()) {
+                        f = fr.next();
+
+                        boolean inside = false;
+                        for (int i : f.getVertices()) {
+                            if (memberships[i] == current) {
+                                inside = true;
+                                break;
+                            }
+                        }
+
+                        if (inside) {
+
+                            ByteBuffer buffer = ByteBuffer.allocate(1 + 4 * f.getNumVertices());
+                            buffer.order(ByteOrder.LITTLE_ENDIAN);
+                            buffer.put((byte) f.getNumVertices());
+                            for (int i : f.getVertices()) {
+                                if (!new_vertex_indexes.containsKey(i)) {
+                                    new_vertex_indexes.put(i, current_vertex_index);
+                                    current_vertex_index += 1;
+                                }
+                                buffer.putInt(new_vertex_indexes.get(i));
+                            }
+                            rafOUT.write(buffer.array());
                         }
                     }
-                    // write face to file1
                 }
             }
+            
+            // write header to file2
+            // write new_vertexes to file2
+            // write file1 to file2
+            // doone
         }
-
-        // write header to file2
-        // write new_vertexes to file2
-        // write file1 to file2
-        // doone
-
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
@@ -104,7 +114,7 @@ public class Splitter
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (Timer ignored = new Timer("Total"); MemStatRecorder ignored2 = new MemStatRecorder())
         {
             File file = new File(cmd.getOptionValue("filename"));
             File outputDir = new File(new File(cmd.getOptionValue("output")).getCanonicalPath());
