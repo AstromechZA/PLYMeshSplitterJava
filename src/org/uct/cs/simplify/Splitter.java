@@ -50,7 +50,7 @@ public class Splitter
             System.out.println();
             File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-            LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
+            LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 8);
             int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
             int num_vertices = new_vertex_indices.size();
 
@@ -79,9 +79,7 @@ public class Splitter
                                 bb.putFloat(v.y);
                                 bb.putFloat(v.z);
 
-                                bb.flip();
                                 bostream.write(bb.array());
-                                bb.flip();
                                 bb.clear();
 
                                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
@@ -173,7 +171,7 @@ public class Splitter
 
     private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
     {
-        stream.write((i >> 0) & 0xFF);
+        stream.write((i) & 0xFF);
         stream.write((i >> 8) & 0xFF);
         stream.write((i >> 16) & 0xFF);
         stream.write((i >> 24) & 0xFF);
@@ -246,10 +244,6 @@ public class Splitter
         Option o3 = new Option("d", "depth", true, "number of levels to split to");
         o3.setType(Short.class);
         options.addOption(o3);
-
-        Option o4 = new Option("s", "scaleTo", true, "scale the model to fit a cube of the given size");
-        o4.setType(Short.class);
-        options.addOption(o4);
 
         CommandLine cmd;
         try
