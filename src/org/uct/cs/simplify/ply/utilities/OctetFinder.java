@@ -5,20 +5,15 @@ import javafx.geometry.Point3D;
 
 public class OctetFinder
 {
-    public enum Octet
-    {
-        XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz
-    }
-
     private final Point3D center;
     private final Octet[] by_i;
 
     public OctetFinder(BoundingBox bb)
     {
         this.center = new Point3D(
-                (bb.getMaxX() + bb.getMinX())/2,
-                (bb.getMaxY() + bb.getMinY())/2,
-                (bb.getMaxZ() + bb.getMinZ())/2
+                (bb.getMaxX() + bb.getMinX()) / 2,
+                (bb.getMaxY() + bb.getMinY()) / 2,
+                (bb.getMaxZ() + bb.getMinZ()) / 2
         );
         this.by_i = Octet.values();
     }
@@ -33,8 +28,13 @@ public class OctetFinder
     {
         int i = 0;
         if (x < this.center.getX()) i += 4;
-        if (x < this.center.getY()) i += 2;
-        if (x < this.center.getZ()) i += 1;
-        return this.by_i[i];
+        if (y < this.center.getY()) i += 2;
+        if (z < this.center.getZ()) i += 1;
+        return this.by_i[ i ];
+    }
+
+    public enum Octet
+    {
+        XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz
     }
 }

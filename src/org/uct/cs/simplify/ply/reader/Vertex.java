@@ -22,6 +22,7 @@ public class Vertex
         this.x = bf.getFloat();
         this.y = bf.getFloat();
         this.z = bf.getFloat();
+
 //
 //        this.r = 0xFF & ((int)bf.get());
 //        this.g = 0xFF & ((int)bf.get());

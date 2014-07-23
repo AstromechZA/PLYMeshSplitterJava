@@ -1,5 +1,6 @@
 package org.uct.cs.simplify;
 
+import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataTypes;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -7,7 +8,6 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYListProperty;
 import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.ProgressBar;
@@ -53,8 +53,17 @@ public class Splitter
             int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
             int num_vertices = new_vertex_indices.size();
 
-            // construct new header
             PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+
+            File octetFile = new File(outputDir, String.format("%s_%s.ply", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
+
+            try (FileOutputStream fostream = new FileOutputStream(octetFaceFile))
+            {
+                fostream.write((newHeader + "\n").getBytes());
+
+
+            }
+
             System.out.println(newHeader);
         }
         // write header to file2
@@ -139,7 +148,7 @@ public class Splitter
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
     {
-        OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
+        OctetFinder ofinder = new OctetFinder(new Point3D(0, 0, 0));
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
@@ -147,19 +156,12 @@ public class Splitter
             {
                 int c = vr.getCount();
                 OctetFinder.Octet[] memberships = new OctetFinder.Octet[ c ];
-                int[] octetCounts = new int[ 8 ];
                 Vertex v;
                 for (int i = 0; i < c; i++)
                 {
                     pb.tick();
                     v = vr.get(i);
-                    OctetFinder.Octet o = ofinder.getOctet(v.x, v.y, v.z);
-                    memberships[ i ] = o;
-                    octetCounts[ o.ordinal() ] += 1;
-                }
-                for (int octetCount : octetCounts)
-                {
-                    System.out.println(octetCount);
+                    memberships[ i ] = ofinder.getOctet(v.x, v.y, v.z);
                 }
                 return memberships;
             }
