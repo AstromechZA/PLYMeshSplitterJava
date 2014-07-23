@@ -35,6 +35,6 @@ public class OctetFinder
 
     public enum Octet
     {
-        XYZ, XYz, XyZ, Xyz, xYZ, xYz, xyZ, xyz
+        pxpypz, pxpynz, pxnypz, pxnynz, nxpypz, nxpynz, nxnypz, nxnynz
     }
 }

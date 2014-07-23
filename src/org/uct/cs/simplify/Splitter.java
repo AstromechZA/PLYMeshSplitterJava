@@ -14,10 +14,10 @@ import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,10 +57,47 @@ public class Splitter
 
             File octetFile = new File(outputDir, String.format("%s_%s.ply", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-            try (FileOutputStream fostream = new FileOutputStream(octetFaceFile))
+            try (FileOutputStream fostream = new FileOutputStream(octetFile))
             {
                 fostream.write((newHeader + "\n").getBytes());
 
+                try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+                {
+                    try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                    {
+                        int c = vr.getCount();
+                        Vertex v;
+                        ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * 4 ]);
+                        bb.order(ByteOrder.LITTLE_ENDIAN);
+                        for (int i = 0; i < c; i++)
+                        {
+                            if (new_vertex_indices.containsKey(i))
+                            {
+                                v = vr.get(i);
+                                bb.putFloat(v.x);
+                                bb.putFloat(v.y);
+                                bb.putFloat(v.z);
+
+                                bb.flip();
+                                bostream.write(bb.array());
+                                bb.flip();
+                                bb.clear();
+
+                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                                {
+                                    fostream.write(bostream.toByteArray());
+                                    bostream.reset();
+                                }
+                            }
+                        }
+                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+                    }
+                }
+
+                try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
+                {
+                    fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
+                }
 
             }
 
@@ -114,14 +151,14 @@ public class Splitter
                             {
                                 num_faces_in_octet += 1;
                                 bostream.write((byte) face.getNumVertices());
-                                for (int v : face.getVertices())
+                                for (int vertex_index : face.getVertices())
                                 {
-                                    if (!output.containsKey(v))
+                                    if (!output.containsKey(vertex_index))
                                     {
-                                        output.put(v, current_vertex_index);
+                                        output.put(vertex_index, current_vertex_index);
                                         current_vertex_index += 1;
                                     }
-                                    littleEndianWrite(bostream, output.get(v));
+                                    littleEndianWrite(bostream, output.get(vertex_index));
                                 }
                             }
                             if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
