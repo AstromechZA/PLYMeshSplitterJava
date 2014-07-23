@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public class Splitter
         {
             File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-            Map<Integer, Integer> new_vertex_indices = new HashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
+            LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
             int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
             int num_vertices = new_vertex_indices.size();
 
@@ -69,25 +69,22 @@ public class Splitter
                         Vertex v;
                         ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * 4 ]);
                         bb.order(ByteOrder.LITTLE_ENDIAN);
-                        for (int i = 0; i < c; i++)
+                        for (int i : new_vertex_indices.keySet())
                         {
-                            if (new_vertex_indices.containsKey(i))
+                            v = vr.get(i);
+                            bb.putFloat(v.x);
+                            bb.putFloat(v.y);
+                            bb.putFloat(v.z);
+
+                            bb.flip();
+                            bostream.write(bb.array());
+                            bb.flip();
+                            bb.clear();
+
+                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
                             {
-                                v = vr.get(i);
-                                bb.putFloat(v.x);
-                                bb.putFloat(v.y);
-                                bb.putFloat(v.z);
-
-                                bb.flip();
-                                bostream.write(bb.array());
-                                bb.flip();
-                                bb.clear();
-
-                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
-                                {
-                                    fostream.write(bostream.toByteArray());
-                                    bostream.reset();
-                                }
+                                fostream.write(bostream.toByteArray());
+                                bostream.reset();
                             }
                         }
                         if (bostream.size() > 0) fostream.write(bostream.toByteArray());
@@ -171,10 +168,11 @@ public class Splitter
 
     private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
     {
-        stream.write(i & 0xFF);
+        stream.write((i >> 0) & 0xFF);
         stream.write((i >> 8) & 0xFF);
         stream.write((i >> 16) & 0xFF);
         stream.write((i >> 24) & 0xFF);
+
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
