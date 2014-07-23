@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,12 +14,11 @@ import java.util.regex.Pattern;
 public class PLYHeader
 {
 
-    private static final int expectedHeaderLength = 1024;
-
+    private static final int EXPECTED_HEADER_LENGTH = 1024;
+    private final File file;
     private PLYFormat format;
     private LinkedHashMap<String, PLYElement> elements;
     private int dataOffset;
-    private final File file;
 
     public PLYHeader(File f) throws IOException
     {
@@ -26,7 +26,7 @@ public class PLYHeader
         try (RandomAccessFile raf = new RandomAccessFile(this.file, "r"))
         {
             FileChannel inChannel = raf.getChannel();
-            ByteBuffer buffer = ByteBuffer.allocate(expectedHeaderLength);
+            ByteBuffer buffer = ByteBuffer.allocate(EXPECTED_HEADER_LENGTH);
 
             if (inChannel.read(buffer) > 0)
             {
@@ -40,6 +40,15 @@ public class PLYHeader
     {
         this.file = null;
         this.constructFromString(headerContent);
+    }
+
+    public PLYHeader(List<PLYElement> elements)
+    {
+        this.file = null;
+        this.format = PLYFormat.LITTLE_ENDIAN;
+        this.elements = new LinkedHashMap<>();
+        elements.forEach(e -> this.elements.put(e.getName(), e));
+        this.dataOffset = this.toString().length();
     }
 
     public File getFile()
@@ -91,10 +100,8 @@ public class PLYHeader
         // read PLY
         headScan.nextLine();
 
-        // read PLY format identifier from the string
         this.format = parseFormat(headScan.nextLine());
 
-        // read the list of elements from scanner
         this.elements = parseElements(headScan);
 
         this.dataOffset = input.length();
@@ -137,13 +144,10 @@ public class PLYHeader
 
     public String toString()
     {
-        StringBuilder sb = new StringBuilder(1000);
+        StringBuilder sb = new StringBuilder(EXPECTED_HEADER_LENGTH);
         sb.append(String.format("ply%n"));
         sb.append(String.format("format binary_little_endian 1.0%n"));
-        for (PLYElement e : this.elements.values())
-        {
-            sb.append(e.toString());
-        }
+        this.elements.values().forEach(sb::append);
         sb.append("end_header");
         return sb.toString();
     }

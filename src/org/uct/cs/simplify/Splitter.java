@@ -1,7 +1,11 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
+import org.uct.cs.simplify.ply.datatypes.DataTypes;
+import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.header.PLYListProperty;
+import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
@@ -12,15 +16,16 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Splitter
 {
-    private static final int DEFAULT_BYTEOSBUF_SIZE = 2048;
+    private static final int DEFAULT_BYTEOSBUF_SIZE = 512 * 1024;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir) throws IOException
@@ -41,61 +46,95 @@ public class Splitter
         OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
 
         OctetFinder.Octet current = OctetFinder.Octet.XYZ;
-        HashMap<Integer, Integer> new_vertex_indexes = new HashMap<>();
 
         File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-        try (ProgressBar pb = new ProgressBar("Scanning vertices", reader.getHeader().getElement("face").getCount()))
-        {
-            try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
-            {
-                try (RandomAccessFile rafOUT = new RandomAccessFile(octetFaceFile, "rw"))
-                {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
-                    Face face;
-                    int current_vertex_index = 1;
-                    while (fr.hasNext())
-                    {
-                        pb.tick();
-                        face = fr.next();
+        Map<Integer, Integer> new_vertex_indices = new HashMap<>(reader.getHeader().getElement("vertex").getCount() / 4);
+        int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
+        int num_vertices = new_vertex_indices.size();
 
-                        if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
-                        {
-                            ByteBuffer buffer = ByteBuffer.allocate(1 + 4 * face.getNumVertices());
-                            buffer.order(ByteOrder.LITTLE_ENDIAN);
-                            buffer.put((byte) face.getNumVertices());
-                            for (int v : face.getVertices())
-                            {
-                                if (!new_vertex_indexes.containsKey(v))
-                                {
-                                    new_vertex_indexes.put(v, current_vertex_index);
-                                    current_vertex_index += 1;
-                                }
-                                buffer.putInt(new_vertex_indexes.get(v));
-                            }
-                            baos.write(buffer.array());
-                        }
-                        if (baos.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
-                        {
-                            rafOUT.write(baos.toByteArray());
-                            baos.reset();
-                        }
-                    }
-                    if (baos.size() > 0)
-                    {
-                        rafOUT.write(baos.toByteArray());
-                        baos.reset();
-                    }
-                }
-            }
-        }
-
-        System.out.println(reader.getHeader());
+        // construct new header
+        PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+        System.out.println(newHeader);
 
         // write header to file2
         // write new_vertexes to file2
         // write file1 to file2
         // doone
+    }
+
+    private static PLYHeader constructNewHeader(int num_faces, int num_vertices)
+    {
+        List<PLYElement> elements = new ArrayList<>();
+        PLYElement eVertex = new PLYElement("vertex", num_vertices);
+        eVertex.addProperty(new PLYProperty("x", DataTypes.DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("y", DataTypes.DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("z", DataTypes.DataType.FLOAT));
+        elements.add(eVertex);
+        PLYElement eFace = new PLYElement("face", num_faces);
+        eFace.addProperty(new PLYListProperty("vertex_indices", DataTypes.DataType.INT, DataTypes.DataType.UCHAR));
+        elements.add(eFace);
+        return new PLYHeader(elements);
+    }
+
+    private static int gatherOctetFaces(
+            ImprovedPLYReader reader,
+            OctetFinder.Octet[] memberships,
+            OctetFinder.Octet current,
+            File octetFaceFile,
+            Map<Integer, Integer> output
+    ) throws IOException
+    {
+        int num_faces_in_octet = 0;
+        try (ProgressBar progress = new ProgressBar("Scanning vertices", reader.getHeader().getElement("face").getCount()))
+        {
+            try (MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader))
+            {
+                try (FileOutputStream fostream = new FileOutputStream(octetFaceFile))
+                {
+                    try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                    {
+                        Face face;
+                        int current_vertex_index = 1;
+                        while (faceReader.hasNext())
+                        {
+                            progress.tick();
+                            face = faceReader.next();
+
+                            if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
+                            {
+                                num_faces_in_octet += 1;
+                                bostream.write((byte) face.getNumVertices());
+                                for (int v : face.getVertices())
+                                {
+                                    if (!output.containsKey(v))
+                                    {
+                                        output.put(v, current_vertex_index);
+                                        current_vertex_index += 1;
+                                    }
+                                    littleEndianWrite(bostream, output.get(v));
+                                }
+                            }
+                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                            {
+                                fostream.write(bostream.toByteArray());
+                                bostream.reset();
+                            }
+                        }
+                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+                    }
+                }
+            }
+        }
+        return num_faces_in_octet;
+    }
+
+    private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
+    {
+        stream.write(i & 0xFF);
+        stream.write((i >> 8) & 0xFF);
+        stream.write((i >> 16) & 0xFF);
+        stream.write((i >> 24) & 0xFF);
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException

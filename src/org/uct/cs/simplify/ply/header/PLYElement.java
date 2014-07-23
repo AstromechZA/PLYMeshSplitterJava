@@ -73,7 +73,7 @@ public class PLYElement
         sb.append(String.format("element %s %d %n", this.name, this.count));
         for(PLYPropertyBase p : this.properties)
         {
-            sb.append(p.toString());
+            sb.append(p);
             sb.append('\n');
         }
         return sb.toString();
