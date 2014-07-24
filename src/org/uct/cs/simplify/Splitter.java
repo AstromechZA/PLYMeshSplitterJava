@@ -1,7 +1,6 @@
 package org.uct.cs.simplify;
 
 import cern.colt.map.OpenIntIntHashMap;
-import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataTypes;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -9,6 +8,7 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYListProperty;
 import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
+import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.ProgressBar;
@@ -25,7 +25,7 @@ import java.util.List;
 public class Splitter
 {
     private static final int BYTE = 0xFF;
-    private static final int DEFAULT_BYTEOSBUF_SIZE = 512 * 1024;
+    private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir) throws IOException
@@ -181,7 +181,7 @@ public class Splitter
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
     {
-        OctetFinder ofinder = new OctetFinder(new Point3D(0, 0, 0));
+        OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {

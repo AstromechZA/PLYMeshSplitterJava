@@ -8,7 +8,7 @@ public class Useful
     private static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
     private static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
     private static final long KILOBYTE = 1024;
-    private static final long MEGABYTE = 1024 * KILOBYTE;
+    private static final long MEGABYTE = 1048576;
 
     public static String getFilenameWithoutExt(String fn)
     {
