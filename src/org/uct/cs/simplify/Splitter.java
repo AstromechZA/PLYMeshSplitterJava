@@ -1,6 +1,6 @@
 package org.uct.cs.simplify;
 
-import cern.colt.map.OpenIntIntHashMap;
+import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataTypes;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -8,7 +8,6 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYListProperty;
 import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.ProgressBar;
@@ -20,12 +19,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Splitter
 {
-    private static final int BYTE = 0xFF;
-    private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
+    private static final int DEFAULT_BYTEOSBUF_SIZE = 512 * 1024;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir) throws IOException
@@ -50,7 +50,7 @@ public class Splitter
             System.out.println();
             File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
 
-            OpenIntIntHashMap new_vertex_indices = new OpenIntIntHashMap(reader.getHeader().getElement("vertex").getCount() / 8);
+            LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 8);
             int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
             int num_vertices = new_vertex_indices.size();
 
@@ -71,7 +71,7 @@ public class Splitter
                         bb.order(ByteOrder.LITTLE_ENDIAN);
                         try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", current), new_vertex_indices.size()))
                         {
-                            for (int i : new_vertex_indices.keys().elements())
+                            for (int i : new_vertex_indices.keySet())
                             {
                                 pb.tick();
                                 v = vr.get(i);
@@ -123,7 +123,7 @@ public class Splitter
             OctetFinder.Octet[] memberships,
             OctetFinder.Octet current,
             File octetFaceFile,
-            OpenIntIntHashMap output
+            Map<Integer, Integer> output
     ) throws IOException
     {
         int num_faces_in_octet = 0;
@@ -172,16 +172,16 @@ public class Splitter
 
     private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
     {
-        stream.write((i) & BYTE);
-        stream.write((i >> 8) & BYTE);
-        stream.write((i >> 16) & BYTE);
-        stream.write((i >> 24) & BYTE);
+        stream.write((i) & 0xFF);
+        stream.write((i >> 8) & 0xFF);
+        stream.write((i >> 16) & 0xFF);
+        stream.write((i >> 24) & 0xFF);
 
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
     {
-        OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
+        OctetFinder ofinder = new OctetFinder(new Point3D(0, 0, 0));
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
