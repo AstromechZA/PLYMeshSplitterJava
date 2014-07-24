@@ -99,6 +99,7 @@ public class Splitter
                     fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
                 }
 
+                octetFaceFile.delete();
             }
         }
     }
