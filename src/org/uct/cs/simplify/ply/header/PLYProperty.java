@@ -1,22 +1,22 @@
 package org.uct.cs.simplify.ply.header;
 
-import org.uct.cs.simplify.ply.datatypes.DataTypes;
+import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.datatypes.IDataTypeReader;
 
 
 public class PLYProperty extends PLYPropertyBase
 {
-    private final DataTypes.DataType type;
+    private final DataType type;
     private final IDataTypeReader typeReader;
 
-    public PLYProperty(String name, DataTypes.DataType type)
+    public PLYProperty(String name, DataType type)
     {
         super(name);
         this.type = type;
         this.typeReader = IDataTypeReader.getReaderForType(this.type);
     }
 
-    public DataTypes.DataType getType()
+    public DataType getType()
     {
         return this.type;
     }

@@ -1,21 +1,21 @@
 package org.uct.cs.simplify.ply.header;
 
-import org.uct.cs.simplify.ply.datatypes.DataTypes;
+import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.datatypes.IDataTypeReader;
 
 public class PLYListProperty extends PLYProperty
 {
-    private final DataTypes.DataType lengthType;
+    private final DataType lengthType;
     private final IDataTypeReader lengthTypeReader;
 
-    public PLYListProperty(String name, DataTypes.DataType innerType, DataTypes.DataType lengthType)
+    public PLYListProperty(String name, DataType innerType, DataType lengthType)
     {
         super(name, innerType);
         this.lengthType = lengthType;
         this.lengthTypeReader = IDataTypeReader.getReaderForType(this.lengthType);
     }
 
-    public DataTypes.DataType getLengthType()
+    public DataType getLengthType()
     {
         return this.lengthType;
     }

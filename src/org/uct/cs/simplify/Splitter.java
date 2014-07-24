@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.ply.datatypes.DataTypes;
+import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYListProperty;
@@ -109,12 +109,12 @@ public class Splitter
     {
         List<PLYElement> elements = new ArrayList<>();
         PLYElement eVertex = new PLYElement("vertex", num_vertices);
-        eVertex.addProperty(new PLYProperty("x", DataTypes.DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("y", DataTypes.DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("z", DataTypes.DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
         elements.add(eVertex);
         PLYElement eFace = new PLYElement("face", num_faces);
-        eFace.addProperty(new PLYListProperty("vertex_indices", DataTypes.DataType.INT, DataTypes.DataType.UCHAR));
+        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
         elements.add(eFace);
         return new PLYHeader(elements);
     }

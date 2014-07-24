@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.ply.header;
 
-import static org.uct.cs.simplify.ply.datatypes.DataTypes.parseDataType;
+import org.uct.cs.simplify.ply.datatypes.DataType;
 
 public class PLYPropertyBase
 {
@@ -26,8 +26,8 @@ public class PLYPropertyBase
         line = line.trim();
         String[] parts = line.split(" ");
         if (parts[ 1 ].equals("list"))
-            return new PLYListProperty(parts[ 4 ], parseDataType(parts[ 3 ]), parseDataType(parts[ 2 ]));
-        return new PLYProperty(parts[ 2 ], parseDataType(parts[ 1 ]));
+            return new PLYListProperty(parts[ 4 ], DataType.from(parts[3]), DataType.from(parts[2]));
+        return new PLYProperty(parts[ 2 ], DataType.from(parts[1]));
     }
 
 
