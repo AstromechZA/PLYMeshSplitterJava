@@ -9,19 +9,14 @@ import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
-import org.uct.cs.simplify.util.MemStatRecorder;
-import org.uct.cs.simplify.util.ProgressBar;
+import org.uct.cs.simplify.util.*;
 import org.uct.cs.simplify.util.Timer;
-import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Splitter
 {
@@ -29,6 +24,7 @@ public class Splitter
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
+    private static final int DEFAULT_NUM_SPLIT_LEVELS = 2;
 
     public static void run(File inputFile, File outputDir) throws IOException
     {
@@ -40,68 +36,83 @@ public class Splitter
         );
 
         ScaleAndRecenter.run(reader, scaledFile, DEFAULT_RESCALE_SIZE);
+        ArrayDeque<Pair<File, Integer>> processQueue = new ArrayDeque<>();
+        processQueue.add(new Pair<>(scaledFile, 0));
 
-        // now switch to rescaled version
-        reader = new ImprovedPLYReader(new PLYHeader(scaledFile));
-
-        // calculate vertex memberships
-        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
-
-        for (OctetFinder.Octet current : OctetFinder.Octet.values())
+        while(!processQueue.isEmpty())
         {
-            System.out.println();
-            File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
+            Pair<File, Integer> processEntry = processQueue.removeFirst();
+            File processFile = processEntry.getFirst();
+            int processDepth = processEntry.getSecond();
 
-            LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 8);
-            int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
-            int num_vertices = new_vertex_indices.size();
+            // now switch to rescaled version
+            reader = new ImprovedPLYReader(new PLYHeader(processFile));
 
-            PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+            // calculate vertex memberships
+            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
 
-            File octetFile = new File(outputDir, String.format("%s_%s.ply", Useful.getFilenameWithoutExt(scaledFile.getName()), current));
-
-            try (FileOutputStream fostream = new FileOutputStream(octetFile))
+            for (OctetFinder.Octet current : OctetFinder.Octet.values())
             {
-                fostream.write((newHeader + "\n").getBytes());
+                System.out.println();
+                File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(processFile.getName()), current));
 
-                try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+                LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 8);
+                int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
+                int num_vertices = new_vertex_indices.size();
+
+                PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+
+                File octetFile = new File(outputDir, String.format("%s_%s.ply", Useful.getFilenameWithoutExt(processFile.getName()), current));
+
+                try (FileOutputStream fostream = new FileOutputStream(octetFile))
                 {
-                    try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                    fostream.write((newHeader + "\n").getBytes());
+
+                    try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
                     {
-                        Vertex v;
-                        ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * 4 ]);
-                        bb.order(ByteOrder.LITTLE_ENDIAN);
-                        try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", current), new_vertex_indices.size()))
+                        try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
                         {
-                            for (int i : new_vertex_indices.keySet())
+                            Vertex v;
+                            ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
+                            bb.order(ByteOrder.LITTLE_ENDIAN);
+                            try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", current), new_vertex_indices.size()))
                             {
-                                pb.tick();
-                                v = vr.get(i);
-                                bb.putFloat(v.x);
-                                bb.putFloat(v.y);
-                                bb.putFloat(v.z);
-
-                                bostream.write(bb.array());
-                                bb.clear();
-
-                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                                for (int i : new_vertex_indices.keySet())
                                 {
-                                    fostream.write(bostream.toByteArray());
-                                    bostream.reset();
-                                }
-                            }
-                            if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+                                    pb.tick();
+                                    v = vr.get(i);
+                                    bb.putFloat(v.x);
+                                    bb.putFloat(v.y);
+                                    bb.putFloat(v.z);
 
+                                    bostream.write(bb.array());
+                                    bb.clear();
+
+                                    if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                                    {
+                                        fostream.write(bostream.toByteArray());
+                                        bostream.reset();
+                                    }
+                                }
+                                if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+
+                            }
                         }
                     }
+
+                    try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
+                    {
+                        fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
+                    }
+
+                    if (!octetFaceFile.delete())
+                        throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
                 }
 
-                try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
+                if (processDepth < DEFAULT_NUM_SPLIT_LEVELS)
                 {
-                    fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
+                    processQueue.addLast(new Pair<>(octetFile, processDepth+1));
                 }
-
-                if(!octetFaceFile.delete()) throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
             }
         }
     }
@@ -139,6 +150,7 @@ public class Splitter
                     {
                         Face face;
                         int current_vertex_index = 0;
+
                         while (faceReader.hasNext())
                         {
                             progress.tick();

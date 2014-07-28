@@ -25,7 +25,7 @@ public enum DataType
         return valueOf(s.trim().toUpperCase());
     }
 
-    public int getBytes()
+    public int getByteSize()
     {
         return this.bytes;
     }
