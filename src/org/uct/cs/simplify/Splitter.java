@@ -27,6 +27,7 @@ public class Splitter
 {
     private static final int BYTE = 0xFF;
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
+    private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir) throws IOException
@@ -83,7 +84,7 @@ public class Splitter
                                 bostream.write(bb.array());
                                 bb.clear();
 
-                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                                 {
                                     fostream.write(bostream.toByteArray());
                                     bostream.reset();
@@ -100,7 +101,7 @@ public class Splitter
                     fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
                 }
 
-                octetFaceFile.delete();
+                if(!octetFaceFile.delete()) throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
             }
         }
     }
@@ -157,7 +158,7 @@ public class Splitter
                                     littleEndianWrite(bostream, output.get(vertex_index));
                                 }
                             }
-                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - 16)
+                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                             {
                                 fostream.write(bostream.toByteArray());
                                 bostream.reset();
@@ -175,8 +176,8 @@ public class Splitter
     {
         stream.write((i) & BYTE);
         stream.write((i >> 8) & BYTE);
-        stream.write((i >> 16) & BYTE);
-        stream.write((i >> 24) & BYTE);
+        stream.write((i >> (8*2)) & BYTE);
+        stream.write((i >> (8*3)) & BYTE);
 
     }
 
@@ -202,6 +203,7 @@ public class Splitter
         }
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         CommandLine cmd = getCommandLine(args);

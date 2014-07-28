@@ -38,6 +38,7 @@ public class Blueprintify
         }
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         CommandLine cmd = parseArgs(args);

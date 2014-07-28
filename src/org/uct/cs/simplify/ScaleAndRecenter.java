@@ -118,6 +118,7 @@ public class ScaleAndRecenter
         }
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
