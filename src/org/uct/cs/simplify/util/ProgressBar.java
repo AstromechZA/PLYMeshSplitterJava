@@ -39,7 +39,7 @@ public class ProgressBar implements AutoCloseable
     {
         this.progressTicks += 1;
 
-        int newPosition = (int)((100f*this.progressTicks) / this.maxTicks);
+        int newPosition = ((100*this.progressTicks) / this.maxTicks);
         int toPrint = newPosition - this.position;
         if (toPrint > 0) {
             char[] chars = new char[toPrint];
