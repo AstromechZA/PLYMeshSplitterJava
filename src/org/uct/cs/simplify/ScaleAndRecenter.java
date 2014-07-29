@@ -3,7 +3,11 @@ package org.uct.cs.simplify;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
+import org.uct.cs.simplify.ply.datatypes.DataType;
+import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.header.PLYListProperty;
+import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
@@ -17,6 +21,8 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScaleAndRecenter
 {
@@ -70,22 +76,28 @@ public class ScaleAndRecenter
                 {
                     try (FileChannel fcOUT = rafOUT.getChannel())
                     {
+
+                        int numVertices = reader.getHeader().getElement("vertex").getCount();
+                        int numFaces = reader.getHeader().getElement("face").getCount();
+
+                        // construct new header
+                        PLYHeader header = constructNewHeader(numFaces, numVertices);
+                        fcOUT.write(ByteBuffer.wrap((header + "\n").getBytes()));
+
                         // copy beginning
                         long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
                         long vertexElementLength = reader.getElementDimension("vertex").getSecond();
-                        copyNBytes(fcIN, fcOUT, vertexElementBegin);
 
                         int blockSize = reader.getHeader().getElement("vertex").getItemSize();
-                        int numVertices = reader.getHeader().getElement("vertex").getCount();
 
                         ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(blockSize);
-                        ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(blockSize);
+                        ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(3 * DataType.FLOAT.getByteSize());
                         blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
                         blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
 
                         try (ProgressBar progress = new ProgressBar("Rescaling", numVertices))
                         {
-
+                            fcIN.position(vertexElementBegin);
                             float x, y, z;
                             for (int n = 0; n < numVertices; n++)
                             {
@@ -106,7 +118,6 @@ public class ScaleAndRecenter
                                 blockBufferOUT.putFloat(y);
                                 blockBufferOUT.putFloat(z);
 
-                                blockBufferOUT.put(blockBufferIN);
                                 blockBufferOUT.flip();
 
                                 fcOUT.write(blockBufferOUT);
@@ -126,18 +137,43 @@ public class ScaleAndRecenter
             }
         }
 
-        double sx = (bb.getMinX() - center.getX()) * scale;
-        double sy = (bb.getMinY() - center.getY()) * scale;
-        double sz = (bb.getMinZ() - center.getZ()) * scale;
-        double ex = (bb.getMaxX() - center.getX()) * scale;
-        double ey = (bb.getMaxY() - center.getY()) * scale;
-        double ez = (bb.getMaxZ() - center.getZ()) * scale;
-
         if (swapYZ)
-            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
-        else
-            return new BoundingBox(sx, sz, sy, ex - sx, ez - sz, ey - sy);
+        {
+            double sx = (bb.getMinX() - center.getX()) * scale;
+            double sy = (bb.getMinZ() - center.getY()) * scale;
+            double sz = (bb.getMinY() - center.getZ()) * scale;
+            double ex = (bb.getMaxX() - center.getX()) * scale;
+            double ey = (bb.getMaxZ() - center.getY()) * scale;
+            double ez = (bb.getMaxY() - center.getZ()) * scale;
 
+            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
+        }
+        else
+        {
+            double sx = (bb.getMinX() - center.getX()) * scale;
+            double sy = (bb.getMinY() - center.getY()) * scale;
+            double sz = (bb.getMinZ() - center.getZ()) * scale;
+            double ex = (bb.getMaxX() - center.getX()) * scale;
+            double ey = (bb.getMaxY() - center.getY()) * scale;
+            double ez = (bb.getMaxZ() - center.getZ()) * scale;
+
+            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
+        }
+
+    }
+
+    private static PLYHeader constructNewHeader(int num_faces, int num_vertices)
+    {
+        List<PLYElement> elements = new ArrayList<>();
+        PLYElement eVertex = new PLYElement("vertex", num_vertices);
+        eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
+        elements.add(eVertex);
+        PLYElement eFace = new PLYElement("face", num_faces);
+        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
+        elements.add(eFace);
+        return new PLYHeader(elements);
     }
 
     @SuppressWarnings("unused")
