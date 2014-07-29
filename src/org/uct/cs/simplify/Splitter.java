@@ -51,78 +51,89 @@ public class Splitter
             int processDepth = processEntry.getSecond();
             Point3D splitPoint = processEntry.getThird();
 
+            String processFileBase = Useful.getFilenameWithoutExt(processFile.getName());
+
             // now switch to rescaled version
             reader = new ImprovedPLYReader(new PLYHeader(processFile));
+            int average_vertices_per_octet = reader.getHeader().getElement("vertex").getCount() / 8;
 
-            // calculate vertex memberships
             OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, splitPoint);
 
-            for (OctetFinder.Octet current : OctetFinder.Octet.values())
+            for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
             {
-                System.out.println();
-                File octetFaceFile = new File(outputDir, String.format("%s_%s", Useful.getFilenameWithoutExt(processFile.getName()), current));
+                File octetFaceFile = new File(outputDir, String.format("%s_%s", processFileBase, currentOctet));
 
-                LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(reader.getHeader().getElement("vertex").getCount() / 8);
-                int num_faces = gatherOctetFaces(reader, memberships, current, octetFaceFile, new_vertex_indices);
-                int num_vertices = new_vertex_indices.size();
+                LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(average_vertices_per_octet);
+                int num_faces = gatherOctetFaces(reader, memberships, currentOctet, octetFaceFile, new_vertex_indices);
 
-                PLYHeader newHeader = constructNewHeader(num_faces, num_vertices);
+                File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
 
-                File octetFile = new File(outputDir, String.format("%s_%s.ply", Useful.getFilenameWithoutExt(processFile.getName()), current));
+                writeOctetPLYModel(reader, currentOctet, octetFaceFile, new_vertex_indices, num_faces, octetFile);
 
-                try (FileOutputStream fostream = new FileOutputStream(octetFile))
-                {
-                    fostream.write((newHeader + "\n").getBytes());
-
-                    try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
-                    {
-                        try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
-                        {
-                            Vertex v;
-                            ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
-                            bb.order(ByteOrder.LITTLE_ENDIAN);
-                            try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", current), new_vertex_indices.size()))
-                            {
-                                for (int i : new_vertex_indices.keySet())
-                                {
-                                    pb.tick();
-                                    v = vr.get(i);
-                                    bb.putFloat(v.x);
-                                    bb.putFloat(v.y);
-                                    bb.putFloat(v.z);
-
-                                    bostream.write(bb.array());
-                                    bb.clear();
-
-                                    if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
-                                    {
-                                        fostream.write(bostream.toByteArray());
-                                        bostream.reset();
-                                    }
-                                }
-                                if (bostream.size() > 0) fostream.write(bostream.toByteArray());
-
-                            }
-                        }
-                    }
-
-                    try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
-                    {
-                        fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
-                    }
-
-                    if (!octetFaceFile.delete())
-                        throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
-                }
+                if (!octetFaceFile.delete()) throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
 
                 if (processDepth < depth)
                 {
                     processQueue.addLast(new Triple<>(
                             octetFile,
                             processDepth+1,
-                            current.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
+                            currentOctet.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
                     ));
                 }
+            }
+        }
+    }
+
+    private static void writeOctetPLYModel(
+            ImprovedPLYReader reader,
+            OctetFinder.Octet currentOctet,
+            File octetFaceFile,
+            LinkedHashMap<Integer, Integer> new_vertex_indices,
+            int num_faces,
+            File octetFile
+    ) throws IOException
+    {
+        PLYHeader newHeader = constructNewHeader(num_faces, new_vertex_indices.size());
+
+        try (FileOutputStream fostream = new FileOutputStream(octetFile))
+        {
+            fostream.write((newHeader + "\n").getBytes());
+
+            try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+            {
+                try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                {
+                    Vertex v;
+                    ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
+                    bb.order(ByteOrder.LITTLE_ENDIAN);
+                    try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", currentOctet), new_vertex_indices.size()))
+                    {
+                        for (int i : new_vertex_indices.keySet())
+                        {
+                            pb.tick();
+                            v = vr.get(i);
+                            bb.putFloat(v.x);
+                            bb.putFloat(v.y);
+                            bb.putFloat(v.z);
+
+                            bostream.write(bb.array());
+                            bb.clear();
+
+                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                            {
+                                fostream.write(bostream.toByteArray());
+                                bostream.reset();
+                            }
+                        }
+                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+
+                    }
+                }
+            }
+
+            try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
+            {
+                fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
             }
         }
     }
