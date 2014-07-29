@@ -23,15 +23,17 @@ public class ScaleAndRecenter
     private static final int DEFAULT_RESCALE_SIZE = 1024;
     private static final int COPYBYTES_BUF_SIZE = 4096;
 
-    public static BoundingBox run(File inputFile, File outputFile, int size) throws IOException
+    public static BoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
 
-        return run(reader, outputFile, size);
+        return run(reader, outputFile, size, swapYZ);
     }
 
-    public static BoundingBox run(ImprovedPLYReader reader, File outputFile, int size) throws IOException
+    public static BoundingBox run(
+            ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ
+    ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         BoundingBox bb = BoundsFinder.getBoundingBox(reader);
@@ -93,6 +95,13 @@ public class ScaleAndRecenter
                                 y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
                                 z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
 
+                                if (swapYZ)
+                                {
+                                    float t = z;
+                                    z = y;
+                                    y = t;
+                                }
+
                                 blockBufferOUT.putFloat(x);
                                 blockBufferOUT.putFloat(y);
                                 blockBufferOUT.putFloat(z);
@@ -124,7 +133,11 @@ public class ScaleAndRecenter
         double ey = (bb.getMaxY() - center.getY()) * scale;
         double ez = (bb.getMaxZ() - center.getZ()) * scale;
 
-        return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
+        if (swapYZ)
+            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
+        else
+            return new BoundingBox(sx, sz, sy, ex - sx, ez - sz, ey - sy);
+
     }
 
     @SuppressWarnings("unused")
@@ -155,7 +168,7 @@ public class ScaleAndRecenter
                     )
             );
 
-            run(inputFile, outputFile, rescaleToSize);
+            run(inputFile, outputFile, rescaleToSize, false);
         }
         catch (IOException | InterruptedException e)
         {

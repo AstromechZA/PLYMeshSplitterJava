@@ -26,7 +26,7 @@ public class Splitter
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_MODEL_SIZE = 1024;
 
-    public static void run(File inputFile, File outputDir, int maxDepth) throws IOException
+    public static void run(File inputFile, File outputDir, int maxDepth, boolean swapYZ) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
@@ -38,7 +38,7 @@ public class Splitter
                 )
         );
 
-        BoundingBox finalBoundingBox = ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE);
+        BoundingBox finalBoundingBox = ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE, swapYZ);
 
         System.out.printf("%f -> %f%n", finalBoundingBox.getMinX(), finalBoundingBox.getMaxX());
         System.out.printf("%f -> %f%n", finalBoundingBox.getMinY(), finalBoundingBox.getMaxY());
@@ -177,7 +177,7 @@ public class Splitter
             OctetFinder.Octet[] memberships,
             OctetFinder.Octet current,
             File octetFaceFile,
-            Map<Integer, Integer> output
+            Map<Integer, Integer> vertexMap
     ) throws IOException
     {
         int num_faces_in_octet = 0;
@@ -208,12 +208,12 @@ public class Splitter
                                 bostream.write((byte) face.getNumVertices());
                                 for (int vertex_index : face.getVertices())
                                 {
-                                    if (!output.containsKey(vertex_index))
+                                    if (!vertexMap.containsKey(vertex_index))
                                     {
-                                        output.put(vertex_index, current_vertex_index);
+                                        vertexMap.put(vertex_index, current_vertex_index);
                                         current_vertex_index += 1;
                                     }
-                                    littleEndianWrite(bostream, output.get(vertex_index));
+                                    littleEndianWrite(bostream, vertexMap.get(vertex_index));
                                 }
                             }
                             if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
@@ -278,7 +278,7 @@ public class Splitter
             int depth = Integer.parseInt(cmd.getOptionValue("depth"));
             if (depth < 2 || depth > 8) throw new IllegalArgumentException("Splitting depth must be between 1 and 9!");
 
-            run(file, outputDir, depth);
+            run(file, outputDir, depth, cmd.hasOption("swapyz"));
         }
         catch (IOException | InterruptedException | IllegalArgumentException e)
         {
@@ -300,17 +300,20 @@ public class Splitter
 
         Options options = new Options();
 
-        Option o1 = new Option("f", "filename", true, "path to PLY model to process");
-        o1.setRequired(true);
-        options.addOption(o1);
+        Option opFilename = new Option("f", "filename", true, "path to PLY model to process");
+        opFilename.setRequired(true);
+        options.addOption(opFilename);
 
-        Option o2 = new Option("o", "output", true, "Destination directory of models");
-        o2.setRequired(true);
-        options.addOption(o2);
+        Option opOutput = new Option("o", "output", true, "Destination directory of models");
+        opOutput.setRequired(true);
+        options.addOption(opOutput);
 
-        Option o3 = new Option("d", "depth", true, "number of levels to split to");
-        o3.setType(Short.class);
-        options.addOption(o3);
+        Option opDepth = new Option("d", "depth", true, "Number of levels to split to");
+        opDepth.setType(Short.class);
+        options.addOption(opDepth);
+
+        Option opSwapYZ = new Option("yz", "swapyz", false, "Swap the Y and Z axis during preprocessing");
+        options.addOption(opSwapYZ);
 
         CommandLine cmd;
         try
