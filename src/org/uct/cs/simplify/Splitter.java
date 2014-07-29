@@ -32,7 +32,9 @@ public class Splitter
         File scaledFile = new File(
                 outputDir,
                 String.format(
-                        "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_MODEL_SIZE
+                        "%s_rescaled_%d.ply",
+                        Useful.getFilenameWithoutExt(inputFile.getName()),
+                        DEFAULT_MODEL_SIZE
                 )
         );
 
@@ -64,24 +66,19 @@ public class Splitter
             {
                 try (
                         TempFile temporaryFaceFile = new TempFile(
-                                outputDir, String.format(
-                                "%s_%s.temp", processFileBase, currentOctet
-                        )
+                                outputDir,
+                                String.format("%s_%s.temp", processFileBase, currentOctet)
                         )
                 )
                 {
-                    LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(
-                            average_vertices_per_octet
-                    );
+                    LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(average_vertices_per_octet);
                     int num_faces = gatherOctetFaces(
-                            reader, memberships, currentOctet, temporaryFaceFile, new_vertex_indices
+                            reader, memberships, currentOctet, temporaryFaceFile, vertexMap
                     );
 
                     File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
 
-                    writeOctetPLYModel(
-                            reader, currentOctet, temporaryFaceFile, new_vertex_indices, num_faces, octetFile
-                    );
+                    writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
 
                     if (processDepth < maxDepth)
                     {
