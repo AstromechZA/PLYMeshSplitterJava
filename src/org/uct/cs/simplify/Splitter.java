@@ -76,19 +76,23 @@ public class Splitter
                             reader, memberships, currentOctet, temporaryFaceFile, vertexMap
                     );
 
-                    File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
-
-                    writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
-
-                    if (processDepth < maxDepth)
+                    if (num_faces > 0)
                     {
-                        processQueue.addLast(
-                                new Triple<>(
-                                        octetFile,
-                                        processDepth + 1,
-                                        currentOctet.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
-                                )
-                        );
+                        File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
+
+                        writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
+
+                        if (processDepth < maxDepth)
+                        {
+                            processQueue.addLast(
+                                    new Triple<>(
+                                            octetFile,
+                                            processDepth + 1,
+                                            currentOctet
+                                                    .calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
+                                    )
+                            );
+                        }
                     }
                 }
             }
