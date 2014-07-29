@@ -21,7 +21,7 @@ public class Blueprintify
     public static void run(File inputFile, File outputDir, int resolution, float alphamod) throws IOException
     {
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
-        
+
         run(reader, outputDir, resolution, alphamod);
     }
 
@@ -83,13 +83,17 @@ public class Blueprintify
         o2.setRequired(true);
         options.addOption(o2);
 
-        Option o3 = new Option("r", "resolution", true,
-                String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION));
+        Option o3 = new Option(
+                "r", "resolution", true,
+                String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION)
+        );
         o3.setType(Short.class);
         options.addOption(o3);
 
-        Option o4 = new Option("a", "alphamod", true,
-                String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD));
+        Option o4 = new Option(
+                "a", "alphamod", true,
+                String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD)
+        );
         o4.setType(Float.class);
         options.addOption(o4);
 

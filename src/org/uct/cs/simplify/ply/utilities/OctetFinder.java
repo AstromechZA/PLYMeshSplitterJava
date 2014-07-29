@@ -30,21 +30,21 @@ public class OctetFinder
         if (x < this.center.getX()) i += 4;
         if (y < this.center.getY()) i += 2;
         if (z < this.center.getZ()) i += 1;
-        return this.by_i[ i ];
+        return this.by_i[i];
     }
 
     public enum Octet
     {
-        PXPYPZ(+1,+1,+1),
-        PXPYnz(+1,+1,-1),
-        PXnyPZ(+1,-1,+1),
-        PXnynz(+1,-1,-1),
-        nxPYPZ(-1,+1,+1),
-        nxPYnz(-1,+1,-1),
-        nxnyPZ(-1,-1,+1),
-        nxnynz(-1,-1,-1);
+        PXPYPZ(+1, +1, +1),
+        PXPYnz(+1, +1, -1),
+        PXnyPZ(+1, -1, +1),
+        PXnynz(+1, -1, -1),
+        nxPYPZ(-1, +1, +1),
+        nxPYnz(-1, +1, -1),
+        nxnyPZ(-1, -1, +1),
+        nxnynz(-1, -1, -1);
 
-        private final int xm,ym,zm;
+        private final int xm, ym, zm;
 
         Octet(int xm, int ym, int zm)
         {
@@ -55,16 +55,16 @@ public class OctetFinder
 
         public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, BoundingBox bb)
         {
-            double div = Math.pow(2, processDepth+1);
+            double div = Math.pow(2, processDepth + 1);
 
             double bbx = bb.getWidth() / div;
             double bby = bb.getHeight() / div;
             double bbz = bb.getDepth() / div;
 
             return new Point3D(
-                    splitPoint.getX() + bbx*this.xm,
-                    splitPoint.getY() + bby*this.ym,
-                    splitPoint.getZ() + bbz*this.zm
+                    splitPoint.getX() + bbx * this.xm,
+                    splitPoint.getY() + bby * this.ym,
+                    splitPoint.getZ() + bbz * this.zm
             );
         }
     }

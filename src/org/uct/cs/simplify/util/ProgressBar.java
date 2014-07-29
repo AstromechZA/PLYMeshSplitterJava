@@ -30,7 +30,7 @@ public class ProgressBar implements AutoCloseable
 
     private void printTitle()
     {
-        char[] pad = new char[ 100 - this.title.length() - 7 ];
+        char[] pad = new char[100 - this.title.length() - 7];
         Arrays.fill(pad, '=');
         System.out.printf("===  %s  %s%n", this.title, new String(pad));
     }
@@ -39,9 +39,10 @@ public class ProgressBar implements AutoCloseable
     {
         this.progressTicks += 1;
 
-        int newPosition = ((100*this.progressTicks) / this.maxTicks);
+        int newPosition = ((100 * this.progressTicks) / this.maxTicks);
         int toPrint = newPosition - this.position;
-        if (toPrint > 0) {
+        if (toPrint > 0)
+        {
             char[] chars = new char[toPrint];
             Arrays.fill(chars, this.progressChar);
 
@@ -56,14 +57,14 @@ public class ProgressBar implements AutoCloseable
         int toPrint = 100 - this.position;
         if (toPrint > 0)
         {
-            char[] chars = new char[ toPrint ];
+            char[] chars = new char[toPrint];
             Arrays.fill(chars, this.progressChar);
 
             System.out.print(chars);
         }
         String timestr = Useful.formatTime(System.nanoTime() - this.startTime);
         timestr = String.format(" ( %s ) ", timestr);
-        char[] pad = new char[ 100 - timestr.length() - 3 ];
+        char[] pad = new char[100 - timestr.length() - 3];
         Arrays.fill(pad, '=');
         System.out.printf("%n%s%s===%n", new String(pad), timestr);
     }

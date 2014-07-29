@@ -26,13 +26,16 @@ public class Splitter
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_MODEL_SIZE = 1024;
 
-    public static void run(File inputFile, File outputDir, int depth) throws IOException
+    public static void run(File inputFile, File outputDir, int maxDepth) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
 
-        File scaledFile = new File(outputDir,
-                String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_MODEL_SIZE)
+        File scaledFile = new File(
+                outputDir,
+                String.format(
+                        "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_MODEL_SIZE
+                )
         );
 
         BoundingBox finalBoundingBox = ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE);
@@ -44,7 +47,7 @@ public class Splitter
         ArrayDeque<Triple<File, Integer, Point3D>> processQueue = new ArrayDeque<>();
         processQueue.add(new Triple<>(scaledFile, 1, Point3D.ZERO));
 
-        while(!processQueue.isEmpty())
+        while (!processQueue.isEmpty())
         {
             Triple<File, Integer, Point3D> processEntry = processQueue.removeFirst();
             File processFile = processEntry.getFirst();
@@ -61,24 +64,37 @@ public class Splitter
 
             for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
             {
-                File octetFaceFile = new File(outputDir, String.format("%s_%s", processFileBase, currentOctet));
-
-                LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(average_vertices_per_octet);
-                int num_faces = gatherOctetFaces(reader, memberships, currentOctet, octetFaceFile, new_vertex_indices);
-
-                File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
-
-                writeOctetPLYModel(reader, currentOctet, octetFaceFile, new_vertex_indices, num_faces, octetFile);
-
-                if (!octetFaceFile.delete()) throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
-
-                if (processDepth < depth)
+                try (
+                        TempFile temporaryFaceFile = new TempFile(
+                                outputDir, String.format(
+                                "%s_%s.temp", processFileBase, currentOctet
+                        )
+                        )
+                )
                 {
-                    processQueue.addLast(new Triple<>(
-                            octetFile,
-                            processDepth+1,
-                            currentOctet.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
-                    ));
+                    LinkedHashMap<Integer, Integer> new_vertex_indices = new LinkedHashMap<>(
+                            average_vertices_per_octet
+                    );
+                    int num_faces = gatherOctetFaces(
+                            reader, memberships, currentOctet, temporaryFaceFile, new_vertex_indices
+                    );
+
+                    File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
+
+                    writeOctetPLYModel(
+                            reader, currentOctet, temporaryFaceFile, new_vertex_indices, num_faces, octetFile
+                    );
+
+                    if (processDepth < maxDepth)
+                    {
+                        processQueue.addLast(
+                                new Triple<>(
+                                        octetFile,
+                                        processDepth + 1,
+                                        currentOctet.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
+                                )
+                        );
+                    }
                 }
             }
         }
@@ -88,12 +104,12 @@ public class Splitter
             ImprovedPLYReader reader,
             OctetFinder.Octet currentOctet,
             File octetFaceFile,
-            LinkedHashMap<Integer, Integer> new_vertex_indices,
-            int num_faces,
+            LinkedHashMap<Integer, Integer> vertexMap,
+            int numFaces,
             File octetFile
     ) throws IOException
     {
-        PLYHeader newHeader = constructNewHeader(num_faces, new_vertex_indices.size());
+        PLYHeader newHeader = constructNewHeader(numFaces, vertexMap.size());
 
         try (FileOutputStream fostream = new FileOutputStream(octetFile))
         {
@@ -106,9 +122,13 @@ public class Splitter
                     Vertex v;
                     ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
                     bb.order(ByteOrder.LITTLE_ENDIAN);
-                    try (ProgressBar pb = new ProgressBar(String.format("%s: Writing Vertices", currentOctet), new_vertex_indices.size()))
+                    try (
+                            ProgressBar pb = new ProgressBar(
+                                    String.format("%s: Writing Vertices", currentOctet), vertexMap.size()
+                            )
+                    )
                     {
-                        for (int i : new_vertex_indices.keySet())
+                        for (int i : vertexMap.keySet())
                         {
                             pb.tick();
                             v = vr.get(i);
@@ -161,7 +181,12 @@ public class Splitter
     ) throws IOException
     {
         int num_faces_in_octet = 0;
-        try (ProgressBar progress = new ProgressBar(String.format("%s : Scanning & Writing Faces", current), reader.getHeader().getElement("face").getCount()))
+        try (
+                ProgressBar progress = new ProgressBar(
+                        String.format("%s : Scanning & Writing Faces", current),
+                        reader.getHeader().getElement("face").getCount()
+                )
+        )
         {
             try (MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader))
             {
@@ -177,7 +202,7 @@ public class Splitter
                             progress.tick();
                             face = faceReader.next();
 
-                            if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
+                            if (face.getVertices().stream().anyMatch(v -> memberships[v] == current))
                             {
                                 num_faces_in_octet += 1;
                                 bostream.write((byte) face.getNumVertices());
@@ -209,12 +234,14 @@ public class Splitter
     {
         stream.write((i) & BYTE);
         stream.write((i >> 8) & BYTE);
-        stream.write((i >> (8*2)) & BYTE);
-        stream.write((i >> (8*3)) & BYTE);
+        stream.write((i >> (8 * 2)) & BYTE);
+        stream.write((i >> (8 * 3)) & BYTE);
 
     }
 
-    private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader, Point3D splitPoint) throws IOException
+    private static OctetFinder.Octet[] calculateVertexMemberships(
+            ImprovedPLYReader reader, Point3D splitPoint
+    ) throws IOException
     {
         OctetFinder ofinder = new OctetFinder(splitPoint);
 
@@ -223,13 +250,13 @@ public class Splitter
             try (ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount()))
             {
                 int c = vr.getCount();
-                OctetFinder.Octet[] memberships = new OctetFinder.Octet[ c ];
+                OctetFinder.Octet[] memberships = new OctetFinder.Octet[c];
                 Vertex v;
                 for (int i = 0; i < c; i++)
                 {
                     pb.tick();
                     v = vr.get(i);
-                    memberships[ i ] = ofinder.getOctet(v.x, v.y, v.z);
+                    memberships[i] = ofinder.getOctet(v.x, v.y, v.z);
                 }
                 return memberships;
             }

@@ -25,11 +25,10 @@ public class PLYPropertyBase
     {
         line = line.trim();
         String[] parts = line.split(" ");
-        if (parts[ 1 ].equals("list"))
-            return new PLYListProperty(parts[ 4 ], DataType.from(parts[3]), DataType.from(parts[2]));
-        return new PLYProperty(parts[ 2 ], DataType.from(parts[1]));
+        if (parts[1].equals("list"))
+            return new PLYListProperty(parts[4], DataType.from(parts[3]), DataType.from(parts[2]));
+        return new PLYProperty(parts[2], DataType.from(parts[1]));
     }
-
 
 
 }

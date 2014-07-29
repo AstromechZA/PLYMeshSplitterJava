@@ -39,7 +39,7 @@ public class MemStatRecorder implements AutoCloseable
         long min = Integer.MAX_VALUE;
         long max = Integer.MIN_VALUE;
         long start = this.recordings.get(0).getSecond();
-        long end = this.recordings.get(this.recordings.size()-1).getSecond();
+        long end = this.recordings.get(this.recordings.size() - 1).getSecond();
         long total = 0;
 
         for (Pair<Long, Long> p : this.recordings)
@@ -50,7 +50,7 @@ public class MemStatRecorder implements AutoCloseable
             total += v;
         }
 
-        double average = total / (double)this.recordings.size();
+        double average = total / (double) this.recordings.size();
 
         System.out.printf("Mem : Start :   %s%n", Useful.convertToByteUnit(start));
         System.out.printf("Mem : Min :     %s%n", Useful.convertToByteUnit(min));

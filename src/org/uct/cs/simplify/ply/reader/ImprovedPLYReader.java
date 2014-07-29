@@ -58,13 +58,13 @@ public class ImprovedPLYReader
 
             int cursor = 0;
 
-            PLYElement[] elements = new PLYElement[this.header.getElements().size() ];
+            PLYElement[] elements = new PLYElement[this.header.getElements().size()];
             this.header.getElements().values().toArray(elements);
             int numElements = elements.length;
 
             for (int i = 0; i < numElements; i++)
             {
-                PLYElement e = elements[ i ];
+                PLYElement e = elements[i];
 
                 // position is the cursor
                 long elementPosition = cursor;
@@ -75,16 +75,14 @@ public class ImprovedPLYReader
                     long elementSize = payloadSize - cursor;
                     this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
                     break;
-                }
-                else if (e.getItemSize() != null)
+                } else if (e.getItemSize() != null)
                 {
                     long elementSize = e.getCount() * e.getItemSize();
                     this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
-                }
-                else
+                } else
                 {
                     long elementSize = calculateSizeOfListElement(e, buffer);
                     this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
@@ -112,8 +110,7 @@ public class ImprovedPLYReader
                     int listSize = (int) pp.getLengthTypeReader().read(buffer);
                     int s = listSize * pp.getLengthTypeReader().bytesAtATime();
                     buffer.position(buffer.position() + s);
-                }
-                else if (p instanceof PLYProperty)
+                } else if (p instanceof PLYProperty)
                 {
                     PLYProperty pp = (PLYProperty) p;
                     buffer.position(buffer.position() + pp.getTypeReader().bytesAtATime());

@@ -23,7 +23,7 @@ public class ScaleAndRecenter
     private static final int DEFAULT_RESCALE_SIZE = 1024;
     private static final int COPYBYTES_BUF_SIZE = 4096;
 
-    public static BoundingBox run(File inputFile, File outputFile, int size) throws  IOException
+    public static BoundingBox run(File inputFile, File outputFile, int size) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
@@ -81,7 +81,7 @@ public class ScaleAndRecenter
                         blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
                         blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
 
-                        try(ProgressBar progress = new ProgressBar("Rescaling", numVertices))
+                        try (ProgressBar progress = new ProgressBar("Rescaling", numVertices))
                         {
 
                             float x, y, z;
@@ -124,7 +124,7 @@ public class ScaleAndRecenter
         double ey = (bb.getMaxY() - center.getY()) * scale;
         double ez = (bb.getMaxZ() - center.getZ()) * scale;
 
-        return new BoundingBox(sx,sy,sz,ex-sx,ey-sy,ez-sz);
+        return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
     }
 
     @SuppressWarnings("unused")
@@ -148,8 +148,11 @@ public class ScaleAndRecenter
             File outputDir = new File(new File(outputDirectory).getCanonicalPath());
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
-            File outputFile = new File(outputDir,
-                    String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize)
+            File outputFile = new File(
+                    outputDir,
+                    String.format(
+                            "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize
+                    )
             );
 
             run(inputFile, outputFile, rescaleToSize);

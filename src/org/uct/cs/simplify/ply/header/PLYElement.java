@@ -27,7 +27,7 @@ public class PLYElement
     {
         s = s.trim();
         String[] parts = s.split(" ");
-        return new PLYElement(parts[ 1 ], Integer.parseInt(parts[ 2 ]));
+        return new PLYElement(parts[1], Integer.parseInt(parts[2]));
     }
 
     public void addProperty(PLYPropertyBase p)
@@ -38,8 +38,7 @@ public class PLYElement
             if (p instanceof PLYListProperty)
             {
                 this.itemSize = null;
-            }
-            else if (p instanceof PLYProperty)
+            } else if (p instanceof PLYProperty)
             {
                 this.itemSize += ((PLYProperty) p).getTypeReader().bytesAtATime();
             }
@@ -71,7 +70,7 @@ public class PLYElement
     {
         StringBuilder sb = new StringBuilder(100);
         sb.append(String.format("element %s %d %n", this.name, this.count));
-        for(PLYPropertyBase p : this.properties)
+        for (PLYPropertyBase p : this.properties)
         {
             sb.append(p);
             sb.append('\n');
