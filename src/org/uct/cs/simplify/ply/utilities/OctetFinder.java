@@ -35,6 +35,32 @@ public class OctetFinder
 
     public enum Octet
     {
-        PXPYPZ, PXPYnz, PXnyPZ, PXnynz, nxPYPZ, nxPYnz, nxnyPZ, nxnynz
+        PXPYPZ(+1,+1,+1),
+        PXPYnz(+1,+1,-1),
+        PXnyPZ(+1,-1,+1),
+        PXnynz(+1,-1,-1),
+        nxPYPZ(-1,+1,+1),
+        nxPYnz(-1,+1,-1),
+        nxnyPZ(-1,-1,+1),
+        nxnynz(-1,-1,-1);
+
+        private final int xm,ym,zm;
+
+        Octet(int xm, int ym, int zm)
+        {
+            this.xm = xm;
+            this.ym = ym;
+            this.zm = zm;
+        }
+
+        public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, int maxwidth)
+        {
+            int d = maxwidth >> processDepth;
+            return new Point3D(
+                    splitPoint.getX() + d*this.xm,
+                    splitPoint.getY() + d*this.ym,
+                    splitPoint.getZ() + d*this.zm
+            );
+        }
     }
 }

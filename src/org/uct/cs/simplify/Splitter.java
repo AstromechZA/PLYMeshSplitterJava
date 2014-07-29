@@ -1,5 +1,6 @@
 package org.uct.cs.simplify;
 
+import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -7,7 +8,6 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.header.PLYListProperty;
 import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.*;
 import org.uct.cs.simplify.util.Timer;
@@ -23,33 +23,33 @@ public class Splitter
     private static final int BYTE = 0xFF;
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
-    private static final int DEFAULT_RESCALE_SIZE = 1024;
-    private static final int DEFAULT_NUM_SPLIT_LEVELS = 2;
+    private static final int DEFAULT_MODEL_SIZE = 2048;
 
-    public static void run(File inputFile, File outputDir) throws IOException
+    public static void run(File inputFile, File outputDir, int depth) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
 
         File scaledFile = new File(outputDir,
-                String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_RESCALE_SIZE)
+                String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_MODEL_SIZE)
         );
 
-        ScaleAndRecenter.run(reader, scaledFile, DEFAULT_RESCALE_SIZE);
-        ArrayDeque<Pair<File, Integer>> processQueue = new ArrayDeque<>();
-        processQueue.add(new Pair<>(scaledFile, 0));
+        ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE);
+        ArrayDeque<Triple<File, Integer, Point3D>> processQueue = new ArrayDeque<>();
+        processQueue.add(new Triple<>(scaledFile, 1, new Point3D(0, 0, 0)));
 
         while(!processQueue.isEmpty())
         {
-            Pair<File, Integer> processEntry = processQueue.removeFirst();
+            Triple<File, Integer, Point3D> processEntry = processQueue.removeFirst();
             File processFile = processEntry.getFirst();
             int processDepth = processEntry.getSecond();
+            Point3D splitPoint = processEntry.getThird();
 
             // now switch to rescaled version
             reader = new ImprovedPLYReader(new PLYHeader(processFile));
 
             // calculate vertex memberships
-            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader);
+            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, splitPoint);
 
             for (OctetFinder.Octet current : OctetFinder.Octet.values())
             {
@@ -109,9 +109,13 @@ public class Splitter
                         throw new IOException("File not deleted " + octetFaceFile.getAbsolutePath());
                 }
 
-                if (processDepth < DEFAULT_NUM_SPLIT_LEVELS)
+                if (processDepth < depth)
                 {
-                    processQueue.addLast(new Pair<>(octetFile, processDepth+1));
+                    processQueue.addLast(new Triple<>(
+                            octetFile,
+                            processDepth+1,
+                            current.calculateCenterBasedOn(splitPoint, processDepth, DEFAULT_MODEL_SIZE)
+                    ));
                 }
             }
         }
@@ -193,9 +197,9 @@ public class Splitter
 
     }
 
-    private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader) throws IOException
+    private static OctetFinder.Octet[] calculateVertexMemberships(ImprovedPLYReader reader, Point3D splitPoint) throws IOException
     {
-        OctetFinder ofinder = new OctetFinder(BoundsFinder.getBoundingBox(reader));
+        OctetFinder ofinder = new OctetFinder(splitPoint);
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
@@ -227,9 +231,12 @@ public class Splitter
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
 
-            run(file, outputDir);
+            int depth = Integer.parseInt(cmd.getOptionValue("depth"));
+            if (depth < 2 || depth > 8) throw new IllegalArgumentException("Splitting depth must be between 1 and 9!");
+
+            run(file, outputDir, depth);
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | InterruptedException | IllegalArgumentException e)
         {
             e.printStackTrace();
         }
