@@ -1,5 +1,6 @@
 package org.uct.cs.simplify;
 
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
@@ -23,7 +24,7 @@ public class Splitter
     private static final int BYTE = 0xFF;
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
-    private static final int DEFAULT_MODEL_SIZE = 2048;
+    private static final int DEFAULT_MODEL_SIZE = 1024;
 
     public static void run(File inputFile, File outputDir, int depth) throws IOException
     {
@@ -34,9 +35,14 @@ public class Splitter
                 String.format("%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), DEFAULT_MODEL_SIZE)
         );
 
-        ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE);
+        BoundingBox finalBoundingBox = ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE);
+
+        System.out.printf("%f -> %f%n", finalBoundingBox.getMinX(), finalBoundingBox.getMaxX());
+        System.out.printf("%f -> %f%n", finalBoundingBox.getMinY(), finalBoundingBox.getMaxY());
+        System.out.printf("%f -> %f%n", finalBoundingBox.getMinZ(), finalBoundingBox.getMaxZ());
+
         ArrayDeque<Triple<File, Integer, Point3D>> processQueue = new ArrayDeque<>();
-        processQueue.add(new Triple<>(scaledFile, 1, new Point3D(0, 0, 0)));
+        processQueue.add(new Triple<>(scaledFile, 1, Point3D.ZERO));
 
         while(!processQueue.isEmpty())
         {
@@ -114,7 +120,7 @@ public class Splitter
                     processQueue.addLast(new Triple<>(
                             octetFile,
                             processDepth+1,
-                            current.calculateCenterBasedOn(splitPoint, processDepth, DEFAULT_MODEL_SIZE)
+                            current.calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
                     ));
                 }
             }

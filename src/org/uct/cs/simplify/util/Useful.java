@@ -17,7 +17,7 @@ public class Useful
 
     public static String formatTime(long ns)
     {
-        if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f minute", ns / (double) NANOSECONDS_PER_MINUTE);
+        if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
         if (ns > NANOSECONDS_PER_SECOND) return String.format("%.2f seconds", ns / (double) NANOSECONDS_PER_SECOND);
         if (ns > NANOSECONDS_PER_MILLISECONDS)
             return String.format("%.2f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);

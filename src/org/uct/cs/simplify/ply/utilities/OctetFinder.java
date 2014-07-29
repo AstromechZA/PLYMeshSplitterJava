@@ -53,13 +53,18 @@ public class OctetFinder
             this.zm = zm;
         }
 
-        public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, int maxwidth)
+        public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, BoundingBox bb)
         {
-            int d = maxwidth >> processDepth;
+            double div = Math.pow(2, processDepth+1);
+
+            double bbx = bb.getWidth() / div;
+            double bby = bb.getHeight() / div;
+            double bbz = bb.getDepth() / div;
+
             return new Point3D(
-                    splitPoint.getX() + d*this.xm,
-                    splitPoint.getY() + d*this.ym,
-                    splitPoint.getZ() + d*this.zm
+                    splitPoint.getX() + bbx*this.xm,
+                    splitPoint.getY() + bby*this.ym,
+                    splitPoint.getZ() + bbz*this.zm
             );
         }
     }

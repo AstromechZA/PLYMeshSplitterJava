@@ -23,15 +23,15 @@ public class ScaleAndRecenter
     private static final int DEFAULT_RESCALE_SIZE = 1024;
     private static final int COPYBYTES_BUF_SIZE = 4096;
 
-    public static void run(File inputFile, File outputFile, int size) throws  IOException
+    public static BoundingBox run(File inputFile, File outputFile, int size) throws  IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
 
-        run(reader, outputFile, size);
+        return run(reader, outputFile, size);
     }
 
-    public static void run(ImprovedPLYReader reader, File outputFile, int size) throws IOException
+    public static BoundingBox run(ImprovedPLYReader reader, File outputFile, int size) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         BoundingBox bb = BoundsFinder.getBoundingBox(reader);
@@ -116,6 +116,15 @@ public class ScaleAndRecenter
                 }
             }
         }
+
+        double sx = (bb.getMinX() - center.getX()) * scale;
+        double sy = (bb.getMinY() - center.getY()) * scale;
+        double sz = (bb.getMinZ() - center.getZ()) * scale;
+        double ex = (bb.getMaxX() - center.getX()) * scale;
+        double ey = (bb.getMaxY() - center.getY()) * scale;
+        double ez = (bb.getMaxZ() - center.getZ()) * scale;
+
+        return new BoundingBox(sx,sy,sz,ex-sx,ey-sy,ez-sz);
     }
 
     @SuppressWarnings("unused")
