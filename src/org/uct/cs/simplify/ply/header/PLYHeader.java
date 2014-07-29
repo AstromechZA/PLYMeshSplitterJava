@@ -1,10 +1,13 @@
 package org.uct.cs.simplify.ply.header;
 
+import org.uct.cs.simplify.ply.datatypes.DataType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -163,6 +166,20 @@ public class PLYHeader
         {
             super(s);
         }
+    }
+
+    public static PLYHeader constructBasicHeader(int numVertices, int numFaces)
+    {
+        List<PLYElement> elements = new ArrayList<>();
+        PLYElement eVertex = new PLYElement("vertex", numVertices);
+        eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
+        eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
+        elements.add(eVertex);
+        PLYElement eFace = new PLYElement("face", numFaces);
+        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
+        elements.add(eFace);
+        return new PLYHeader(elements);
     }
 
 }

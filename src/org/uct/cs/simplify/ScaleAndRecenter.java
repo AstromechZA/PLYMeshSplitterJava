@@ -4,10 +4,7 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
-import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.header.PLYListProperty;
-import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.MemStatRecorder;
@@ -21,8 +18,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ScaleAndRecenter
 {
@@ -68,112 +63,78 @@ public class ScaleAndRecenter
         System.out.printf("Output File: %s%n", outputFile);
         System.out.printf("Scale ratio: %f%n", scale);
 
-        try (RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r"))
+        try (
+                RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r");
+                FileChannel fcIN = rafIN.getChannel();
+                RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw");
+                FileChannel fcOUT = rafOUT.getChannel()
+        )
         {
-            try (FileChannel fcIN = rafIN.getChannel())
+
+            int numVertices = reader.getHeader().getElement("vertex").getCount();
+            int numFaces = reader.getHeader().getElement("face").getCount();
+
+            // construct new header
+            PLYHeader header = PLYHeader.constructBasicHeader(numVertices, numFaces);
+            fcOUT.write(ByteBuffer.wrap((header + "\n").getBytes()));
+
+            long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
+            long vertexElementLength = reader.getElementDimension("vertex").getSecond();
+
+            int blockSize = reader.getHeader().getElement("vertex").getItemSize();
+
+            ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(blockSize);
+            ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(3 * DataType.FLOAT.getByteSize());
+            blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
+            blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
+
+            try (ProgressBar progress = new ProgressBar("Rescaling", numVertices))
             {
-                try (RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw"))
+                fcIN.position(vertexElementBegin);
+                float x, y, z;
+                for (int n = 0; n < numVertices; n++)
                 {
-                    try (FileChannel fcOUT = rafOUT.getChannel())
+                    fcIN.read(blockBufferIN);
+                    blockBufferIN.flip();
+                    x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
+                    y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
+                    z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
+
+                    if (swapYZ)
                     {
-
-                        int numVertices = reader.getHeader().getElement("vertex").getCount();
-                        int numFaces = reader.getHeader().getElement("face").getCount();
-
-                        // construct new header
-                        PLYHeader header = constructNewHeader(numFaces, numVertices);
-                        fcOUT.write(ByteBuffer.wrap((header + "\n").getBytes()));
-
-                        // copy beginning
-                        long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
-                        long vertexElementLength = reader.getElementDimension("vertex").getSecond();
-
-                        int blockSize = reader.getHeader().getElement("vertex").getItemSize();
-
-                        ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(blockSize);
-                        ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(3 * DataType.FLOAT.getByteSize());
-                        blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
-                        blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
-
-                        try (ProgressBar progress = new ProgressBar("Rescaling", numVertices))
-                        {
-                            fcIN.position(vertexElementBegin);
-                            float x, y, z;
-                            for (int n = 0; n < numVertices; n++)
-                            {
-                                fcIN.read(blockBufferIN);
-                                blockBufferIN.flip();
-                                x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
-                                y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
-                                z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
-
-                                if (swapYZ)
-                                {
-                                    float t = z;
-                                    z = y;
-                                    y = t;
-                                }
-
-                                blockBufferOUT.putFloat(x);
-                                blockBufferOUT.putFloat(y);
-                                blockBufferOUT.putFloat(z);
-
-                                blockBufferOUT.flip();
-
-                                fcOUT.write(blockBufferOUT);
-
-                                blockBufferIN.clear();
-                                blockBufferOUT.clear();
-
-                                progress.tick();
-                            }
-                        }
-
-                        // copy remainder
-                        long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
-                        copyNBytes(fcIN, fcOUT, fileRemainder);
+                        float t = z;
+                        z = y;
+                        y = t;
                     }
+
+                    blockBufferOUT.putFloat(x);
+                    blockBufferOUT.putFloat(y);
+                    blockBufferOUT.putFloat(z);
+
+                    blockBufferOUT.flip();
+
+                    fcOUT.write(blockBufferOUT);
+
+                    blockBufferIN.clear();
+                    blockBufferOUT.clear();
+
+                    progress.tick();
                 }
             }
+
+            // copy remainder
+            long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
+            copyNBytes(fcIN, fcOUT, fileRemainder);
         }
 
-        if (swapYZ)
-        {
-            double sx = (bb.getMinX() - center.getX()) * scale;
-            double sy = (bb.getMinZ() - center.getY()) * scale;
-            double sz = (bb.getMinY() - center.getZ()) * scale;
-            double ex = (bb.getMaxX() - center.getX()) * scale;
-            double ey = (bb.getMaxZ() - center.getY()) * scale;
-            double ez = (bb.getMaxY() - center.getZ()) * scale;
+        double sx = (bb.getMinX() - center.getX()) * scale;
+        double ex = (bb.getMaxX() - center.getX()) * scale;
+        double sy = ((swapYZ ? bb.getMinZ() : bb.getMinY()) - center.getY()) * scale;
+        double sz = ((swapYZ ? bb.getMinY() : bb.getMinZ()) - center.getY()) * scale;
+        double ey = ((swapYZ ? bb.getMaxZ() : bb.getMaxY()) - center.getY()) * scale;
+        double ez = ((swapYZ ? bb.getMaxY() : bb.getMaxZ()) - center.getY()) * scale;
 
-            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
-        }
-        else
-        {
-            double sx = (bb.getMinX() - center.getX()) * scale;
-            double sy = (bb.getMinY() - center.getY()) * scale;
-            double sz = (bb.getMinZ() - center.getZ()) * scale;
-            double ex = (bb.getMaxX() - center.getX()) * scale;
-            double ey = (bb.getMaxY() - center.getY()) * scale;
-            double ez = (bb.getMaxZ() - center.getZ()) * scale;
-
-            return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
-        }
-
-    }
-
-    private static PLYHeader constructNewHeader(int num_faces, int num_vertices)
-    {
-        List<PLYElement> elements = new ArrayList<>();
-        PLYElement eVertex = new PLYElement("vertex", num_vertices);
-        eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
-        elements.add(eVertex);
-        PLYElement eFace = new PLYElement("face", num_faces);
-        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
-        elements.add(eFace);
-        return new PLYHeader(elements);
+        return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
     }
 
     @SuppressWarnings("unused")

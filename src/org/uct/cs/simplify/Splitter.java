@@ -4,20 +4,18 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
-import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.header.PLYListProperty;
-import org.uct.cs.simplify.ply.header.PLYProperty;
 import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.*;
-import org.uct.cs.simplify.util.Timer;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Splitter
 {
@@ -109,7 +107,7 @@ public class Splitter
             File octetFile
     ) throws IOException
     {
-        PLYHeader newHeader = constructNewHeader(numFaces, vertexMap.size());
+        PLYHeader newHeader = PLYHeader.constructBasicHeader(vertexMap.size(), numFaces);
 
         try (FileOutputStream fostream = new FileOutputStream(octetFile))
         {
@@ -156,20 +154,6 @@ public class Splitter
                 fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
             }
         }
-    }
-
-    private static PLYHeader constructNewHeader(int num_faces, int num_vertices)
-    {
-        List<PLYElement> elements = new ArrayList<>();
-        PLYElement eVertex = new PLYElement("vertex", num_vertices);
-        eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
-        eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
-        elements.add(eVertex);
-        PLYElement eFace = new PLYElement("face", num_faces);
-        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
-        elements.add(eFace);
-        return new PLYHeader(elements);
     }
 
     private static int gatherOctetFaces(
