@@ -113,39 +113,40 @@ public class Splitter
         {
             fostream.write((newHeader + "\n").getBytes());
 
-            try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+            try (
+                    MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
+                    ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+            )
             {
-                try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                Vertex v;
+                ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                try (
+                        ProgressBar pb = new ProgressBar(
+                                String.format("%s: Writing Vertices", currentOctet),
+                                vertexMap.size()
+                        )
+                )
                 {
-                    Vertex v;
-                    ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
-                    bb.order(ByteOrder.LITTLE_ENDIAN);
-                    try (
-                            ProgressBar pb = new ProgressBar(
-                                    String.format("%s: Writing Vertices", currentOctet), vertexMap.size()
-                            )
-                    )
+                    for (int i : vertexMap.keySet())
                     {
-                        for (int i : vertexMap.keySet())
+                        pb.tick();
+                        v = vr.get(i);
+                        bb.putFloat(v.x);
+                        bb.putFloat(v.y);
+                        bb.putFloat(v.z);
+
+                        bostream.write(bb.array());
+                        bb.clear();
+
+                        if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                         {
-                            pb.tick();
-                            v = vr.get(i);
-                            bb.putFloat(v.x);
-                            bb.putFloat(v.y);
-                            bb.putFloat(v.z);
-
-                            bostream.write(bb.array());
-                            bb.clear();
-
-                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
-                            {
-                                fostream.write(bostream.toByteArray());
-                                bostream.reset();
-                            }
+                            fostream.write(bostream.toByteArray());
+                            bostream.reset();
                         }
-                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
-
                     }
+                    if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+
                 }
             }
 
@@ -169,47 +170,41 @@ public class Splitter
                 ProgressBar progress = new ProgressBar(
                         String.format("%s : Scanning & Writing Faces", current),
                         reader.getHeader().getElement("face").getCount()
-                )
+                );
+                MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
+                FileOutputStream fostream = new FileOutputStream(octetFaceFile);
+                ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
-            try (MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader))
+            Face face;
+            int current_vertex_index = 0;
+
+            while (faceReader.hasNext())
             {
-                try (FileOutputStream fostream = new FileOutputStream(octetFaceFile))
+                progress.tick();
+                face = faceReader.next();
+
+                if (face.getVertices().stream().anyMatch(v -> memberships[v] == current))
                 {
-                    try (ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE))
+                    num_faces_in_octet += 1;
+                    bostream.write((byte) face.getNumVertices());
+                    for (int vertex_index : face.getVertices())
                     {
-                        Face face;
-                        int current_vertex_index = 0;
-
-                        while (faceReader.hasNext())
+                        if (!vertexMap.containsKey(vertex_index))
                         {
-                            progress.tick();
-                            face = faceReader.next();
-
-                            if (face.getVertices().stream().anyMatch(v -> memberships[v] == current))
-                            {
-                                num_faces_in_octet += 1;
-                                bostream.write((byte) face.getNumVertices());
-                                for (int vertex_index : face.getVertices())
-                                {
-                                    if (!vertexMap.containsKey(vertex_index))
-                                    {
-                                        vertexMap.put(vertex_index, current_vertex_index);
-                                        current_vertex_index += 1;
-                                    }
-                                    littleEndianWrite(bostream, vertexMap.get(vertex_index));
-                                }
-                            }
-                            if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
-                            {
-                                fostream.write(bostream.toByteArray());
-                                bostream.reset();
-                            }
+                            vertexMap.put(vertex_index, current_vertex_index);
+                            current_vertex_index += 1;
                         }
-                        if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+                        littleEndianWrite(bostream, vertexMap.get(vertex_index));
                     }
                 }
+                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                {
+                    fostream.write(bostream.toByteArray());
+                    bostream.reset();
+                }
             }
+            if (bostream.size() > 0) fostream.write(bostream.toByteArray());
         }
         return num_faces_in_octet;
     }
@@ -229,21 +224,21 @@ public class Splitter
     {
         OctetFinder ofinder = new OctetFinder(splitPoint);
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (
+                MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
+                ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
+        )
         {
-            try (ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount()))
+            int c = vr.getCount();
+            OctetFinder.Octet[] memberships = new OctetFinder.Octet[c];
+            Vertex v;
+            for (int i = 0; i < c; i++)
             {
-                int c = vr.getCount();
-                OctetFinder.Octet[] memberships = new OctetFinder.Octet[c];
-                Vertex v;
-                for (int i = 0; i < c; i++)
-                {
-                    pb.tick();
-                    v = vr.get(i);
-                    memberships[i] = ofinder.getOctet(v.x, v.y, v.z);
-                }
-                return memberships;
+                pb.tick();
+                v = vr.get(i);
+                memberships[i] = ofinder.getOctet(v.x, v.y, v.z);
             }
+            return memberships;
         }
     }
 
