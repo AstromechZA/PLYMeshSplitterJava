@@ -30,12 +30,12 @@ public class Splitter
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
 
         File scaledFile = new File(
-                outputDir,
-                String.format(
-                        "%s_rescaled_%d.ply",
-                        Useful.getFilenameWithoutExt(inputFile.getName()),
-                        DEFAULT_MODEL_SIZE
-                )
+            outputDir,
+            String.format(
+                "%s_rescaled_%d.ply",
+                Useful.getFilenameWithoutExt(inputFile.getName()),
+                DEFAULT_MODEL_SIZE
+            )
         );
 
         BoundingBox finalBoundingBox = ScaleAndRecenter.run(reader, scaledFile, DEFAULT_MODEL_SIZE, swapYZ);
@@ -65,15 +65,15 @@ public class Splitter
             for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
             {
                 try (
-                        TempFile temporaryFaceFile = new TempFile(
-                                outputDir,
-                                String.format("%s_%s.temp", processFileBase, currentOctet)
-                        )
+                    TempFile temporaryFaceFile = new TempFile(
+                        outputDir,
+                        String.format("%s_%s.temp", processFileBase, currentOctet)
+                    )
                 )
                 {
                     LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(average_vertices_per_octet);
                     int num_faces = gatherOctetFaces(
-                            reader, memberships, currentOctet, temporaryFaceFile, vertexMap
+                        reader, memberships, currentOctet, temporaryFaceFile, vertexMap
                     );
 
                     if (num_faces > 0)
@@ -85,12 +85,12 @@ public class Splitter
                         if (processDepth < maxDepth)
                         {
                             processQueue.addLast(
-                                    new Triple<>(
-                                            octetFile,
-                                            processDepth + 1,
-                                            currentOctet
-                                                    .calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
-                                    )
+                                new Triple<>(
+                                    octetFile,
+                                    processDepth + 1,
+                                    currentOctet
+                                        .calculateCenterBasedOn(splitPoint, processDepth, finalBoundingBox)
+                                )
                             );
                         }
                     }
@@ -100,12 +100,12 @@ public class Splitter
     }
 
     private static void writeOctetPLYModel(
-            ImprovedPLYReader reader,
-            OctetFinder.Octet currentOctet,
-            File octetFaceFile,
-            LinkedHashMap<Integer, Integer> vertexMap,
-            int numFaces,
-            File octetFile
+        ImprovedPLYReader reader,
+        OctetFinder.Octet currentOctet,
+        File octetFaceFile,
+        LinkedHashMap<Integer, Integer> vertexMap,
+        int numFaces,
+        File octetFile
     ) throws IOException
     {
         PLYHeader newHeader = PLYHeader.constructBasicHeader(vertexMap.size(), numFaces);
@@ -115,18 +115,18 @@ public class Splitter
             fostream.write((newHeader + "\n").getBytes());
 
             try (
-                    MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
-                    ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+                MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
+                ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
             )
             {
                 Vertex v;
                 ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 try (
-                        ProgressBar pb = new ProgressBar(
-                                String.format("%s: Writing Vertices", currentOctet),
-                                vertexMap.size()
-                        )
+                    ProgressBar pb = new ProgressBar(
+                        String.format("%s: Writing Vertices", currentOctet),
+                        vertexMap.size()
+                    )
                 )
                 {
                     for (int i : vertexMap.keySet())
@@ -159,22 +159,22 @@ public class Splitter
     }
 
     private static int gatherOctetFaces(
-            ImprovedPLYReader reader,
-            OctetFinder.Octet[] memberships,
-            OctetFinder.Octet current,
-            File octetFaceFile,
-            Map<Integer, Integer> vertexMap
+        ImprovedPLYReader reader,
+        OctetFinder.Octet[] memberships,
+        OctetFinder.Octet current,
+        File octetFaceFile,
+        Map<Integer, Integer> vertexMap
     ) throws IOException
     {
         int num_faces_in_octet = 0;
         try (
-                ProgressBar progress = new ProgressBar(
-                        String.format("%s : Scanning & Writing Faces", current),
-                        reader.getHeader().getElement("face").getCount()
-                );
-                MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
-                FileOutputStream fostream = new FileOutputStream(octetFaceFile);
-                ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+            ProgressBar progress = new ProgressBar(
+                String.format("%s : Scanning & Writing Faces", current),
+                reader.getHeader().getElement("face").getCount()
+            );
+            MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
+            FileOutputStream fostream = new FileOutputStream(octetFaceFile);
+            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
             Face face;
@@ -220,14 +220,14 @@ public class Splitter
     }
 
     private static OctetFinder.Octet[] calculateVertexMemberships(
-            ImprovedPLYReader reader, Point3D splitPoint
+        ImprovedPLYReader reader, Point3D splitPoint
     ) throws IOException
     {
         OctetFinder ofinder = new OctetFinder(splitPoint);
 
         try (
-                MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
-                ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
+            MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
+            ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
         )
         {
             int c = vr.getCount();

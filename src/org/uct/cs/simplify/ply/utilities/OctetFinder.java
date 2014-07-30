@@ -11,9 +11,9 @@ public class OctetFinder
     public OctetFinder(BoundingBox bb)
     {
         this.center = new Point3D(
-                (bb.getMaxX() + bb.getMinX()) / 2,
-                (bb.getMaxY() + bb.getMinY()) / 2,
-                (bb.getMaxZ() + bb.getMinZ()) / 2
+            (bb.getMaxX() + bb.getMinX()) / 2,
+            (bb.getMaxY() + bb.getMinY()) / 2,
+            (bb.getMaxZ() + bb.getMinZ()) / 2
         );
         this.by_i = Octet.values();
     }
@@ -62,9 +62,9 @@ public class OctetFinder
             double bbz = bb.getDepth() / div;
 
             return new Point3D(
-                    splitPoint.getX() + bbx * this.xm,
-                    splitPoint.getY() + bby * this.ym,
-                    splitPoint.getZ() + bbz * this.zm
+                splitPoint.getX() + bbx * this.xm,
+                splitPoint.getY() + bby * this.ym,
+                splitPoint.getZ() + bbz * this.zm
             );
         }
     }

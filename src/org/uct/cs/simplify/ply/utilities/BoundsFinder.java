@@ -29,11 +29,11 @@ public class BoundsFinder
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
-                    maxx = -Float.MAX_VALUE,
-                    miny = Float.MAX_VALUE,
-                    maxy = -Float.MAX_VALUE,
-                    minz = Float.MAX_VALUE,
-                    maxz = -Float.MAX_VALUE;
+                maxx = -Float.MAX_VALUE,
+                miny = Float.MAX_VALUE,
+                maxy = -Float.MAX_VALUE,
+                minz = Float.MAX_VALUE,
+                maxz = -Float.MAX_VALUE;
 
             Vertex v;
             int c = vr.getCount();

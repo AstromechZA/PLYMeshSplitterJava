@@ -46,10 +46,10 @@ public class Blueprintify
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
         {
             int resolution = (
-                    cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
+                cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
             );
             float alphamod = (
-                    cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD
+                cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD
             );
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
@@ -84,15 +84,15 @@ public class Blueprintify
         options.addOption(o2);
 
         Option o3 = new Option(
-                "r", "resolution", true,
-                String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION)
+            "r", "resolution", true,
+            String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION)
         );
         o3.setType(Short.class);
         options.addOption(o3);
 
         Option o4 = new Option(
-                "a", "alphamod", true,
-                String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD)
+            "a", "alphamod", true,
+            String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD)
         );
         o4.setType(Float.class);
         options.addOption(o4);

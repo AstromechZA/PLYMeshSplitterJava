@@ -19,37 +19,37 @@ public class BluePrintGenerator
     private static final int BYTE = 0xFF;
 
     public static BufferedImage CreateImage(
-            ImprovedPLYReader reader, int resolution, float alphaAdjustment
+        ImprovedPLYReader reader, int resolution, float alphaAdjustment
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, Axis.X_Y);
     }
 
     public static BufferedImage CreateImage(
-            ImprovedPLYReader reader, int resolution, float alphaAdjustment, Axis type
+        ImprovedPLYReader reader, int resolution, float alphaAdjustment, Axis type
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
     }
 
     public static BufferedImage CreateImage(
-            ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
+        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, Axis.X_Y);
     }
 
     public static BufferedImage CreateImage(
-            ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
-            Axis type
+        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
+        Axis type
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type);
     }
 
     private static BufferedImage makeBufferedImage(
-            ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
-            Axis type
+        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
+        Axis type
     ) throws IOException
     {
         IAxisValueGetter avg = parseAVG(type);
@@ -102,9 +102,9 @@ public class BluePrintGenerator
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
-                    maxx = -Float.MAX_VALUE,
-                    miny = Float.MAX_VALUE,
-                    maxy = -Float.MAX_VALUE;
+                maxx = -Float.MAX_VALUE,
+                miny = Float.MAX_VALUE,
+                maxy = -Float.MAX_VALUE;
             float pr, se;
 
             Vertex v;

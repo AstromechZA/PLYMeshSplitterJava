@@ -33,26 +33,26 @@ public class ScaleAndRecenter
     }
 
     public static BoundingBox run(
-            ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ
+        ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ
     ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         BoundingBox bb = BoundsFinder.getBoundingBox(reader);
         Point3D center = new Point3D(
-                (bb.getMinX() + bb.getMaxX()) / 2,
-                (bb.getMinY() + bb.getMaxY()) / 2,
-                (bb.getMinZ() + bb.getMaxZ()) / 2
+            (bb.getMinX() + bb.getMaxX()) / 2,
+            (bb.getMinY() + bb.getMaxY()) / 2,
+            (bb.getMinZ() + bb.getMaxZ()) / 2
         );
 
         // mesh size is the maximum axis
         double meshHalfSize = Math.abs(
+            Math.max(
                 Math.max(
-                        Math.max(
-                                bb.getMaxX() - center.getX(),
-                                bb.getMaxY() - center.getY()
-                        ),
-                        bb.getMaxZ() - center.getZ()
-                )
+                    bb.getMaxX() - center.getX(),
+                    bb.getMaxY() - center.getY()
+                ),
+                bb.getMaxZ() - center.getZ()
+            )
         );
         double scale = size / (2 * meshHalfSize);
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
@@ -64,10 +64,10 @@ public class ScaleAndRecenter
         System.out.printf("Scale ratio: %f%n", scale);
 
         try (
-                RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r");
-                FileChannel fcIN = rafIN.getChannel();
-                RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw");
-                FileChannel fcOUT = rafOUT.getChannel()
+            RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r");
+            FileChannel fcIN = rafIN.getChannel();
+            RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw");
+            FileChannel fcOUT = rafOUT.getChannel()
         )
         {
 
@@ -144,7 +144,7 @@ public class ScaleAndRecenter
         {
             CommandLine cmd = parseArgs(args);
             int rescaleToSize = (
-                    cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE
+                cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE
             );
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
@@ -159,10 +159,10 @@ public class ScaleAndRecenter
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
             File outputFile = new File(
-                    outputDir,
-                    String.format(
-                            "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize
-                    )
+                outputDir,
+                String.format(
+                    "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize
+                )
             );
 
             run(inputFile, outputFile, rescaleToSize, false);
