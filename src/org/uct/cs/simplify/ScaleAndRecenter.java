@@ -103,7 +103,7 @@ public class ScaleAndRecenter
                     if (swapYZ)
                     {
                         float t = z;
-                        z = y;
+                        z = -y;
                         y = t;
                     }
 
@@ -127,14 +127,21 @@ public class ScaleAndRecenter
             copyNBytes(fcIN, fcOUT, fileRemainder);
         }
 
-        double sx = (bb.getMinX() - center.getX()) * scale;
-        double ex = (bb.getMaxX() - center.getX()) * scale;
-        double sy = ((swapYZ ? bb.getMinZ() : bb.getMinY()) - center.getY()) * scale;
-        double sz = ((swapYZ ? bb.getMinY() : bb.getMinZ()) - center.getY()) * scale;
-        double ey = ((swapYZ ? bb.getMaxZ() : bb.getMaxY()) - center.getY()) * scale;
-        double ez = ((swapYZ ? bb.getMaxY() : bb.getMaxZ()) - center.getY()) * scale;
+        double minX = (bb.getMinX() - center.getX()) * scale;
+        double minY = (bb.getMinY() - center.getY()) * scale;
+        double minZ = (bb.getMinZ() - center.getZ()) * scale;
+        double lenX = (bb.getMaxX() - center.getX()) * scale - minX;
+        double lenY = (bb.getMaxY() - center.getY()) * scale - minY;
+        double lenZ = (bb.getMaxZ() - center.getZ()) * scale - minZ;
 
-        return new BoundingBox(sx, sy, sz, ex - sx, ey - sy, ez - sz);
+        if (swapYZ)
+        {
+            double t = lenY;
+            lenY = lenZ;
+            lenZ = t;
+        }
+
+        return new BoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
     }
 
     @SuppressWarnings("unused")
