@@ -1,14 +1,14 @@
 package org.uct.cs.simplify.ply.utilities;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
+import org.uct.cs.simplify.util.XBoundingBox;
 
 public class OctetFinder
 {
     private final Point3D center;
     private final Octet[] by_i;
 
-    public OctetFinder(BoundingBox bb)
+    public OctetFinder(XBoundingBox bb)
     {
         this.center = new Point3D(
             (bb.getMaxX() + bb.getMinX()) / 2,
@@ -44,7 +44,7 @@ public class OctetFinder
         nxnyPZ(-1, -1, +1),
         nxnynz(-1, -1, -1);
 
-        private final int xm, ym, zm;
+        public final int xm, ym, zm;
 
         Octet(int xm, int ym, int zm)
         {
@@ -53,7 +53,7 @@ public class OctetFinder
             this.zm = zm;
         }
 
-        public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, BoundingBox bb)
+        public Point3D calculateCenterBasedOn(Point3D splitPoint, int processDepth, XBoundingBox bb)
         {
             double div = Math.pow(2, processDepth + 1);
 

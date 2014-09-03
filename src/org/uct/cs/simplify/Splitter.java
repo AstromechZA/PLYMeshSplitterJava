@@ -11,12 +11,12 @@ import java.io.IOException;
 public class Splitter
 {
 
-    public static void run(File inputFile, File outputDir, int maxDepth, boolean swapYZ) throws IOException
+    public static void run(File inputFile, File outputDir, boolean swapYZ) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
 
-        OctreeSplitter splitter = new OctreeSplitter(inputFile, outputDir, maxDepth, swapYZ);
+        OctreeSplitter splitter = new OctreeSplitter(inputFile, outputDir, swapYZ);
         splitter.run();
     }
 
@@ -31,10 +31,7 @@ public class Splitter
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
 
-            int depth = Integer.parseInt(cmd.getOptionValue("depth"));
-            if (depth < 2 || depth > 8) throw new IllegalArgumentException("Splitting depth must be between 1 and 9!");
-
-            run(file, outputDir, depth, cmd.hasOption("swapyz"));
+            run(file, outputDir, cmd.hasOption("swapyz"));
         }
         catch (IOException | InterruptedException | IllegalArgumentException e)
         {
@@ -63,10 +60,6 @@ public class Splitter
         Option opOutput = new Option("o", "output", true, "Destination directory of models");
         opOutput.setRequired(true);
         options.addOption(opOutput);
-
-        Option opDepth = new Option("d", "depth", true, "Number of levels to split to");
-        opDepth.setType(Short.class);
-        options.addOption(opDepth);
 
         Option opSwapYZ = new Option("yz", "swapyz", false, "Swap the Y and Z axis during preprocessing");
         options.addOption(opSwapYZ);

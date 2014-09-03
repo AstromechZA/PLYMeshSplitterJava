@@ -1,16 +1,12 @@
 package org.uct.cs.simplify;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
-import org.uct.cs.simplify.util.MemStatRecorder;
-import org.uct.cs.simplify.util.ProgressBar;
-import org.uct.cs.simplify.util.Timer;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +20,7 @@ public class ScaleAndRecenter
     private static final int DEFAULT_RESCALE_SIZE = 1024;
     private static final int COPYBYTES_BUF_SIZE = 4096;
 
-    public static BoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
+    public static XBoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // this scans the target file and works out start and end ranges
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
@@ -32,12 +28,10 @@ public class ScaleAndRecenter
         return run(reader, outputFile, size, swapYZ);
     }
 
-    public static BoundingBox run(
-        ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ
-    ) throws IOException
+    public static XBoundingBox run(ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
-        BoundingBox bb = BoundsFinder.getBoundingBox(reader);
+        XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
         Point3D center = new Point3D(
             (bb.getMinX() + bb.getMaxX()) / 2,
             (bb.getMinY() + bb.getMaxY()) / 2,
@@ -139,9 +133,13 @@ public class ScaleAndRecenter
             double t = lenY;
             lenY = lenZ;
             lenZ = t;
+
+            t = minY;
+            minY = minZ;
+            minZ = t;
         }
 
-        return new BoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
+        return new XBoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
     }
 
     @SuppressWarnings("unused")

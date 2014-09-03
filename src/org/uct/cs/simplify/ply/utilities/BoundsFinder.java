@@ -1,9 +1,9 @@
 package org.uct.cs.simplify.ply.utilities;
 
-import javafx.geometry.BoundingBox;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
+import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
 
@@ -13,18 +13,18 @@ import java.io.IOException;
 public class BoundsFinder
 {
 
-    public static BoundingBox getBoundingBox(ImprovedPLYReader reader) throws IOException
+    public static XBoundingBox getBoundingBox(ImprovedPLYReader reader) throws IOException
     {
         return getBoundingBoxInner(reader, 1);
     }
 
-    public static BoundingBox getBoundingBox(ImprovedPLYReader reader, int nth) throws IOException
+    public static XBoundingBox getBoundingBox(ImprovedPLYReader reader, int nth) throws IOException
     {
         if (nth <= 0 || nth >= 100) throw new IllegalArgumentException("Nth skipper must be 1-99");
         return getBoundingBoxInner(reader, nth);
     }
 
-    private static BoundingBox getBoundingBoxInner(ImprovedPLYReader reader, int nth) throws IOException
+    private static XBoundingBox getBoundingBoxInner(ImprovedPLYReader reader, int nth) throws IOException
     {
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
@@ -50,7 +50,7 @@ public class BoundsFinder
                 minz = Math.min(minz, v.z);
                 maxz = Math.max(maxz, v.z);
             }
-            return new BoundingBox(minx, miny, minz, maxx - minx, maxy - miny, maxz - minz);
+            return new XBoundingBox(minx, miny, minz, maxx - minx, maxy - miny, maxz - minz);
         }
     }
 

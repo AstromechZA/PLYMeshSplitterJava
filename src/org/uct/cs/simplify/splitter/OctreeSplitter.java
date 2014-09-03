@@ -1,16 +1,16 @@
 package org.uct.cs.simplify.splitter;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Point3D;
 import org.uct.cs.simplify.ScaleAndRecenter;
+import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.*;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.TempFile;
-import org.uct.cs.simplify.util.Triple;
 import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -27,34 +27,33 @@ public class OctreeSplitter
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_MODEL_SIZE = 1024;
     private static final int DEFAULT_MODEL_SIZE_H = DEFAULT_MODEL_SIZE / 2;
+    private static final int DEFAULT_CUTOFF_VERTEX_COUNT = 100_000;
 
     private final File outputDir;
-    private final int maxDepth;
     private final boolean swapYZ;
     private final boolean rescale;
     private final int rescaleToSize;
     private final File inputFile;
-    private final BoundingBox boundingBox;
+    private final XBoundingBox boundingBox;
 
     private File processedFile;
 
-    public OctreeSplitter(File inputFile, File outputDir, int maxDepth, boolean swapYZ, int rescaleToSize, boolean rescale) throws IOException
+    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ, int rescaleToSize, boolean rescale) throws IOException
     {
         this.inputFile = inputFile;
         this.outputDir = outputDir;
-        this.maxDepth = maxDepth;
         this.swapYZ = swapYZ;
         this.rescale = rescale;
         this.rescaleToSize = rescaleToSize;
         this.boundingBox = this.prepare();
     }
 
-    public OctreeSplitter(File inputFile, File outputDir, int maxDepth, boolean swapYZ) throws IOException
+    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ) throws IOException
     {
-        this(inputFile, outputDir, maxDepth, swapYZ, DEFAULT_MODEL_SIZE, true);
+        this(inputFile, outputDir, swapYZ, DEFAULT_MODEL_SIZE, true);
     }
 
-    private BoundingBox prepare() throws IOException
+    private XBoundingBox prepare() throws IOException
     {
         // if we want the model to be rescaled (which we usually do)
         if (rescale)
@@ -78,28 +77,31 @@ public class OctreeSplitter
         // otherwise the bounding box matches the expected size
         int halfsize = this.rescaleToSize / 2;
         this.processedFile = inputFile;
-        return new BoundingBox(-halfsize, -halfsize, -halfsize, halfsize, halfsize, halfsize);
+        return new XBoundingBox(-halfsize, -halfsize, -halfsize, this.rescaleToSize, this.rescaleToSize, this.rescaleToSize);
     }
 
-    public void run() throws IOException
+    public PackagedHierarchicalFile run() throws IOException
     {
-        ArrayDeque<Triple<File, Integer, Point3D>> processQueue = new ArrayDeque<>();
-        processQueue.add(new Triple<>(this.processedFile, 0, Point3D.ZERO));
+        // empty queue for processing
+        ArrayDeque<PackagedHierarchicalFile.HierarchyNode> processQueue = new ArrayDeque<>();
 
+        PackagedHierarchicalFile outputHierarchy = new PackagedHierarchicalFile();
+        PackagedHierarchicalFile.HierarchyNode root = outputHierarchy.add(null, this.processedFile, this.boundingBox);
+
+        // add first element
+        processQueue.add(root);
         while (!processQueue.isEmpty())
         {
-            Triple<File, Integer, Point3D> processEntry = processQueue.removeFirst();
-            File processFile = processEntry.getFirst();
-            int processDepth = processEntry.getSecond();
-            Point3D splitPoint = processEntry.getThird();
+            PackagedHierarchicalFile.HierarchyNode currentNode = processQueue.removeFirst();
 
-            String processFileBase = Useful.getFilenameWithoutExt(processFile.getName());
+            System.out.println(currentNode.getNumFaces());
+
+            String processFileBase = Useful.getFilenameWithoutExt(currentNode.getLinkedFile().getName());
 
             // now switch to rescaled version
-            ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(processFile));
-            int average_vertices_per_octet = reader.getHeader().getElement("vertex").getCount() / 8;
+            ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(currentNode.getLinkedFile()));
 
-            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, splitPoint);
+            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, currentNode.getBoundingBox().getCenter());
 
             for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
             {
@@ -110,7 +112,7 @@ public class OctreeSplitter
                     )
                 )
                 {
-                    LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(average_vertices_per_octet);
+                    LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(currentNode.getNumVertices() / 8);
                     int num_faces = gatherOctetFaces(reader, memberships, currentOctet, temporaryFaceFile, vertexMap);
                     if (num_faces > 0)
                     {
@@ -118,23 +120,14 @@ public class OctreeSplitter
 
                         writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
 
-                        if (processDepth <= this.maxDepth)
-                        {
-                            processQueue.addLast(
-                                new Triple<>(
-                                    octetFile,
-                                    processDepth + 1,
-                                    currentOctet
-                                        .calculateCenterBasedOn(splitPoint, processDepth, this.boundingBox)
-                                )
-                            );
-                        }
+                        PackagedHierarchicalFile.HierarchyNode n = outputHierarchy.add(currentNode.getID(), octetFile, currentNode.getBoundingBox().getSubBB(currentOctet));
+
+                        if (n.getNumVertices() > DEFAULT_CUTOFF_VERTEX_COUNT) processQueue.addLast(n);
                     }
                 }
             }
         }
-
-
+        return outputHierarchy;
     }
 
     private static void writeOctetPLYModel(
