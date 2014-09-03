@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.img;
+package org.uct.cs.simplify.blueprint;
 
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
@@ -148,4 +148,56 @@ public class BluePrintGenerator
         X_Y, X_Z, Y_Z
     }
 
+    public static interface IAxisValueGetter
+    {
+        public float getPrimaryAxisValue(Vertex v);
+
+        public float getSecondaryAxisValue(Vertex v);
+    }
+
+    public static class XYAxisValueGetter implements IAxisValueGetter
+    {
+        @Override
+        public float getPrimaryAxisValue(Vertex v)
+        {
+            return v.x;
+        }
+
+        @Override
+        public float getSecondaryAxisValue(Vertex v)
+        {
+            return v.y;
+        }
+    }
+
+    public static class XZAxisValueGetter implements IAxisValueGetter
+    {
+        @Override
+        public float getPrimaryAxisValue(Vertex v)
+        {
+            return v.x;
+        }
+
+        @Override
+        public float getSecondaryAxisValue(Vertex v)
+        {
+            return v.z;
+        }
+    }
+
+    public static class YZAxisValueGetter implements IAxisValueGetter
+    {
+
+        @Override
+        public float getPrimaryAxisValue(Vertex v)
+        {
+            return v.y;
+        }
+
+        @Override
+        public float getSecondaryAxisValue(Vertex v)
+        {
+            return v.z;
+        }
+    }
 }

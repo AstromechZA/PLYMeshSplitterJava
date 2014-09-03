@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.img.BluePrintGenerator;
+import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.util.MemStatRecorder;
