@@ -20,7 +20,7 @@ public class Splitter
         OctreeSplitter splitter = new OctreeSplitter(inputFile, outputDir, swapYZ);
         PackagedHierarchicalFile result = splitter.run();
 
-        System.out.println(result.asJSON());
+        System.out.println(result.asJSON(true));
     }
 
     public static void main(String[] args)

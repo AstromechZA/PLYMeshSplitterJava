@@ -1,7 +1,5 @@
 package org.uct.cs.simplify.file_builder;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.util.XBoundingBox;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -52,31 +50,43 @@ public class PackagedHierarchicalFile
 
     public String asJSON()
     {
-        JSONArray array = new JSONArray();
+        return this.asJSON(false);
+    }
+
+    public String asJSON(boolean indented)
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+
+        String sep1 = (indented) ? "\n\t" : "";
+        String sep2 = (indented) ? "\n\t\t" : "";
+
+        sb.append("[");
 
         for (HierarchyNode n : this.nodeList)
         {
-            JSONObject o = new JSONObject();
+            if (!isFirst) sb.append(",");
 
-            o.put("id", n.getID());
-            o.put("parent_id", (n.getParent() == null) ? null : n.getParent().getID());
-            o.put("face_count", n.getNumFaces());
-            o.put("vertex_count", n.getNumVertices());
-            o.put("block_offset", 0); // TODO
-            o.put("block_length", 0); // TODO
+            sb.append(sep1).append("{");
+            sb.append(sep2).append(String.format("\"id\":%d,", n.getID()));
+            sb.append(sep2).append(String.format("\"parent_id\":%d,", (n.getParent() == null) ? null : n.getParent().getID()));
+            sb.append(sep2).append(String.format("\"num_faces\":%d,", n.getNumFaces()));
+            sb.append(sep2).append(String.format("\"num_vertices\":%d,", n.getNumVertices()));
+            sb.append(sep2).append(String.format("\"block_offset\":%d,", 0));
+            sb.append(sep2).append(String.format("\"block_length\":%d,", 0));
+            sb.append(sep2).append(String.format("\"min_x\":%f,", n.getBoundingBox().getMinX()));
+            sb.append(sep2).append(String.format("\"min_y\":%f,", n.getBoundingBox().getMinY()));
+            sb.append(sep2).append(String.format("\"min_z\":%f,", n.getBoundingBox().getMinZ()));
+            sb.append(sep2).append(String.format("\"max_x\":%f,", n.getBoundingBox().getMaxX()));
+            sb.append(sep2).append(String.format("\"max_y\":%f,", n.getBoundingBox().getMaxY()));
+            sb.append(sep2).append(String.format("\"max_z\":%f", n.getBoundingBox().getMaxZ()));
+            sb.append(sep1).append("}");
 
-            o.put("min_x", n.getBoundingBox().getMinX());
-            o.put("min_y", n.getBoundingBox().getMinY());
-            o.put("min_z", n.getBoundingBox().getMinZ());
-
-            o.put("max_x", n.getBoundingBox().getMaxX());
-            o.put("max_y", n.getBoundingBox().getMaxY());
-            o.put("max_z", n.getBoundingBox().getMaxZ());
-
-            array.add(o);
+            isFirst = false;
         }
-
-        return array.toJSONString();
+        if (indented) sb.append("\n");
+        sb.append("]");
+        return sb.toString();
     }
 
     public static class HierarchyNode
