@@ -1,6 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
+import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
 import org.uct.cs.simplify.splitter.OctreeSplitter;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
@@ -17,7 +18,9 @@ public class Splitter
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
 
         OctreeSplitter splitter = new OctreeSplitter(inputFile, outputDir, swapYZ);
-        splitter.run();
+        PackagedHierarchicalFile result = splitter.run();
+
+        System.out.println(result.asJSON());
     }
 
     public static void main(String[] args)

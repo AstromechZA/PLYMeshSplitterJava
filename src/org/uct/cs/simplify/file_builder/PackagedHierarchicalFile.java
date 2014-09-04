@@ -1,5 +1,7 @@
 package org.uct.cs.simplify.file_builder;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.util.XBoundingBox;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -46,6 +48,35 @@ public class PackagedHierarchicalFile
             parent.addChild(newNode);
             return newNode;
         }
+    }
+
+    public String asJSON()
+    {
+        JSONArray array = new JSONArray();
+
+        for (HierarchyNode n : this.nodeList)
+        {
+            JSONObject o = new JSONObject();
+
+            o.put("id", n.getID());
+            o.put("parent_id", (n.getParent() == null) ? null : n.getParent().getID());
+            o.put("face_count", n.getNumFaces());
+            o.put("vertex_count", n.getNumVertices());
+            o.put("block_offset", 0); // TODO
+            o.put("block_length", 0); // TODO
+
+            o.put("min_x", n.getBoundingBox().getMinX());
+            o.put("min_y", n.getBoundingBox().getMinY());
+            o.put("min_z", n.getBoundingBox().getMinZ());
+
+            o.put("max_x", n.getBoundingBox().getMaxX());
+            o.put("max_y", n.getBoundingBox().getMaxY());
+            o.put("max_z", n.getBoundingBox().getMaxZ());
+
+            array.add(o);
+        }
+
+        return array.toJSONString();
     }
 
     public static class HierarchyNode

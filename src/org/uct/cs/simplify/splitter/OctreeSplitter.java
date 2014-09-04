@@ -27,7 +27,7 @@ public class OctreeSplitter
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
     private static final int DEFAULT_MODEL_SIZE = 1024;
     private static final int DEFAULT_MODEL_SIZE_H = DEFAULT_MODEL_SIZE / 2;
-    private static final int DEFAULT_CUTOFF_VERTEX_COUNT = 100_000;
+    private static final int DEFAULT_CUTOFF_VERTEX_COUNT = 200_000;
 
     private final File outputDir;
     private final boolean swapYZ;
