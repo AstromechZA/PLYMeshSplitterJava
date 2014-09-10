@@ -5,6 +5,7 @@ import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
 import org.uct.cs.simplify.splitter.OctreeSplitter;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
+import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,17 @@ public class Splitter
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
 
-        OctreeSplitter splitter = new OctreeSplitter(inputFile, outputDir, swapYZ);
+        int rescaleSize = 1024;
+        File scaledFile = new File(
+            outputDir,
+            String.format(
+                "%s_rescaled_%d.ply",
+                Useful.getFilenameWithoutExt(inputFile.getName()),
+                rescaleSize
+            )
+        );
+        ScaleAndRecenter.run(inputFile, scaledFile, rescaleSize, swapYZ);
+        OctreeSplitter splitter = new OctreeSplitter(scaledFile, outputDir, swapYZ);
         PackagedHierarchicalFile result = splitter.run();
 
         System.out.println(result.asJSON(true));

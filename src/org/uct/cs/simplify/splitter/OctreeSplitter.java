@@ -1,11 +1,11 @@
 package org.uct.cs.simplify.splitter;
 
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.ScaleAndRecenter;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.*;
+import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.TempFile;
@@ -31,53 +31,20 @@ public class OctreeSplitter
 
     private final File outputDir;
     private final boolean swapYZ;
-    private final boolean rescale;
-    private final int rescaleToSize;
     private final File inputFile;
     private final XBoundingBox boundingBox;
 
-    private File processedFile;
-
-    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ, int rescaleToSize, boolean rescale) throws IOException
+    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ) throws IOException
     {
         this.inputFile = inputFile;
         this.outputDir = outputDir;
         this.swapYZ = swapYZ;
-        this.rescale = rescale;
-        this.rescaleToSize = rescaleToSize;
         this.boundingBox = this.prepare();
-    }
-
-    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ) throws IOException
-    {
-        this(inputFile, outputDir, swapYZ, DEFAULT_MODEL_SIZE, true);
     }
 
     private XBoundingBox prepare() throws IOException
     {
-        // if we want the model to be rescaled (which we usually do)
-        if (rescale)
-        {
-            ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(this.inputFile));
-
-            // create scale version
-            File scaledFile = new File(
-                outputDir,
-                String.format(
-                    "%s_rescaled_%d.ply",
-                    Useful.getFilenameWithoutExt(this.inputFile.getName()),
-                    this.rescaleToSize
-                )
-            );
-
-            this.processedFile = scaledFile;
-            return ScaleAndRecenter.run(reader, scaledFile, this.rescaleToSize, this.swapYZ);
-        }
-
-        // otherwise the bounding box matches the expected size
-        int halfsize = this.rescaleToSize / 2;
-        this.processedFile = inputFile;
-        return new XBoundingBox(-halfsize, -halfsize, -halfsize, this.rescaleToSize, this.rescaleToSize, this.rescaleToSize);
+        return BoundsFinder.getBoundingBox(new ImprovedPLYReader(new PLYHeader(this.inputFile)));
     }
 
     public PackagedHierarchicalFile run() throws IOException
@@ -86,7 +53,7 @@ public class OctreeSplitter
         ArrayDeque<PackagedHierarchicalFile.HierarchyNode> processQueue = new ArrayDeque<>();
 
         PackagedHierarchicalFile outputHierarchy = new PackagedHierarchicalFile();
-        PackagedHierarchicalFile.HierarchyNode root = outputHierarchy.add(null, this.processedFile, this.boundingBox);
+        PackagedHierarchicalFile.HierarchyNode root = outputHierarchy.add(null, this.inputFile, this.boundingBox);
 
         // add first element
         processQueue.add(root);
