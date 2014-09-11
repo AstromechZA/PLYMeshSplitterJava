@@ -2,6 +2,7 @@ package org.uct.cs.simplify.splitter;
 
 import javafx.geometry.Point3D;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
+import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.*;
@@ -30,15 +31,13 @@ public class OctreeSplitter
     private static final int DEFAULT_CUTOFF_VERTEX_COUNT = 200_000;
 
     private final File outputDir;
-    private final boolean swapYZ;
     private final File inputFile;
     private final XBoundingBox boundingBox;
 
-    public OctreeSplitter(File inputFile, File outputDir, boolean swapYZ) throws IOException
+    public OctreeSplitter(File inputFile, File outputDir) throws IOException
     {
         this.inputFile = inputFile;
         this.outputDir = outputDir;
-        this.swapYZ = swapYZ;
         this.boundingBox = this.prepare();
     }
 
@@ -50,16 +49,16 @@ public class OctreeSplitter
     public PackagedHierarchicalFile run() throws IOException
     {
         // empty queue for processing
-        ArrayDeque<PackagedHierarchicalFile.HierarchyNode> processQueue = new ArrayDeque<>();
+        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
 
         PackagedHierarchicalFile outputHierarchy = new PackagedHierarchicalFile();
-        PackagedHierarchicalFile.HierarchyNode root = outputHierarchy.add(null, this.inputFile, this.boundingBox);
+        PackagedHierarchicalNode root = outputHierarchy.add(null, this.inputFile, this.boundingBox);
 
         // add first element
         processQueue.add(root);
         while (!processQueue.isEmpty())
         {
-            PackagedHierarchicalFile.HierarchyNode currentNode = processQueue.removeFirst();
+            PackagedHierarchicalNode currentNode = processQueue.removeFirst();
 
             String processFileBase = Useful.getFilenameWithoutExt(currentNode.getLinkedFile().getName());
 
@@ -80,7 +79,7 @@ public class OctreeSplitter
 
                         writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
 
-                        PackagedHierarchicalFile.HierarchyNode n = outputHierarchy.add(currentNode.getID(), octetFile, currentNode.getBoundingBox().getSubBB(currentOctet));
+                        PackagedHierarchicalNode n = outputHierarchy.add(currentNode.getID(), octetFile, currentNode.getBoundingBox().getSubBB(currentOctet));
 
                         if (n.getNumVertices() > DEFAULT_CUTOFF_VERTEX_COUNT) processQueue.addLast(n);
                     }

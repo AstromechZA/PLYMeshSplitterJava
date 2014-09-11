@@ -88,9 +88,7 @@ public class MemStatRecorder implements AutoCloseable
                     long ms = System.currentTimeMillis();
                     Runtime r = Runtime.getRuntime();
                     long used = r.totalMemory() - r.freeMemory();
-
-                    this.parent.add(ms, used);
-
+                    if (used > 0) this.parent.add(ms, used);
                     Thread.sleep(this.parent.getInterval());
                 }
                 while (!Thread.currentThread().isInterrupted());

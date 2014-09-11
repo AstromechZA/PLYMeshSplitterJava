@@ -28,7 +28,7 @@ public class Splitter
             )
         );
         ScaleAndRecenter.run(inputFile, scaledFile, rescaleSize, swapYZ);
-        OctreeSplitter splitter = new OctreeSplitter(scaledFile, outputDir, swapYZ);
+        OctreeSplitter splitter = new OctreeSplitter(scaledFile, outputDir);
         PackagedHierarchicalFile result = splitter.run();
 
         System.out.println(result.asJSON(true));
