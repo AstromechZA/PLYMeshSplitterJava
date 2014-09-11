@@ -31,15 +31,14 @@ public class Splitter
         );
         ScaleAndRecenter.run(inputFile, scaledFile, rescaleSize, swapYZ);
 
-        OctreeSplitter s = new OctreeSplitter();
-
+        OctreeSplitter splitter = new OctreeSplitter();
         ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
         PackagedHierarchicalNode root = new PackagedHierarchicalNode(scaledFile);
         processQueue.add(root);
         while (!processQueue.isEmpty())
         {
             PackagedHierarchicalNode currentNode = processQueue.removeFirst();
-            ArrayList<PackagedHierarchicalNode> children = s.split(currentNode, outputDir);
+            ArrayList<PackagedHierarchicalNode> children = splitter.split(currentNode, outputDir);
             for (PackagedHierarchicalNode child : children)
             {
                 currentNode.addChild(child);
