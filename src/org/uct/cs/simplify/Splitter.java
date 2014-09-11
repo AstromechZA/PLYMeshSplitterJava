@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public class Splitter
 {
+    private static final int MINIMUM_VERTEX_COUNT = 200_000;
 
     public static void run(File inputFile, File outputDir, boolean swapYZ) throws IOException
     {
@@ -42,7 +43,7 @@ public class Splitter
             for (PackagedHierarchicalNode child : children)
             {
                 currentNode.addChild(child);
-                if (child.getNumVertices() > 200_000) processQueue.add(child);
+                if (child.getNumVertices() > MINIMUM_VERTEX_COUNT) processQueue.add(child);
             }
         }
     }

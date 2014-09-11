@@ -2,10 +2,11 @@ package org.uct.cs.simplify.splitter;
 
 import javafx.geometry.Point3D;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.octant.Octant;
+import org.uct.cs.simplify.octant.OctantFinder;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.*;
-import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.Useful;
@@ -32,39 +33,39 @@ public class OctreeSplitter implements ISplitter
 
         ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(parent.getLinkedFile()));
 
-        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, parent.getBoundingBox().getCenter());
-        for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
+        Octant[] memberships = calculateVertexMemberships(reader, parent.getBoundingBox().getCenter());
+        for (Octant currentOctant : Octant.values())
         {
-            String tempfilepath = String.format("%s_%s.temp", processFileBase, currentOctet);
+            String tempfilepath = String.format("%s_%s.temp", processFileBase, currentOctant);
             try (TempFile temporaryFaceFile = new TempFile(outputDir, tempfilepath))
             {
                 LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(parent.getNumVertices() / 8);
-                int num_faces = gatherOctetFaces(reader, memberships, currentOctet, temporaryFaceFile, vertexMap);
+                int num_faces = gatherOctantFaces(reader, memberships, currentOctant, temporaryFaceFile, vertexMap);
                 if (num_faces > 0)
                 {
-                    File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
+                    File octantFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctant));
 
-                    writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
+                    writeOctantPLYModel(reader, currentOctant, temporaryFaceFile, vertexMap, num_faces, octantFile);
 
-                    output.add(new PackagedHierarchicalNode(parent.getBoundingBox().getSubBB(currentOctet), vertexMap.size(), num_faces, octetFile));
+                    output.add(new PackagedHierarchicalNode(currentOctant.getSubBB(parent.getBoundingBox()), vertexMap.size(), num_faces, octantFile));
                 }
             }
         }
         return output;
     }
 
-    private static void writeOctetPLYModel(
+    private static void writeOctantPLYModel(
         ImprovedPLYReader reader,
-        OctetFinder.Octet currentOctet,
-        File octetFaceFile,
+        Octant currentOctant,
+        File octantFaceFile,
         LinkedHashMap<Integer, Integer> vertexMap,
         int numFaces,
-        File octetFile
+        File octantFile
     ) throws IOException
     {
         PLYHeader newHeader = PLYHeader.constructBasicHeader(vertexMap.size(), numFaces);
 
-        try (FileOutputStream fostream = new FileOutputStream(octetFile))
+        try (FileOutputStream fostream = new FileOutputStream(octantFile))
         {
             fostream.write((newHeader + "\n").getBytes());
 
@@ -78,7 +79,7 @@ public class OctreeSplitter implements ISplitter
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 try (
                     ProgressBar pb = new ProgressBar(
-                        String.format("%s: Writing Vertices", currentOctet),
+                        String.format("%s: Writing Vertices", currentOctant),
                         vertexMap.size()
                     )
                 )
@@ -101,33 +102,32 @@ public class OctreeSplitter implements ISplitter
                         }
                     }
                     if (bostream.size() > 0) fostream.write(bostream.toByteArray());
-
                 }
             }
 
-            try (FileChannel fc = new FileInputStream(octetFaceFile).getChannel())
+            try (FileChannel fc = new FileInputStream(octantFaceFile).getChannel())
             {
                 fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
             }
         }
     }
 
-    private static int gatherOctetFaces(
+    private static int gatherOctantFaces(
         ImprovedPLYReader reader,
-        OctetFinder.Octet[] memberships,
-        OctetFinder.Octet current,
-        File octetFaceFile,
+        Octant[] memberships,
+        Octant current,
+        File octantFaceFile,
         Map<Integer, Integer> vertexMap
     ) throws IOException
     {
-        int num_faces_in_octet = 0;
+        int num_faces_in_octant = 0;
         try (
             ProgressBar progress = new ProgressBar(
                 String.format("%s : Scanning & Writing Faces", current),
                 reader.getHeader().getElement("face").getCount()
             );
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
-            FileOutputStream fostream = new FileOutputStream(octetFaceFile);
+            FileOutputStream fostream = new FileOutputStream(octantFaceFile);
             ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
@@ -141,7 +141,7 @@ public class OctreeSplitter implements ISplitter
 
                 if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
                 {
-                    num_faces_in_octet += 1;
+                    num_faces_in_octant += 1;
                     bostream.write((byte) face.getNumVertices());
                     for (int vertex_index : face.getVertices())
                     {
@@ -161,7 +161,7 @@ public class OctreeSplitter implements ISplitter
             }
             if (bostream.size() > 0) fostream.write(bostream.toByteArray());
         }
-        return num_faces_in_octet;
+        return num_faces_in_octant;
     }
 
     private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
@@ -173,11 +173,11 @@ public class OctreeSplitter implements ISplitter
 
     }
 
-    private static OctetFinder.Octet[] calculateVertexMemberships(
+    private static Octant[] calculateVertexMemberships(
         ImprovedPLYReader reader, Point3D splitPoint
     ) throws IOException
     {
-        OctetFinder ofinder = new OctetFinder(splitPoint);
+        OctantFinder ofinder = new OctantFinder(splitPoint);
 
         try (
             MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
@@ -185,13 +185,13 @@ public class OctreeSplitter implements ISplitter
         )
         {
             int c = vr.getCount();
-            OctetFinder.Octet[] memberships = new OctetFinder.Octet[ c ];
+            Octant[] memberships = new Octant[ c ];
             Vertex v;
             for (int i = 0; i < c; i++)
             {
                 pb.tick();
                 v = vr.get(i);
-                memberships[ i ] = ofinder.getOctet(v.x, v.y, v.z);
+                memberships[ i ] = ofinder.getOctant(v.x, v.y, v.z);
             }
             return memberships;
         }
