@@ -26,7 +26,7 @@ public class Useful
         return String.format("%d nanoseconds", ns);
     }
 
-    public static String convertToByteUnit(double bytes)
+    public static String formatBytes(double bytes)
     {
         if (bytes > MEGABYTE) return String.format("%.2f MB", bytes / MEGABYTE);
         if (bytes > KILOBYTE) return String.format("%.2f KB", bytes / KILOBYTE);
