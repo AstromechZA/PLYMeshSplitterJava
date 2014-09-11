@@ -1,51 +1,50 @@
 package org.uct.cs.simplify.file_builder;
 
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class PackagedHierarchicalNode
 {
-    private final int id;
     private final int numVertices;
     private final int numFaces;
     private final XBoundingBox boundingBox;
     private final File linkedFile;
 
-    private PackagedHierarchicalNode parent;
     private ArrayList<PackagedHierarchicalNode> children;
 
-    public PackagedHierarchicalNode(int newID, PackagedHierarchicalNode parent, XBoundingBox bb, int numV, int numF, File linkedFile)
+    public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File linkedFile)
     {
-        this.id = newID;
         this.numFaces = numF;
         this.numVertices = numV;
         this.boundingBox = bb;
         this.linkedFile = linkedFile;
-
-        this.parent = parent;
         this.children = new ArrayList<>();
     }
 
-    public int addChild(PackagedHierarchicalNode newNode)
+    public PackagedHierarchicalNode(File linkedFile) throws IOException
     {
-        return this.id;
+        ImprovedPLYReader r = new ImprovedPLYReader(new PLYHeader(linkedFile));
+        this.numFaces = r.getHeader().getElement("face").getCount();
+        this.numVertices = r.getHeader().getElement("vertex").getCount();
+        this.boundingBox = BoundsFinder.getBoundingBox(r);
+        this.linkedFile = linkedFile;
+        this.children = new ArrayList<>();
     }
 
-    public PackagedHierarchicalNode getParent()
+    public void addChild(PackagedHierarchicalNode node)
     {
-        return this.parent;
+        this.children.add(node);
     }
 
     public ArrayList<PackagedHierarchicalNode> getChildren()
     {
         return this.children;
-    }
-
-    public int getID()
-    {
-        return id;
     }
 
     public int getNumVertices()

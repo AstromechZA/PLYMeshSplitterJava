@@ -1,92 +1,56 @@
 package org.uct.cs.simplify.splitter;
 
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.*;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.ply.utilities.OctetFinder;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.Useful;
-import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class OctreeSplitter
+public class OctreeSplitter implements ISplitter
 {
-
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
-    private static final int DEFAULT_MODEL_SIZE = 1024;
-    private static final int DEFAULT_MODEL_SIZE_H = DEFAULT_MODEL_SIZE / 2;
-    private static final int DEFAULT_CUTOFF_VERTEX_COUNT = 200_000;
 
-    private final File outputDir;
-    private final File inputFile;
-    private final XBoundingBox boundingBox;
-
-    public OctreeSplitter(File inputFile, File outputDir) throws IOException
+    @Override
+    public ArrayList<PackagedHierarchicalNode> split(PackagedHierarchicalNode parent, File outputDir) throws IOException
     {
-        this.inputFile = inputFile;
-        this.outputDir = outputDir;
-        this.boundingBox = this.prepare();
-    }
+        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
 
-    private XBoundingBox prepare() throws IOException
-    {
-        return BoundsFinder.getBoundingBox(new ImprovedPLYReader(new PLYHeader(this.inputFile)));
-    }
+        String processFileBase = Useful.getFilenameWithoutExt(parent.getLinkedFile().getName());
 
-    public PackagedHierarchicalFile run() throws IOException
-    {
-        // empty queue for processing
-        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+        ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(parent.getLinkedFile()));
 
-        PackagedHierarchicalFile outputHierarchy = new PackagedHierarchicalFile();
-        PackagedHierarchicalNode root = outputHierarchy.add(null, this.inputFile, this.boundingBox);
-
-        // add first element
-        processQueue.add(root);
-        while (!processQueue.isEmpty())
+        OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, parent.getBoundingBox().getCenter());
+        for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
         {
-            PackagedHierarchicalNode currentNode = processQueue.removeFirst();
-
-            String processFileBase = Useful.getFilenameWithoutExt(currentNode.getLinkedFile().getName());
-
-            // now switch to rescaled version
-            ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(currentNode.getLinkedFile()));
-
-            OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, currentNode.getBoundingBox().getCenter());
-            for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
+            String tempfilepath = String.format("%s_%s.temp", processFileBase, currentOctet);
+            try (TempFile temporaryFaceFile = new TempFile(outputDir, tempfilepath))
             {
-                String tempfilepath = String.format("%s_%s.temp", processFileBase, currentOctet);
-                try (TempFile temporaryFaceFile = new TempFile(this.outputDir, tempfilepath))
+                LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(parent.getNumVertices() / 8);
+                int num_faces = gatherOctetFaces(reader, memberships, currentOctet, temporaryFaceFile, vertexMap);
+                if (num_faces > 0)
                 {
-                    LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(currentNode.getNumVertices() / 8);
-                    int num_faces = gatherOctetFaces(reader, memberships, currentOctet, temporaryFaceFile, vertexMap);
-                    if (num_faces > 0)
-                    {
-                        File octetFile = new File(this.outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
+                    File octetFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, currentOctet));
 
-                        writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
+                    writeOctetPLYModel(reader, currentOctet, temporaryFaceFile, vertexMap, num_faces, octetFile);
 
-                        PackagedHierarchicalNode n = outputHierarchy.add(currentNode.getID(), octetFile, currentNode.getBoundingBox().getSubBB(currentOctet));
-
-                        if (n.getNumVertices() > DEFAULT_CUTOFF_VERTEX_COUNT) processQueue.addLast(n);
-                    }
+                    output.add(new PackagedHierarchicalNode(parent.getBoundingBox().getSubBB(currentOctet), vertexMap.size(), num_faces, octetFile));
                 }
             }
         }
-        return outputHierarchy;
+        return output;
     }
 
     private static void writeOctetPLYModel(

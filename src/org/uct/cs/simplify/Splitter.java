@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.file_builder.PackagedHierarchicalFile;
+import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.OctreeSplitter;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
@@ -9,6 +9,8 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 public class Splitter
 {
@@ -28,10 +30,22 @@ public class Splitter
             )
         );
         ScaleAndRecenter.run(inputFile, scaledFile, rescaleSize, swapYZ);
-        OctreeSplitter splitter = new OctreeSplitter(scaledFile, outputDir);
-        PackagedHierarchicalFile result = splitter.run();
 
-        System.out.println(result.asJSON(true));
+        OctreeSplitter s = new OctreeSplitter();
+
+        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+        PackagedHierarchicalNode root = new PackagedHierarchicalNode(scaledFile);
+        processQueue.add(root);
+        while (!processQueue.isEmpty())
+        {
+            PackagedHierarchicalNode currentNode = processQueue.removeFirst();
+            ArrayList<PackagedHierarchicalNode> children = s.split(currentNode, outputDir);
+            for (PackagedHierarchicalNode child : children)
+            {
+                currentNode.addChild(child);
+                if (child.getNumVertices() > 200_000) processQueue.add(child);
+            }
+        }
     }
 
     public static void main(String[] args)
