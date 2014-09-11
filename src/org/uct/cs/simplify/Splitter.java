@@ -46,6 +46,8 @@ public class Splitter
                 if (child.getNumVertices() > MINIMUM_VERTEX_COUNT) processQueue.add(child);
             }
         }
+
+        System.out.println("JSON: " + PackagedHierarchicalNode.buildJSONHierarchy(root));
     }
 
     public static void main(String[] args)
