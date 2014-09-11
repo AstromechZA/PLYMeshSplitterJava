@@ -56,6 +56,7 @@ public class ScaleAndRecenter
         System.out.printf("Input File: %s%n", reader.getFile());
         System.out.printf("Output File: %s%n", outputFile);
         System.out.printf("Scale ratio: %f%n", scale);
+        System.out.printf("Swapping YZ axis: %s%n", swapYZ);
 
         try (
             RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r");
@@ -82,10 +83,10 @@ public class ScaleAndRecenter
             blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
             blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
 
-            try (ProgressBar progress = new ProgressBar("Rescaling", numVertices))
+            try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
             {
                 fcIN.position(vertexElementBegin);
-                float x, y, z;
+                float x, y, z, t;
                 for (int n = 0; n < numVertices; n++)
                 {
                     fcIN.read(blockBufferIN);
@@ -96,7 +97,7 @@ public class ScaleAndRecenter
 
                     if (swapYZ)
                     {
-                        float t = z;
+                        t = z;
                         z = -y;
                         y = t;
                     }
@@ -142,7 +143,6 @@ public class ScaleAndRecenter
         return new XBoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
     }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
@@ -170,7 +170,7 @@ public class ScaleAndRecenter
                 )
             );
 
-            run(inputFile, outputFile, rescaleToSize, false);
+            run(inputFile, outputFile, rescaleToSize, cmd.hasOption("swapyz"));
         }
         catch (IOException | InterruptedException e)
         {
@@ -186,6 +186,7 @@ public class ScaleAndRecenter
         long div = n / bufsize;
         int rem = (int) (n % bufsize);
 
+        ProgressBar pb = new ProgressBar("Copying Edges", div + 1);
         ByteBuffer temp = ByteBuffer.allocate(bufsize);
         for (long i = 0; i < div; i++)
         {
@@ -193,15 +194,17 @@ public class ScaleAndRecenter
             temp.flip();
             while (temp.hasRemaining()) output.write(temp);
             temp.clear();
+            pb.tick();
         }
-
         if (rem > 0)
         {
             temp = ByteBuffer.allocate(rem);
             input.read(temp);
             temp.flip();
             while (temp.hasRemaining()) output.write(temp);
+            pb.tick();
         }
+        pb.close();
     }
 
     private static CommandLine parseArgs(String[] args)
@@ -222,7 +225,7 @@ public class ScaleAndRecenter
         o3.setType(Short.class);
         options.addOption(o3);
 
-        Option o4 = new Option("m", "memlog", false, "Log memory usage to file (memlog.dat)");
+        Option o4 = new Option("z", "swapyz", false, "Swap Y and Z axes");
         options.addOption(o4);
 
         try
