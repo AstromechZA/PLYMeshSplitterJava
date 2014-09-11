@@ -143,6 +143,35 @@ public class ScaleAndRecenter
         return new XBoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
     }
 
+    private static void copyNBytes(FileChannel input, FileChannel output, long n) throws IOException
+    {
+        if (n == 0) return;
+
+        int bufsize = COPYBYTES_BUF_SIZE;
+        long div = n / bufsize;
+        int rem = (int) (n % bufsize);
+
+        ProgressBar pb = new ProgressBar("Copying Edges", div + 1);
+        ByteBuffer temp = ByteBuffer.allocate(bufsize);
+        for (long i = 0; i < div; i++)
+        {
+            input.read(temp);
+            temp.flip();
+            while (temp.hasRemaining()) output.write(temp);
+            temp.clear();
+            pb.tick();
+        }
+        if (rem > 0)
+        {
+            temp = ByteBuffer.allocate(rem);
+            input.read(temp);
+            temp.flip();
+            while (temp.hasRemaining()) output.write(temp);
+            pb.tick();
+        }
+        pb.close();
+    }
+
     public static void main(String[] args)
     {
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
@@ -178,35 +207,6 @@ public class ScaleAndRecenter
         }
     }
 
-    private static void copyNBytes(FileChannel input, FileChannel output, long n) throws IOException
-    {
-        if (n == 0) return;
-
-        int bufsize = COPYBYTES_BUF_SIZE;
-        long div = n / bufsize;
-        int rem = (int) (n % bufsize);
-
-        ProgressBar pb = new ProgressBar("Copying Edges", div + 1);
-        ByteBuffer temp = ByteBuffer.allocate(bufsize);
-        for (long i = 0; i < div; i++)
-        {
-            input.read(temp);
-            temp.flip();
-            while (temp.hasRemaining()) output.write(temp);
-            temp.clear();
-            pb.tick();
-        }
-        if (rem > 0)
-        {
-            temp = ByteBuffer.allocate(rem);
-            input.read(temp);
-            temp.flip();
-            while (temp.hasRemaining()) output.write(temp);
-            pb.tick();
-        }
-        pb.close();
-    }
-
     private static CommandLine parseArgs(String[] args)
     {
         CommandLineParser clp = new BasicParser();
@@ -225,8 +225,7 @@ public class ScaleAndRecenter
         o3.setType(Short.class);
         options.addOption(o3);
 
-        Option o4 = new Option("z", "swapyz", false, "Swap Y and Z axes");
-        options.addOption(o4);
+        options.addOption(new Option("z", "swapyz", false, "Swap Y and Z axes"));
 
         try
         {
