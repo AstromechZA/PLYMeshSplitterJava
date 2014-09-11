@@ -61,23 +61,16 @@ public class OctreeSplitter
         {
             PackagedHierarchicalFile.HierarchyNode currentNode = processQueue.removeFirst();
 
-            System.out.println(currentNode.getNumFaces());
-
             String processFileBase = Useful.getFilenameWithoutExt(currentNode.getLinkedFile().getName());
 
             // now switch to rescaled version
             ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(currentNode.getLinkedFile()));
 
             OctetFinder.Octet[] memberships = calculateVertexMemberships(reader, currentNode.getBoundingBox().getCenter());
-
             for (OctetFinder.Octet currentOctet : OctetFinder.Octet.values())
             {
-                try (
-                    TempFile temporaryFaceFile = new TempFile(
-                        this.outputDir,
-                        String.format("%s_%s.temp", processFileBase, currentOctet)
-                    )
-                )
+                String tempfilepath = String.format("%s_%s.temp", processFileBase, currentOctet);
+                try (TempFile temporaryFaceFile = new TempFile(this.outputDir, tempfilepath))
                 {
                     LinkedHashMap<Integer, Integer> vertexMap = new LinkedHashMap<>(currentNode.getNumVertices() / 8);
                     int num_faces = gatherOctetFaces(reader, memberships, currentOctet, temporaryFaceFile, vertexMap);
