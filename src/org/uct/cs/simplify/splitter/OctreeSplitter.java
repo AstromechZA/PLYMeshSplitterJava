@@ -133,13 +133,16 @@ public class OctreeSplitter implements ISplitter
         {
             Face face;
             int current_vertex_index = 0;
-
+            int num_vertices_from_face;
             while (faceReader.hasNext())
             {
                 progress.tick();
                 face = faceReader.next();
+                num_vertices_from_face = 0;
+                for (Integer i : face.getVertices())
+                    if (memberships[ i ] == current) num_vertices_from_face += 1;
 
-                if (face.getVertices().stream().anyMatch(v -> memberships[ v ] == current))
+                if (num_vertices_from_face > (face.getNumVertices() / 2))
                 {
                     num_faces_in_octant += 1;
                     bostream.write((byte) face.getNumVertices());
