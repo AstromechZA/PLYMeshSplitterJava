@@ -54,22 +54,22 @@ public class PackagedHierarchicalNode
 
     public int getNumVertices()
     {
-        return numVertices;
+        return this.numVertices;
     }
 
     public int getNumFaces()
     {
-        return numFaces;
+        return this.numFaces;
     }
 
     public XBoundingBox getBoundingBox()
     {
-        return boundingBox;
+        return this.boundingBox;
     }
 
     public File getLinkedFile()
     {
-        return linkedFile;
+        return this.linkedFile;
     }
 
     public void setParent(PackagedHierarchicalNode parent)

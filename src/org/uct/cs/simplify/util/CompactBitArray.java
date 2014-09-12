@@ -15,7 +15,7 @@ public class CompactBitArray
     {
         // for compactness and performance reasons we only support blocks of size 1, 2, 4, 8, 16 bits. For this reason,
         // <bits> should be smaller than or equal to 8
-        if (bits < 1 || bits > 16)
+        if (bits < 1 || bits > INTEGER_SIZE)
             throw new IllegalArgumentException("Bits argument must be between 1 and 16 (inclusive).");
         this.bits = bits;
         this.length = length;

@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 public class MembershipBuilderResult
 {
-    public HashMap<Integer, XBoundingBox> subNodes;
-    public CompactBitArray memberships;
+    public final HashMap<Integer, XBoundingBox> subNodes;
+    public final CompactBitArray memberships;
 
     public MembershipBuilderResult(HashMap<Integer, XBoundingBox> subNodes, CompactBitArray memberships)
     {

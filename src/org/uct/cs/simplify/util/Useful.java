@@ -11,6 +11,7 @@ public class Useful
     private static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
     private static final long KILOBYTE = 1024;
     private static final long MEGABYTE = 1048576;
+    private static final int BYTE = 255;
 
     public static String getFilenameWithoutExt(String fn)
     {
@@ -37,9 +38,9 @@ public class Useful
 
     public static void littleEndianWrite(ByteArrayOutputStream stream, int i)
     {
-        stream.write((i) & 0xFF);
-        stream.write((i >> 8) & 0xFF);
-        stream.write((i >> (8 * 2)) & 0xFF);
-        stream.write((i >> (8 * 3)) & 0xFF);
+        stream.write((i) & BYTE);
+        stream.write((i >> 8) & BYTE);
+        stream.write((i >> (8 * 2)) & BYTE);
+        stream.write((i >> (8 * 3)) & BYTE);
     }
 }

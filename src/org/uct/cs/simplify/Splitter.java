@@ -16,13 +16,14 @@ import java.util.ArrayList;
 public class Splitter
 {
     private static final int MINIMUM_VERTEX_COUNT = 200_000;
+    private static final int RESCALE_TO_FIT = 1024;
 
     public static void run(File inputFile, File outputDir, boolean swapYZ) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
 
-        int rescaleSize = 1024;
+        int rescaleSize = RESCALE_TO_FIT;
         File scaledFile = new File(
             outputDir,
             String.format(
