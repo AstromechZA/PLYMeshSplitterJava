@@ -1,29 +1,31 @@
 package org.uct.cs.simplify.splitter;
 
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.ply.reader.Face;
-import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
-import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
-import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.TempFile;
-import org.uct.cs.simplify.util.Useful;
-import org.uct.cs.simplify.util.XBoundingBox;
+import org.uct.cs.simplify.ply.datatypes.DataType;
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.reader.*;
+import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
+import org.uct.cs.simplify.util.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class KDTreeSplitter implements ISplitter
+public class HierarchicalSplitter
 {
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
 
-    @Override
-    public ArrayList<PackagedHierarchicalNode> split(PackagedHierarchicalNode parent, File outputDir) throws IOException
+    public static ArrayList<PackagedHierarchicalNode> split(
+        PackagedHierarchicalNode parent,
+        IMembershipBuilder membershipBuilder,
+        File outputDir
+    ) throws IOException
     {
         // output object for subnodes
         ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
@@ -34,31 +36,85 @@ public class KDTreeSplitter implements ISplitter
         // build reader object
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
-        // calculate subnode memberships
-        CompactBitArray memberships = getSubnodeMemberships(reader, parent.getBoundingBox());
-
-        int[] subnodes = new int[] { 0, 1 };
-        for (int subnode : subnodes)
+        MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
+        for (Map.Entry<Integer, XBoundingBox> entry : mr.subNodes.entrySet())
         {
+            int nodeID = entry.getKey();
             try (
-                TempFile temporaryFaceFile = new TempFile(
-                    outputDir, String.format("%s_%s.temp", processFileBase, subnode)
+                TempFile tempFaceFile = new TempFile(
+                    outputDir,
+                    String.format("%s_%s.temp", processFileBase, nodeID)
                 )
             )
             {
-
-                GatheringResult result = gatherVerticesAndWriteFaces(reader, memberships, temporaryFaceFile, subnode);
+                GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
                 if (result.numFaces > 0)
                 {
-                    File subNodeFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, subnode));
+                    File subNodeFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, nodeID));
 
-                    // TODO 
+                    writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
+                    output.add(
+                        new PackagedHierarchicalNode(entry.getValue(), result.numVertices, result.numFaces, subNodeFile)
+                    );
                 }
             }
         }
 
         return output;
+    }
+
+    private static void writeSubnodePLYModel(
+        PLYReader reader, File subNodeFile, TempFile tempFaceFile, GatheringResult result
+    ) throws IOException
+    {
+        PLYHeader newHeader = PLYHeader.constructBasicHeader(result.numVertices, result.numFaces);
+
+        try (FileOutputStream fostream = new FileOutputStream(subNodeFile))
+        {
+            fostream.write((newHeader + "\n").getBytes());
+
+            try (
+                MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
+                ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+            )
+            {
+                Vertex v;
+                ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                try (
+                    ProgressBar pb = new ProgressBar(
+                        String.format("%s: Writing Vertices", Useful.getFilenameWithoutExt(subNodeFile.getName())),
+                        result.numVertices
+                    )
+                )
+                {
+                    for (int i : result.vertexIndexMap.keySet())
+                    {
+                        pb.tick();
+                        v = vr.get(i);
+                        bb.putFloat(v.x);
+                        bb.putFloat(v.y);
+                        bb.putFloat(v.z);
+
+                        bostream.write(bb.array());
+                        bb.clear();
+
+                        if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                        {
+                            fostream.write(bostream.toByteArray());
+                            bostream.reset();
+                        }
+                    }
+                    if (bostream.size() > 0) fostream.write(bostream.toByteArray());
+                }
+            }
+
+            try (FileChannel fc = new FileInputStream(tempFaceFile).getChannel())
+            {
+                fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
+            }
+        }
     }
 
     private static CompactBitArray getSubnodeMemberships(PLYReader reader, XBoundingBox bb) throws IOException
@@ -124,7 +180,7 @@ public class KDTreeSplitter implements ISplitter
         try (
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
-            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
+            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
             Face face;

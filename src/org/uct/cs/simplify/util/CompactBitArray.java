@@ -13,10 +13,10 @@ public class CompactBitArray
 
     public CompactBitArray(int bits, long length)
     {
-        // for compactness and performance reasons we only support blocks of size 1, 2, 4, 8 bits. For this reason,
+        // for compactness and performance reasons we only support blocks of size 1, 2, 4, 8, 16 bits. For this reason,
         // <bits> should be smaller than or equal to 8
-        if (bits < 1 || bits > 8)
-            throw new IllegalArgumentException("Bits argument must be between 1 and 8 (inclusive).");
+        if (bits < 1 || bits > 16)
+            throw new IllegalArgumentException("Bits argument must be between 1 and 16 (inclusive).");
         this.bits = bits;
         this.length = length;
         this.blockLength = (int) Math.pow(2, Math.ceil(Math.log(bits) / Math.log(2)));
