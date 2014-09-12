@@ -2,7 +2,8 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.splitter.OctreeSplitter;
+import org.uct.cs.simplify.splitter.HierarchicalSplitter;
+import org.uct.cs.simplify.splitter.memberships.OcttreeMembershipBuilder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -32,14 +33,14 @@ public class Splitter
         );
         ScaleAndRecenter.run(inputFile, scaledFile, rescaleSize, swapYZ);
 
-        OctreeSplitter splitter = new OctreeSplitter();
         ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
         PackagedHierarchicalNode root = new PackagedHierarchicalNode(scaledFile);
         processQueue.add(root);
         while (!processQueue.isEmpty())
         {
             PackagedHierarchicalNode currentNode = processQueue.removeFirst();
-            ArrayList<PackagedHierarchicalNode> children = splitter.split(currentNode, outputDir);
+            ArrayList<PackagedHierarchicalNode> children = HierarchicalSplitter
+                .split(currentNode, new OcttreeMembershipBuilder(), outputDir);
             for (PackagedHierarchicalNode child : children)
             {
                 currentNode.addChild(child);

@@ -27,6 +27,19 @@ public class XBoundingBox extends BoundingBox
         super(minX, minY, width, height);
     }
 
+    public static XBoundingBox fromTo(
+        double minX,
+        double minY,
+        double minZ,
+
+        double maxX,
+        double maxY,
+        double maxZ
+    )
+    {
+        return new XBoundingBox(minX, minY, minZ, maxX - minX, maxY - minY, maxZ - minZ);
+    }
+
     public Point3D getCenter()
     {
         return new Point3D(
