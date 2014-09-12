@@ -1,5 +1,7 @@
 package org.uct.cs.simplify.splitter;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
@@ -13,8 +15,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class HierarchicalSplitter
 {
@@ -37,9 +37,8 @@ public class HierarchicalSplitter
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
-        for (Map.Entry<Integer, XBoundingBox> entry : mr.subNodes.entrySet())
+        for (int nodeID : mr.subNodes.keys())
         {
-            int nodeID = entry.getKey();
             try (
                 TempFile tempFaceFile = new TempFile(
                     outputDir,
@@ -55,7 +54,7 @@ public class HierarchicalSplitter
                     writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
                     output.add(
-                        new PackagedHierarchicalNode(entry.getValue(), result.numVertices, result.numFaces, subNodeFile)
+                        new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile)
                     );
                 }
             }
@@ -64,9 +63,7 @@ public class HierarchicalSplitter
         return output;
     }
 
-    private static void writeSubnodePLYModel(
-        PLYReader reader, File subNodeFile, TempFile tempFaceFile, GatheringResult result
-    ) throws IOException
+    private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, TempFile tempFaceFile, GatheringResult result) throws IOException
     {
         PLYHeader newHeader = PLYHeader.constructBasicHeader(result.numVertices, result.numFaces);
 
@@ -89,7 +86,7 @@ public class HierarchicalSplitter
                     )
                 )
                 {
-                    for (int i : result.vertexIndexMap.keySet())
+                    for (int i : result.vertexIndexMap.keys())
                     {
                         pb.tick();
                         v = vr.get(i);
@@ -176,7 +173,7 @@ public class HierarchicalSplitter
     ) throws IOException
     {
         int currentVertexIndex = 0;
-        LinkedHashMap<Integer, Integer> vertexIndexMap = new LinkedHashMap<>();
+        TIntIntMap vertexIndexMap = new TIntIntHashMap((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
@@ -190,7 +187,8 @@ public class HierarchicalSplitter
             {
                 face = faceReader.next();
                 numVerticesOfFaceInSubnode = 0;
-                for (Integer i : face.getVertices())
+
+                for (int i : face.getVertices().toArray())
                 {
                     if (memberships.get(i) == subnode) numVerticesOfFaceInSubnode += 1;
                 }
@@ -199,7 +197,7 @@ public class HierarchicalSplitter
                 {
                     numFacesInSubnode++;
                     bostream.write((byte) face.getNumVertices());
-                    for (int vertex_index : face.getVertices())
+                    for (int vertex_index : face.getVertices().toArray())
                     {
                         if (!vertexIndexMap.containsKey(vertex_index))
                         {
@@ -226,9 +224,9 @@ public class HierarchicalSplitter
     {
         public final int numFaces;
         public final int numVertices;
-        public final LinkedHashMap<Integer, Integer> vertexIndexMap;
+        public final TIntIntMap vertexIndexMap;
 
-        public GatheringResult(int numFacesInSubnode, LinkedHashMap<Integer, Integer> vertexIndexMap)
+        public GatheringResult(int numFacesInSubnode, TIntIntMap vertexIndexMap)
         {
             this.numFaces = numFacesInSubnode;
             this.numVertices = vertexIndexMap.size();

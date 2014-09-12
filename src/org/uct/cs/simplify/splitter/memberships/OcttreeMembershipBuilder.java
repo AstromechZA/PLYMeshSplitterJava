@@ -1,5 +1,7 @@
 package org.uct.cs.simplify.splitter.memberships;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
@@ -9,7 +11,6 @@ import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 public class OcttreeMembershipBuilder implements IMembershipBuilder
 {
@@ -17,7 +18,7 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException
     {
         Point3D center = boundingBox.getCenter();
-        HashMap<Integer, XBoundingBox> subNodes = new HashMap<>();
+        TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(8);
         subNodes.put(
             0, XBoundingBox.fromTo(
                 boundingBox.getMinX(),

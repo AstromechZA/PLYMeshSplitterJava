@@ -1,14 +1,14 @@
 package org.uct.cs.simplify.ply.reader;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 {
@@ -55,7 +55,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     public Face next()
     {
         int vertexCount = this.buffer.get() & BYTE;
-        List<Integer> vertexList = new ArrayList<>();
+        TIntArrayList vertexList = new TIntArrayList(3);
         for (int i = 0; i < vertexCount; i++)
         {
             vertexList.add(this.buffer.getInt());

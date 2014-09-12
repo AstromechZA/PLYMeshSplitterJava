@@ -1,17 +1,18 @@
 package org.uct.cs.simplify.ply.reader;
 
-import java.util.List;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class Face
 {
-    private final List<Integer> vertices;
+    private final TIntArrayList vertices;
 
-    public Face(List<Integer> vertexList)
+    public Face(TIntArrayList vertexList)
     {
         this.vertices = vertexList;
     }
 
-    public List<Integer> getVertices()
+    public TIntList getVertices()
     {
         return this.vertices;
     }
