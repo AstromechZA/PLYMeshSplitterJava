@@ -10,20 +10,25 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.LinkedHashMap;
 
-public class ImprovedPLYReader
+public class PLYReader
 {
 
     private final File file;
     private final PLYHeader header;
     private final LinkedHashMap<String, Pair<Long, Long>> elementDimensions;
 
-    public ImprovedPLYReader(PLYHeader h) throws IOException
+    public PLYReader(PLYHeader h) throws IOException
     {
         this.header = h;
         this.file = h.getFile();
         this.elementDimensions = new LinkedHashMap<>();
 
         this.positionScan();
+    }
+
+    public PLYReader(File f) throws IOException
+    {
+        this(new PLYHeader(f));
     }
 
     public File getFile()

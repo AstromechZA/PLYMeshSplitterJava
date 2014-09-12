@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.ply.utilities;
 
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
 import org.uct.cs.simplify.util.XBoundingBox;
 
@@ -13,18 +13,18 @@ import java.io.IOException;
 public class BoundsFinder
 {
 
-    public static XBoundingBox getBoundingBox(ImprovedPLYReader reader) throws IOException
+    public static XBoundingBox getBoundingBox(PLYReader reader) throws IOException
     {
         return getBoundingBoxInner(reader, 1);
     }
 
-    public static XBoundingBox getBoundingBox(ImprovedPLYReader reader, int nth) throws IOException
+    public static XBoundingBox getBoundingBox(PLYReader reader, int nth) throws IOException
     {
         if (nth <= 0 || nth >= 100) throw new IllegalArgumentException("Nth skipper must be 1-99");
         return getBoundingBoxInner(reader, nth);
     }
 
-    private static XBoundingBox getBoundingBoxInner(ImprovedPLYReader reader, int nth) throws IOException
+    private static XBoundingBox getBoundingBoxInner(PLYReader reader, int nth) throws IOException
     {
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {

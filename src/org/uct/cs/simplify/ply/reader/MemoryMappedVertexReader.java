@@ -14,7 +14,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
     private RandomAccessFile raf;
     private FileChannel fc;
 
-    public MemoryMappedVertexReader(ImprovedPLYReader reader, String vertexElementName) throws IOException
+    public MemoryMappedVertexReader(PLYReader reader, String vertexElementName) throws IOException
     {
         int c = reader.getHeader().getElement(vertexElementName).getCount();
         long p = reader.getElementDimension(vertexElementName).getFirst();
@@ -23,7 +23,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
         this.construct(reader.getFile(), p, c, blockSize);
     }
 
-    public MemoryMappedVertexReader(ImprovedPLYReader reader) throws IOException
+    public MemoryMappedVertexReader(PLYReader reader) throws IOException
     {
         int c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getFirst();

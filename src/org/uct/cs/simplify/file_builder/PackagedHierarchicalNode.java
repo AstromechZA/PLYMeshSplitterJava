@@ -1,7 +1,6 @@
 package org.uct.cs.simplify.file_builder;
 
-import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.XBoundingBox;
 
@@ -33,7 +32,7 @@ public class PackagedHierarchicalNode
 
     public PackagedHierarchicalNode(File linkedFile) throws IOException
     {
-        ImprovedPLYReader r = new ImprovedPLYReader(new PLYHeader(linkedFile));
+        PLYReader r = new PLYReader(linkedFile);
         this.numFaces = r.getHeader().getElement("face").getCount();
         this.numVertices = r.getHeader().getElement("vertex").getCount();
         this.boundingBox = BoundsFinder.getBoundingBox(r);
@@ -95,6 +94,27 @@ public class PackagedHierarchicalNode
             String.format("\"max_y\":%f,", this.boundingBox.getMaxY()) +
             String.format("\"max_z\":%f", this.boundingBox.getMaxZ()) +
             "}";
+    }
+
+    public ArrayList<PackagedHierarchicalNode> getLeafNodes(ArrayList<PackagedHierarchicalNode> o)
+    {
+        if (this.children.isEmpty())
+        {
+            o.add(this);
+        } else
+        {
+            for (PackagedHierarchicalNode child : this.children)
+            {
+                child.getLeafNodes(o);
+            }
+        }
+        return o;
+    }
+
+    public ArrayList<PackagedHierarchicalNode> getLeafNodes()
+    {
+        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
+        return this.getLeafNodes(output);
     }
 
     public static String buildJSONHierarchy(PackagedHierarchicalNode root)

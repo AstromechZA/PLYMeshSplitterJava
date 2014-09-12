@@ -1,5 +1,7 @@
 package org.uct.cs.simplify.util;
 
+import java.io.ByteArrayOutputStream;
+
 public class Useful
 {
 
@@ -31,5 +33,13 @@ public class Useful
         if (bytes > MEGABYTE) return String.format("%.2f MB", bytes / MEGABYTE);
         if (bytes > KILOBYTE) return String.format("%.2f KB", bytes / KILOBYTE);
         return String.format("%.2f B", bytes);
+    }
+
+    public static void littleEndianWrite(ByteArrayOutputStream stream, int i)
+    {
+        stream.write((i) & 0xFF);
+        stream.write((i >> 8) & 0xFF);
+        stream.write((i >> (8 * 2)) & 0xFF);
+        stream.write((i >> (8 * 3)) & 0xFF);
     }
 }

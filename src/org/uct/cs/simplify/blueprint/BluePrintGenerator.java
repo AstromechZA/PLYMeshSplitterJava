@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.blueprint;
 
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.reader.Vertex;
 
 import java.awt.*;
@@ -19,28 +19,28 @@ public class BluePrintGenerator
     private static final int BYTE = 0xFF;
 
     public static BufferedImage CreateImage(
-        ImprovedPLYReader reader, int resolution, float alphaAdjustment
+        PLYReader reader, int resolution, float alphaAdjustment
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, Axis.X_Y);
     }
 
     public static BufferedImage CreateImage(
-        ImprovedPLYReader reader, int resolution, float alphaAdjustment, Axis type
+        PLYReader reader, int resolution, float alphaAdjustment, Axis type
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
     }
 
     public static BufferedImage CreateImage(
-        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
+        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
     ) throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, Axis.X_Y);
     }
 
     public static BufferedImage CreateImage(
-        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
+        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
         Axis type
     ) throws IOException
     {
@@ -48,7 +48,7 @@ public class BluePrintGenerator
     }
 
     private static BufferedImage makeBufferedImage(
-        ImprovedPLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
+        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
         Axis type
     ) throws IOException
     {
@@ -97,7 +97,7 @@ public class BluePrintGenerator
         return new YZAxisValueGetter();
     }
 
-    private static Rectangle2D calculateBounds(ImprovedPLYReader reader, IAxisValueGetter avg) throws IOException
+    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg) throws IOException
     {
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {

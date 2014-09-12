@@ -2,8 +2,7 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
-import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
@@ -20,12 +19,12 @@ public class Blueprintify
 
     public static void run(File inputFile, File outputDir, int resolution, float alphamod) throws IOException
     {
-        ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
+        PLYReader reader = new PLYReader(inputFile);
 
         run(reader, outputDir, resolution, alphamod);
     }
 
-    public static void run(ImprovedPLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
+    public static void run(PLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
     {
 
         for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())

@@ -4,7 +4,7 @@ import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.reader.ImprovedPLYReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.*;
 
@@ -23,12 +23,12 @@ public class ScaleAndRecenter
     public static XBoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // this scans the target file and works out start and end ranges
-        ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(inputFile));
+        PLYReader reader = new PLYReader(inputFile);
 
         return run(reader, outputFile, size, swapYZ);
     }
 
-    public static XBoundingBox run(ImprovedPLYReader reader, File outputFile, int size, boolean swapYZ) throws IOException
+    public static XBoundingBox run(PLYReader reader, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         XBoundingBox bb = BoundsFinder.getBoundingBox(reader);

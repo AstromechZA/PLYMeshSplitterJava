@@ -31,7 +31,7 @@ public class OctreeSplitter implements ISplitter
 
         String processFileBase = Useful.getFilenameWithoutExt(parent.getLinkedFile().getName());
 
-        ImprovedPLYReader reader = new ImprovedPLYReader(new PLYHeader(parent.getLinkedFile()));
+        PLYReader reader = new PLYReader(parent.getLinkedFile());
 
         Octant[] memberships = calculateVertexMemberships(reader, parent.getBoundingBox().getCenter());
         for (Octant currentOctant : Octant.values())
@@ -55,7 +55,7 @@ public class OctreeSplitter implements ISplitter
     }
 
     private static void writeOctantPLYModel(
-        ImprovedPLYReader reader,
+        PLYReader reader,
         Octant currentOctant,
         File octantFaceFile,
         LinkedHashMap<Integer, Integer> vertexMap,
@@ -113,7 +113,7 @@ public class OctreeSplitter implements ISplitter
     }
 
     private static int gatherOctantFaces(
-        ImprovedPLYReader reader,
+        PLYReader reader,
         Octant[] memberships,
         Octant current,
         File octantFaceFile,
@@ -153,7 +153,7 @@ public class OctreeSplitter implements ISplitter
                             vertexMap.put(vertex_index, current_vertex_index);
                             current_vertex_index += 1;
                         }
-                        littleEndianWrite(bostream, vertexMap.get(vertex_index));
+                        Useful.littleEndianWrite(bostream, vertexMap.get(vertex_index));
                     }
                 }
                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
@@ -167,17 +167,10 @@ public class OctreeSplitter implements ISplitter
         return num_faces_in_octant;
     }
 
-    private static void littleEndianWrite(ByteArrayOutputStream stream, int i)
-    {
-        stream.write((i) & 0xFF);
-        stream.write((i >> 8) & 0xFF);
-        stream.write((i >> (8 * 2)) & 0xFF);
-        stream.write((i >> (8 * 3)) & 0xFF);
 
-    }
 
     private static Octant[] calculateVertexMemberships(
-        ImprovedPLYReader reader, Point3D splitPoint
+        PLYReader reader, Point3D splitPoint
     ) throws IOException
     {
         OctantFinder ofinder = new OctantFinder(splitPoint);

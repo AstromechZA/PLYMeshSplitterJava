@@ -20,7 +20,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     private FileChannel fc;
     private MappedByteBuffer buffer;
 
-    public MemoryMappedFaceReader(ImprovedPLYReader reader, String faceElementName) throws IOException
+    public MemoryMappedFaceReader(PLYReader reader, String faceElementName) throws IOException
     {
         int c = reader.getHeader().getElement(faceElementName).getCount();
         long p = reader.getElementDimension(faceElementName).getFirst();
@@ -29,7 +29,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
         this.construct(reader.getFile(), p, c, l);
     }
 
-    public MemoryMappedFaceReader(ImprovedPLYReader reader) throws IOException
+    public MemoryMappedFaceReader(PLYReader reader) throws IOException
     {
         int c = reader.getHeader().getElement("face").getCount();
         long p = reader.getElementDimension("face").getFirst();
