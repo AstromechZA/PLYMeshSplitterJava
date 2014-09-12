@@ -10,6 +10,7 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
@@ -49,7 +50,19 @@ public class Splitter
             }
         }
 
-        System.out.println("JSON: " + PackagedHierarchicalNode.buildJSONHierarchy(root));
+        File outJson = new File(
+            outputDir,
+            String.format(
+                "%s_rescaled_%d_out.json",
+                Useful.getFilenameWithoutExt(inputFile.getName()),
+                rescaleSize
+            )
+        );
+        System.out.printf("Writing json to %s%n", outJson.getAbsolutePath());
+        try (PrintWriter pw = new PrintWriter(outJson))
+        {
+            pw.print(PackagedHierarchicalNode.buildJSONHierarchy(root));
+        }
     }
 
     public static void main(String[] args)
