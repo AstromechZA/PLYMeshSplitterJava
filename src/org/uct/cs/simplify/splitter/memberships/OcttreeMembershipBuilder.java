@@ -114,7 +114,7 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
         {
 
             int c = vr.getCount();
-            CompactBitArray memberships = new CompactBitArray(8, c);
+            CompactBitArray memberships = new CompactBitArray(3, c);
             OctantFinder ofinder = new OctantFinder(center);
             Vertex v;
             for (int i = 0; i < c; i++)

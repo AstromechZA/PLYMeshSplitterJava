@@ -3,7 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
-import org.uct.cs.simplify.splitter.memberships.OcttreeMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class Splitter
 {
-    private static final int MINIMUM_VERTEX_COUNT = 200_000;
+    private static final int MINIMUM_VERTEX_COUNT = 100_000;
     private static final int RESCALE_TO_FIT = 1024;
 
     public static void run(File inputFile, File outputDir, boolean swapYZ) throws IOException
@@ -42,7 +42,7 @@ public class Splitter
         {
             PackagedHierarchicalNode currentNode = processQueue.removeFirst();
             ArrayList<PackagedHierarchicalNode> children = HierarchicalSplitter
-                .split(currentNode, new OcttreeMembershipBuilder(), outputDir);
+                .split(currentNode, new VariableKDTreeMembershipBuilder(), outputDir);
             for (PackagedHierarchicalNode child : children)
             {
                 currentNode.addChild(child);
