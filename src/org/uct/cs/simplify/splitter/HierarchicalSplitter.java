@@ -1,7 +1,5 @@
 package org.uct.cs.simplify.splitter;
 
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
@@ -15,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class HierarchicalSplitter
 {
@@ -86,7 +85,7 @@ public class HierarchicalSplitter
                     )
                 )
                 {
-                    for (int i : result.vertexIndexMap.keys())
+                    for (int i : result.vertexIndexMap.keySet())
                     {
                         pb.tick();
                         v = vr.get(i);
@@ -173,7 +172,7 @@ public class HierarchicalSplitter
     ) throws IOException
     {
         int currentVertexIndex = 0;
-        TIntIntMap vertexIndexMap = new TIntIntHashMap((int) (memberships.size() / Math.pow(2, memberships.getBits())));
+        LinkedHashMap<Integer, Integer> vertexIndexMap = new LinkedHashMap<>((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
@@ -224,9 +223,9 @@ public class HierarchicalSplitter
     {
         public final int numFaces;
         public final int numVertices;
-        public final TIntIntMap vertexIndexMap;
+        public final LinkedHashMap<Integer, Integer> vertexIndexMap;
 
-        public GatheringResult(int numFacesInSubnode, TIntIntMap vertexIndexMap)
+        public GatheringResult(int numFacesInSubnode, LinkedHashMap<Integer, Integer> vertexIndexMap)
         {
             this.numFaces = numFacesInSubnode;
             this.numVertices = vertexIndexMap.size();
