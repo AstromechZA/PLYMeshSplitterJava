@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.ply.reader;
+package org.uct.cs.simplify.ply.datatypes;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -30,5 +30,10 @@ public class Vertex
 //        this.a = 0xFF & ((int)bf.get());
     }
 
+    @Override
+    public int hashCode()
+    {
+        return Float.hashCode(this.x) + Float.hashCode(this.y) + Float.hashCode(this.z);
+    }
 
 }

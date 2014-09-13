@@ -1,9 +1,9 @@
 package org.uct.cs.simplify.splitter.memberships;
 
 import gnu.trove.map.TIntObjectMap;
+import org.uct.cs.simplify.ply.datatypes.Vertex;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.ply.reader.Vertex;
 import org.uct.cs.simplify.splitter.SplittingAxis;
 import org.uct.cs.simplify.util.CompactBitArray;
 import org.uct.cs.simplify.util.XBoundingBox;

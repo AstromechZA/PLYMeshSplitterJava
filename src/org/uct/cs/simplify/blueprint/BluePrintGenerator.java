@@ -1,8 +1,8 @@
 package org.uct.cs.simplify.blueprint;
 
+import org.uct.cs.simplify.ply.datatypes.Vertex;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.ply.reader.Vertex;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -84,7 +84,7 @@ public class BluePrintGenerator
                 int ty = (int) (center - (avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio);
 
                 int index = ty * w + tx;
-                pixels[index] = blend(pixels[index], fgi, alphaAdjustment);
+                pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
         }
         return bi;

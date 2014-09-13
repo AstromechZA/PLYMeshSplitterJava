@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.ply.reader;
+package org.uct.cs.simplify.ply.datatypes;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;

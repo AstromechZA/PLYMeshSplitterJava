@@ -1,8 +1,8 @@
 package org.uct.cs.simplify.ply.utilities;
 
+import org.uct.cs.simplify.ply.datatypes.Vertex;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.ply.reader.Vertex;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;

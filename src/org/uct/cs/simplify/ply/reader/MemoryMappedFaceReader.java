@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.ply.reader;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.uct.cs.simplify.ply.datatypes.Face;
 
 import java.io.File;
 import java.io.IOException;

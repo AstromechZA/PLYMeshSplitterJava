@@ -1,5 +1,7 @@
 package org.uct.cs.simplify.ply.reader;
 
+import org.uct.cs.simplify.ply.datatypes.Vertex;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -52,7 +54,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
     {
         int index = i * this.blockSize;
         this.buffer.position(index);
-        byte[] b = new byte[this.blockSize];
+        byte[] b = new byte[ this.blockSize ];
         this.buffer.get(b, 0, this.blockSize);
         return new Vertex(b);
     }
