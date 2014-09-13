@@ -73,10 +73,10 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         approximate = (min + max) / 2;
         ratio = countValuesLessThan(vr, axis, approximate) / nv;
 
-        double minR = 0.5 + approximationThreshold;
-        double maxR = 0.5 - approximationThreshold;
+        double minR = 0.5 - approximationThreshold;
+        double maxR = 0.5 + approximationThreshold;
 
-        while (ratio > minR || ratio < maxR)
+        while (ratio < minR || ratio > maxR)
         {
             if (ratio > 0.5)
             {
