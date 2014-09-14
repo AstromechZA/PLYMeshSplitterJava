@@ -16,7 +16,6 @@ public class PackagedHierarchicalNode
     private final int numFaces;
     private final XBoundingBox boundingBox;
     private final File linkedFile;
-    private int depth;
     private PackagedHierarchicalNode parent;
     private ArrayList<PackagedHierarchicalNode> children;
 
@@ -28,7 +27,6 @@ public class PackagedHierarchicalNode
         this.linkedFile = linkedFile;
         this.parent = null;
         this.children = new ArrayList<>();
-        this.depth = 0;
     }
 
     public PackagedHierarchicalNode(File linkedFile) throws IOException
@@ -46,17 +44,6 @@ public class PackagedHierarchicalNode
     {
         this.children.add(node);
         node.setParent(this);
-        node.setDepth(this.depth + 1);
-    }
-
-    public int getDepth()
-    {
-        return this.depth;
-    }
-
-    public void setDepth(int d)
-    {
-        this.depth = d;
     }
 
     public ArrayList<PackagedHierarchicalNode> getChildren()
@@ -113,7 +100,8 @@ public class PackagedHierarchicalNode
         if (this.children.isEmpty())
         {
             o.add(this);
-        } else
+        }
+        else
         {
             for (PackagedHierarchicalNode child : this.children)
             {
