@@ -1,6 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
+import org.uct.cs.simplify.file_builder.PackagedHierarchicalFileBuilder;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
@@ -41,7 +42,7 @@ public class FileBuilder
                 new TreeDepthRule(2)
             );
 
-            org.uct.cs.simplify.file_builder.FileBuilder.compile(tree, outputFile);
+            PackagedHierarchicalFileBuilder.compile(tree, outputFile);
 
         }
         catch (InterruptedException | IllegalArgumentException e)

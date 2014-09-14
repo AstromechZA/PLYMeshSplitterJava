@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.sticher;
+package org.uct.cs.simplify.stitcher;
 
 import gnu.trove.map.hash.TDoubleIntHashMap;
 import org.uct.cs.simplify.ply.datatypes.DataType;

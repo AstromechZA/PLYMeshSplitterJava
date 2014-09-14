@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.sticher.NaiveMeshStitcher;
+import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 

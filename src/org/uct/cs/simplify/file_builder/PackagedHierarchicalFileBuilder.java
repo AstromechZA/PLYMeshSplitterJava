@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayDeque;
 
-public class FileBuilder
+public class PackagedHierarchicalFileBuilder
 {
     public static File compile(PackagedHierarchicalNode tree, File outputFile) throws IOException
     {
@@ -19,7 +19,7 @@ public class FileBuilder
         {
             try (FileChannel fcOUT = new FileOutputStream(temp).getChannel())
             {
-                ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<PackagedHierarchicalNode>();
+                ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
                 processQueue.add(tree);
 
                 long position = 0;
