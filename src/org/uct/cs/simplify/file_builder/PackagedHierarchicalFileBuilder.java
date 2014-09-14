@@ -45,7 +45,7 @@ public class PackagedHierarchicalFileBuilder
             }
 
             String jsonheader = PackagedHierarchicalNode.buildJSONHierarchy(tree);
-
+            System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());
             try (FileOutputStream fostream = new FileOutputStream(outputFile))
             {
                 int l = jsonheader.length();
@@ -57,15 +57,47 @@ public class PackagedHierarchicalFileBuilder
                 });
                 fostream.write(jsonheader.getBytes());
 
+                System.out.printf("Writing header (%s)%n", Useful.formatBytes(l));
+
                 try (
                     FileChannel fcOUT = fostream.getChannel();
                     FileChannel fcIN = new FileInputStream(temp).getChannel()
                 )
                 {
+                    System.out.printf("Writing data (%s)%n", Useful.formatBytes(fcIN.size()));
                     fcOUT.transferFrom(fcIN, fcOUT.position(), fcIN.size());
                 }
             }
         }
+
+        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+        processQueue.add(tree);
+
+        // force gc and wait, so we can delete locked files
+        // (this is a remnant of mapped Byte buffers
+        try
+        {
+            System.gc();
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException e)
+        { /* nothing */ }
+
+        long position = 0;
+        while (!processQueue.isEmpty())
+        {
+            PackagedHierarchicalNode current = processQueue.removeFirst();
+            if (current.getLinkedFile().exists())
+            {
+                System.out.printf("Removing %s .. ", current.getLinkedFile().getPath());
+                System.out.printf("%s%n", current.getLinkedFile().delete());
+            }
+            for (PackagedHierarchicalNode node : current.getChildren())
+            {
+                processQueue.add(node);
+            }
+        }
+
         return outputFile;
     }
 }
