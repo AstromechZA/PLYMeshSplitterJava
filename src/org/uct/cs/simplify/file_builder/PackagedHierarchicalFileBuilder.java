@@ -1,7 +1,10 @@
 package org.uct.cs.simplify.file_builder;
 
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,11 +12,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 public class PackagedHierarchicalFileBuilder
 {
     public static File compile(PackagedHierarchicalNode tree, File outputFile) throws IOException
     {
+        prepare(tree);
+
         String tempF = Useful.getFilenameWithoutExt(outputFile.getName()) + ".temp";
         try (TempFile temp = new TempFile(outputFile.getParent(), tempF))
         {
@@ -100,4 +106,45 @@ public class PackagedHierarchicalFileBuilder
 
         return outputFile;
     }
+
+
+    public static void prepare(PackagedHierarchicalNode node) throws IOException
+    {
+        if (node.hasChildren())
+        {
+
+            XBoundingBox bb = node.getBoundingBox().copy();
+
+            ArrayList<PackagedHierarchicalNode> children = node.getChildren();
+
+            for (PackagedHierarchicalNode c : children)
+            {
+                prepare(c);
+
+                // TODO simplify child
+            }
+
+            if (node.getLinkedFile().exists()) node.getLinkedFile().delete();
+
+
+            File last = children.get(0).getLinkedFile();
+            for (int i = 1; i < children.size(); i++)
+            {
+                File temp = File.createTempFile("phf", ".tmp");
+                temp.deleteOnExit();
+                File current = children.get(1).getLinkedFile();
+                System.out.printf("Stitching %s and %s into %s%n", last, current, temp);
+                NaiveMeshStitcher.stitch(last, current, temp);
+
+                last = temp;
+            }
+
+            node.setLinkedFile(last);
+            PLYHeader h = new PLYHeader(last);
+            node.setNumFaces(h.getElement("face").getCount());
+            node.setNumVertices(h.getElement("vertex").getCount());
+        }
+    }
+
+
 }

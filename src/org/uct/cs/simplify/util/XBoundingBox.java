@@ -48,4 +48,10 @@ public class XBoundingBox extends BoundingBox
             (this.getMinZ() + this.getMaxZ()) / 2
         );
     }
+
+    public XBoundingBox copy()
+    {
+        return new XBoundingBox(this.getMinX(), this.getMinY(), this.getMinZ(), this.getWidth(), this.getHeight(), this.getDepth());
+    }
+
 }
