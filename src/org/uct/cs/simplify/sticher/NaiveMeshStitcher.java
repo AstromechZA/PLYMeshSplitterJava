@@ -4,11 +4,13 @@ import gnu.trove.map.hash.TDoubleIntHashMap;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.datatypes.Face;
 import org.uct.cs.simplify.ply.datatypes.Vertex;
+import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
 import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.Useful;
 
@@ -27,34 +29,48 @@ public class NaiveMeshStitcher
     {
 
         String outputFileBase = Useful.getFilenameWithoutExt(outputFile.getName());
-        TempFile vertexFile = new TempFile(outputFile.getParent(), outputFileBase + "_v.temp");
-        if (vertexFile.exists()) vertexFile.delete();
-        TempFile faceFile = new TempFile(outputFile.getParent(), outputFileBase + "_f.temp");
-        if (faceFile.exists()) faceFile.delete();
-
-        PLYReader reader1 = new PLYReader(file1);
-        int mesh1NumVertices = reader1.getHeader().getElement("vertex").getCount();
-        TDoubleIntHashMap mesh1Vertices = new TDoubleIntHashMap(mesh1NumVertices);
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
+        try (
+            TempFile vertexFile = new TempFile(outputFile.getParent(), outputFileBase + "_v.temp");
+            TempFile faceFile = new TempFile(outputFile.getParent(), outputFileBase + "_f.temp")
+        )
         {
-            for (int i = 0; i < mesh1NumVertices; i++)
-            {
-                mesh1Vertices.put(vr.get(i).hashCode(), i);
-            }
+            PLYReader reader1 = new PLYReader(file1);
+            PLYReader reader2 = new PLYReader(file2);
+            PLYElement mesh1vertices = reader1.getHeader().getElement("vertex");
+            PLYElement mesh1faces = reader1.getHeader().getElement("face");
+            PLYElement mesh2vertices = reader2.getHeader().getElement("vertex");
+            PLYElement mesh2faces = reader2.getHeader().getElement("face");
+
+            TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
+
+            writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
+
+            VertexStitchResult stitchResult = getStitchTransform(vertexFile, reader2, mesh1Vertices, mesh1vertices.getCount(), mesh2vertices.getCount());
+
+            writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
+
+            System.out.printf("mesh1v : %d%n", reader1.getHeader().getElement("vertex").getCount());
+            System.out.printf("mesh2v : %d%n", reader2.getHeader().getElement("vertex").getCount());
+            System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
+
+            System.out.printf("mesh1f : %d%n", reader1.getHeader().getElement("face").getCount());
+            System.out.printf("mesh2f : %d%n", reader2.getHeader().getElement("face").getCount());
+
+            int numVertices = reader1.getHeader().getElement("vertex").getCount() +
+                reader2.getHeader().getElement("vertex").getCount() -
+                stitchResult.getStitchedCount();
+
+            int numFaces = reader1.getHeader().getElement("face").getCount() +
+                reader2.getHeader().getElement("face").getCount();
+
+            return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
         }
-        // write vertices to tempfile1
-        ElementDimension vertexE = reader1.getElementDimension("vertex");
-        copyFileBytesToFile(file1, vertexE.getOffset(), vertexE.getLength(), vertexFile);
-        // write faces to tempfile2
-        ElementDimension faceE = reader1.getElementDimension("face");
-        copyFileBytesToFile(file1, faceE.getOffset(), faceE.getLength(), faceFile);
+    }
 
-        PLYReader reader2 = new PLYReader(file2);
-        int mesh2NumVertices = reader2.getHeader().getElement("vertex").getCount();
+    private static VertexStitchResult getStitchTransform(File vertexFile, PLYReader reader2, TDoubleIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices) throws IOException
+    {
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
-
-        int index = mesh1NumVertices;
-        int stitchedVertices = 0;
+        int stitched = 0;
         try (
             FileOutputStream fostream = new FileOutputStream(vertexFile, true);
             ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
@@ -67,14 +83,14 @@ public class NaiveMeshStitcher
             for (int i = 0; i < mesh2NumVertices; i++)
             {
                 v = vr.get(i);
-                if (mesh1Vertices.containsKey(v.hashCode()))
+                if (mesh1VertexMap.containsKey(v.hashCode()))
                 {
-                    mesh2VertexIndices[ i ] = mesh1Vertices.get(v.hashCode());
-                    stitchedVertices++;
+                    mesh2VertexIndices[ i ] = mesh1VertexMap.get(v.hashCode());
+                    stitched++;
                 }
                 else
                 {
-                    mesh2VertexIndices[ i ] = index++;
+                    mesh2VertexIndices[ i ] = startingIndex++;
                     bb.putFloat(v.x);
                     bb.putFloat(v.y);
                     bb.putFloat(v.z);
@@ -90,9 +106,13 @@ public class NaiveMeshStitcher
             }
             if (bostream.size() > 0) fostream.write(bostream.toByteArray());
         }
+        return new VertexStitchResult(stitched, mesh2VertexIndices);
+    }
 
+    private static void writeMesh2FacesStitched(File faceFile, PLYReader reader, int[] indexTransform) throws IOException
+    {
         try (
-            MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader2);
+            MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(faceFile, true);
             ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
@@ -104,7 +124,7 @@ public class NaiveMeshStitcher
                 bostream.write((byte) face.getNumVertices());
                 for (int i : face.getVertices().toArray())
                 {
-                    Useful.littleEndianWrite(bostream, mesh2VertexIndices[ i ]);
+                    Useful.littleEndianWrite(bostream, indexTransform[ i ]);
                 }
                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                 {
@@ -114,24 +134,30 @@ public class NaiveMeshStitcher
             }
             if (bostream.size() > 0) fostream.write(bostream.toByteArray());
         }
-
-        System.out.printf("mesh1v : %d%n", reader1.getHeader().getElement("vertex").getCount());
-        System.out.printf("mesh2v : %d%n", reader2.getHeader().getElement("vertex").getCount());
-        System.out.printf("stitched : %d%n", stitchedVertices);
-
-        System.out.printf("mesh1f : %d%n", reader1.getHeader().getElement("face").getCount());
-        System.out.printf("mesh2f : %d%n", reader2.getHeader().getElement("face").getCount());
-
-        int numVertices = reader1.getHeader().getElement("vertex").getCount() +
-            reader2.getHeader().getElement("vertex").getCount() -
-            stitchedVertices;
-
-        int numFaces = reader1.getHeader().getElement("face").getCount() +
-            reader2.getHeader().getElement("face").getCount();
-
-        return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
     }
 
+    private static void writeMesh1ToTempFiles(File file1, TempFile vertexFile, TempFile faceFile, PLYReader reader1) throws IOException
+    {
+        // write vertices to tempfile1
+        ElementDimension vertexE = reader1.getElementDimension("vertex");
+        copyFileBytesToFile(file1, vertexE.getOffset(), vertexE.getLength(), vertexFile);
+        // write faces to tempfile2
+        ElementDimension faceE = reader1.getElementDimension("face");
+        copyFileBytesToFile(file1, faceE.getOffset(), faceE.getLength(), faceFile);
+    }
+
+    private static TDoubleIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
+    {
+        TDoubleIntHashMap mesh1Vertices = new TDoubleIntHashMap(mesh1NumVertices);
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
+        {
+            for (int i = 0; i < mesh1NumVertices; i++)
+            {
+                mesh1Vertices.put(vr.get(i).hashCode(), i);
+            }
+        }
+        return mesh1Vertices;
+    }
 
     private static void copyFileBytesToFile(File inputFile, Long offset, Long length, File outputFile) throws IOException
     {
@@ -193,5 +219,23 @@ public class NaiveMeshStitcher
         }
 
         return new PLYHeader(outputFile);
+    }
+
+    private static class VertexStitchResult extends Pair<Integer, int[]>
+    {
+        public VertexStitchResult(Integer f, int[] s)
+        {
+            super(f, s);
+        }
+
+        public int getStitchedCount()
+        {
+            return this.getFirst();
+        }
+
+        public int[] getStitchTransform()
+        {
+            return this.getSecond();
+        }
     }
 }

@@ -5,20 +5,22 @@ import java.io.IOException;
 
 public class TempFile extends File implements AutoCloseable
 {
-
     public TempFile(String parent, String child)
     {
         super(parent, child);
+        if (this.exists()) this.delete();
     }
 
     public TempFile(String pathname)
     {
         super(pathname);
+        if (this.exists()) this.delete();
     }
 
     public TempFile(File parent, String child)
     {
         super(parent, child);
+        if (this.exists()) this.delete();
     }
 
     @Override
