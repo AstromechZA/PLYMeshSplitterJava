@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 
 public class Splitter
 {
+    private static final int RESCALE_TO_FIT = 1024;
+
     public static void main(String[] args)
     {
         CommandLine cmd = getCommandLine(args);
@@ -24,11 +26,20 @@ public class Splitter
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
 
-            PackagedHierarchicalNode tree = HierarchicalSplitter.split(
-                inputFile,
+            File scaledFile = new File(
                 outputDir,
-                HierarchicalSplitter.DepthControl.TREE_DEPTH_LIMIT,
-                cmd.hasOption("swapyz")
+                String.format(
+                    "%s_rescaled_%d.ply",
+                    Useful.getFilenameWithoutExt(inputFile.getName()),
+                    RESCALE_TO_FIT
+                )
+            );
+            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_TO_FIT, cmd.hasOption("swapyz"));
+
+            PackagedHierarchicalNode tree = HierarchicalSplitter.split(
+                scaledFile,
+                outputDir,
+                HierarchicalSplitter.DepthControl.TREE_DEPTH_LIMIT
             );
 
             File outJson = new File(
