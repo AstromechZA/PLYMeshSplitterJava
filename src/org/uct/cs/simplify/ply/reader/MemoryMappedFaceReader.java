@@ -50,7 +50,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 
     public boolean hasNext()
     {
-        return this.index < (this.count - 1);
+        return this.index <= (this.count - 1);
     }
 
     public Face next()
