@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class HierarchicalSplitter
 {
     private static final int MINIMUM_VERTEX_COUNT = 100_000;
-    private static final int DEPTH_LIMIT = 6;
+    private static final int DEPTH_LIMIT = 4;
 
     public static PackagedHierarchicalNode split(File inputFile, File outputDir, DepthControl depthControl) throws IOException
     {

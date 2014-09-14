@@ -18,6 +18,7 @@ public class PackagedHierarchicalNode
     private final File linkedFile;
     private PackagedHierarchicalNode parent;
     private ArrayList<PackagedHierarchicalNode> children;
+    private long blockOffset, blockLength;
 
     public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File linkedFile)
     {
@@ -27,6 +28,8 @@ public class PackagedHierarchicalNode
         this.linkedFile = linkedFile;
         this.parent = null;
         this.children = new ArrayList<>();
+        this.blockOffset = 0;
+        this.blockLength = 0;
     }
 
     public PackagedHierarchicalNode(File linkedFile) throws IOException
@@ -38,6 +41,8 @@ public class PackagedHierarchicalNode
         this.linkedFile = linkedFile;
         this.parent = null;
         this.children = new ArrayList<>();
+        this.blockOffset = 0;
+        this.blockLength = 0;
     }
 
     public void addChild(PackagedHierarchicalNode node)
@@ -76,6 +81,26 @@ public class PackagedHierarchicalNode
         this.parent = parent;
     }
 
+    public long getBlockOffset()
+    {
+        return blockOffset;
+    }
+
+    public void setBlockOffset(long blockOffset)
+    {
+        this.blockOffset = blockOffset;
+    }
+
+    public long getBlockLength()
+    {
+        return blockLength;
+    }
+
+    public void setBlockLength(long blockLength)
+    {
+        this.blockLength = blockLength;
+    }
+
     public String toJSON(int id, Integer parentID)
     {
         return "{" +
@@ -84,8 +109,8 @@ public class PackagedHierarchicalNode
             String.format("\"num_faces\":%d,", this.numFaces) +
             String.format("\"num_vertices\":%d,", this.numVertices) +
             String.format("\"file\":\"%s\",", this.linkedFile.getAbsolutePath().replace("\\", "\\\\")) +
-            String.format("\"block_offset\":%d,", 0) +
-            String.format("\"block_length\":%d,", 0) +
+            String.format("\"block_offset\":%d,", this.blockOffset) +
+            String.format("\"block_length\":%d,", this.blockLength) +
             String.format("\"min_x\":%f,", this.boundingBox.getMinX()) +
             String.format("\"min_y\":%f,", this.boundingBox.getMinY()) +
             String.format("\"min_z\":%f,", this.boundingBox.getMinZ()) +
@@ -142,4 +167,15 @@ public class PackagedHierarchicalNode
         }
         return s + "]";
     }
+
+    public int countDescendants()
+    {
+        int c = 1;
+        for (PackagedHierarchicalNode child : children)
+        {
+            c += child.countDescendants();
+        }
+        return c;
+    }
+
 }
