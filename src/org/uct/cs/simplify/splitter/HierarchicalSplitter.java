@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.splitter;
 
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.ISplitRule;
 
 import java.io.File;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class HierarchicalSplitter
 {
-    public static PackagedHierarchicalNode split(File inputFile, File outputDir, ISplitRule rule) throws IOException
+    public static PackagedHierarchicalNode split(File inputFile, File outputDir, ISplitRule rule, IMembershipBuilder membershipBuilder) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
@@ -25,7 +25,7 @@ public class HierarchicalSplitter
 
             ArrayList<PackagedHierarchicalNode> children = NodeSplitter.split(
                 currentNode,
-                new VariableKDTreeMembershipBuilder(),
+                membershipBuilder,
                 outputDir
             );
 

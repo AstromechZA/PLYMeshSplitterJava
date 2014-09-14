@@ -3,6 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
+import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
@@ -40,7 +41,8 @@ public class Splitter
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
                 scaledFile,
                 outputDir,
-                new TreeDepthRule(2)
+                new TreeDepthRule(2),
+                new VariableKDTreeMembershipBuilder()
             );
 
             File outJson = new File(
