@@ -13,6 +13,7 @@ public class Vertex
 //    public int b;
 //    public int a;
     public final byte[] data;
+    public final int hash;
 
     public Vertex(byte[] input)
     {
@@ -22,18 +23,24 @@ public class Vertex
         this.x = bf.getFloat();
         this.y = bf.getFloat();
         this.z = bf.getFloat();
-
 //
 //        this.r = 0xFF & ((int)bf.get());
 //        this.g = 0xFF & ((int)bf.get());
 //        this.b = 0xFF & ((int)bf.get());
 //        this.a = 0xFF & ((int)bf.get());
+
+        long bits = 7L;
+        bits = 31L * bits + Double.doubleToLongBits(this.x);
+        bits = 31L * bits + Double.doubleToLongBits(this.y);
+        bits = 31L * bits + Double.doubleToLongBits(this.z);
+        hash = (int) (bits ^ (bits >> 32));
+
     }
 
     @Override
     public int hashCode()
     {
-        return Float.hashCode(this.x) + Float.hashCode(this.y) + Float.hashCode(this.z);
+        return this.hash;
     }
 
 }

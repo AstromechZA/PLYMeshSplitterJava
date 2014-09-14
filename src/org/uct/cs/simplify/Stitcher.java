@@ -6,10 +6,11 @@ import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Stitcher
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         CommandLine cmd = getCommandLine(args);
 
