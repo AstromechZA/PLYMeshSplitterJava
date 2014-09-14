@@ -17,9 +17,10 @@ import java.util.ArrayList;
 public class Splitter
 {
     private static final int MINIMUM_VERTEX_COUNT = 100_000;
+    private static final int DEPTH_LIMIT = 6;
     private static final int RESCALE_TO_FIT = 1024;
 
-    public static void run(File inputFile, File outputDir, boolean swapYZ) throws IOException
+    public static void run(File inputFile, File outputDir, DepthControl depthControl, boolean swapYZ) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
@@ -46,7 +47,15 @@ public class Splitter
             for (PackagedHierarchicalNode child : children)
             {
                 currentNode.addChild(child);
-                if (child.getNumVertices() > MINIMUM_VERTEX_COUNT) processQueue.add(child);
+
+                if (depthControl == DepthControl.VERTEX_COUNT)
+                {
+                    if (child.getNumVertices() > MINIMUM_VERTEX_COUNT) processQueue.add(child);
+                }
+                else
+                {
+                    if (child.getDepth() < DEPTH_LIMIT) processQueue.add(child);
+                }
             }
         }
 
@@ -76,7 +85,7 @@ public class Splitter
             if (!outputDir.exists() && !outputDir.mkdirs())
                 throw new IOException("Could not create output directory " + outputDir);
 
-            run(file, outputDir, cmd.hasOption("swapyz"));
+            run(file, outputDir, DepthControl.TREE_DEPTH_LIMIT, cmd.hasOption("swapyz"));
         }
         catch (IOException | InterruptedException | IllegalArgumentException e)
         {
@@ -122,6 +131,11 @@ public class Splitter
             System.exit(1);
             return null;
         }
+    }
+
+    private enum DepthControl
+    {
+        VERTEX_COUNT, TREE_DEPTH_LIMIT
     }
 
 }

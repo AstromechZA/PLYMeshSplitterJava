@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
 {
-    private static final double APPROXIMATION_THRESHOLD = 0.05;
+    private static final double APPROXIMATION_THRESHOLD = 0.01;
 
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException
