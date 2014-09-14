@@ -3,6 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
+import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -37,7 +38,7 @@ public class FileBuilder
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
                 scaledFile,
                 outputDir,
-                HierarchicalSplitter.DepthControl.TREE_DEPTH_LIMIT
+                new TreeDepthRule(2)
             );
 
             org.uct.cs.simplify.file_builder.FileBuilder.compile(tree, outputFile);

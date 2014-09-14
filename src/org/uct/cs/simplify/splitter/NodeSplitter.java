@@ -56,9 +56,9 @@ public class NodeSplitter
 
                     writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
-                    output.add(
-                        new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile)
-                    );
+                    PackagedHierarchicalNode child = new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
+                    child.setDepth(parent.getDepth() + 1);
+                    output.add(child);
                 }
             }
         }

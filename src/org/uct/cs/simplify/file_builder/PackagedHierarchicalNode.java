@@ -19,6 +19,7 @@ public class PackagedHierarchicalNode
     private PackagedHierarchicalNode parent;
     private ArrayList<PackagedHierarchicalNode> children;
     private long blockOffset, blockLength;
+    private int depth;
 
     public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File linkedFile)
     {
@@ -30,6 +31,7 @@ public class PackagedHierarchicalNode
         this.children = new ArrayList<>();
         this.blockOffset = 0;
         this.blockLength = 0;
+        this.depth = 0;
     }
 
     public PackagedHierarchicalNode(File linkedFile) throws IOException
@@ -43,6 +45,7 @@ public class PackagedHierarchicalNode
         this.children = new ArrayList<>();
         this.blockOffset = 0;
         this.blockLength = 0;
+        this.depth = 0;
     }
 
     public void addChild(PackagedHierarchicalNode node)
@@ -178,4 +181,13 @@ public class PackagedHierarchicalNode
         return c;
     }
 
+    public int getDepth()
+    {
+        return depth;
+    }
+
+    public void setDepth(int depth)
+    {
+        this.depth = depth;
+    }
 }
