@@ -19,7 +19,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
     public MemoryMappedVertexReader(PLYReader reader, String vertexElementName) throws IOException
     {
         int c = reader.getHeader().getElement(vertexElementName).getCount();
-        long p = reader.getElementDimension(vertexElementName).getFirst();
+        long p = reader.getElementDimension(vertexElementName).getOffset();
         int blockSize = reader.getHeader().getElement(vertexElementName).getItemSize();
 
         this.construct(reader.getFile(), p, c, blockSize);
@@ -28,7 +28,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
     public MemoryMappedVertexReader(PLYReader reader) throws IOException
     {
         int c = reader.getHeader().getElement("vertex").getCount();
-        long p = reader.getElementDimension("vertex").getFirst();
+        long p = reader.getElementDimension("vertex").getOffset();
         int blockSize = reader.getHeader().getElement("vertex").getItemSize();
 
         this.construct(reader.getFile(), p, c, blockSize);

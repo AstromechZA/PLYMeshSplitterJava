@@ -1,7 +1,6 @@
 package org.uct.cs.simplify.ply.reader;
 
 import org.uct.cs.simplify.ply.header.*;
-import org.uct.cs.simplify.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class PLYReader
 
     private final File file;
     private final PLYHeader header;
-    private final LinkedHashMap<String, Pair<Long, Long>> elementDimensions;
+    private final LinkedHashMap<String, ElementDimension> elementDimensions;
 
     public PLYReader(PLYHeader h) throws IOException
     {
@@ -41,7 +40,7 @@ public class PLYReader
         return this.header;
     }
 
-    public Pair<Long, Long> getElementDimension(String n)
+    public ElementDimension getElementDimension(String n)
     {
         return this.elementDimensions.get(n);
     }
@@ -78,19 +77,19 @@ public class PLYReader
                 if (i == numElements - 1)
                 {
                     long elementSize = payloadSize - cursor;
-                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
                     break;
                 } else if (e.getItemSize() != null)
                 {
                     long elementSize = e.getCount() * e.getItemSize();
-                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
                 } else
                 {
                     long elementSize = calculateSizeOfListElement(e, buffer);
-                    this.elementDimensions.put(e.getName(), new Pair<>(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);

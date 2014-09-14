@@ -73,8 +73,8 @@ public class ScaleAndRecenter
             PLYHeader header = PLYHeader.constructBasicHeader(numVertices, numFaces);
             fcOUT.write(ByteBuffer.wrap((header + "\n").getBytes()));
 
-            long vertexElementBegin = reader.getElementDimension("vertex").getFirst();
-            long vertexElementLength = reader.getElementDimension("vertex").getSecond();
+            long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
+            long vertexElementLength = reader.getElementDimension("vertex").getLength();
 
             int blockSize = reader.getHeader().getElement("vertex").getItemSize();
 

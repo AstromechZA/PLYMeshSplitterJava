@@ -24,8 +24,8 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     public MemoryMappedFaceReader(PLYReader reader, String faceElementName) throws IOException
     {
         int c = reader.getHeader().getElement(faceElementName).getCount();
-        long p = reader.getElementDimension(faceElementName).getFirst();
-        long l = reader.getElementDimension(faceElementName).getSecond();
+        long p = reader.getElementDimension(faceElementName).getOffset();
+        long l = reader.getElementDimension(faceElementName).getLength();
 
         this.construct(reader.getFile(), p, c, l);
     }
@@ -33,8 +33,8 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
     public MemoryMappedFaceReader(PLYReader reader) throws IOException
     {
         int c = reader.getHeader().getElement("face").getCount();
-        long p = reader.getElementDimension("face").getFirst();
-        long l = reader.getElementDimension("face").getSecond();
+        long p = reader.getElementDimension("face").getOffset();
+        long l = reader.getElementDimension("face").getLength();
 
         this.construct(reader.getFile(), p, c, l);
     }
