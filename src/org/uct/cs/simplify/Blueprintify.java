@@ -27,10 +27,10 @@ public class Blueprintify
     public static void run(PLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
     {
 
-        for (BluePrintGenerator.Axis axis : BluePrintGenerator.Axis.values())
+        for (BluePrintGenerator.CoordinateSpace coordinateSpace : BluePrintGenerator.CoordinateSpace.values())
         {
-            File outputFile = new File(outputDir, reader.getFile().getName() + "." + axis.name() + "." + OUTPUT_FORMAT);
-            BufferedImage bi = BluePrintGenerator.CreateImage(reader, resolution, alphamod, axis);
+            File outputFile = new File(outputDir, reader.getFile().getName() + "." + coordinateSpace.name() + "." + OUTPUT_FORMAT);
+            BufferedImage bi = BluePrintGenerator.CreateImage(reader, resolution, alphamod, coordinateSpace);
             ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);
