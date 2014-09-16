@@ -1,6 +1,8 @@
 package org.uct.cs.simplify.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class Useful
 {
@@ -37,7 +39,7 @@ public class Useful
         return String.format("%.2f B", bytes);
     }
 
-    public static void littleEndianWrite(ByteArrayOutputStream stream, int i)
+    public static void littleEndianWrite(OutputStream stream, int i) throws IOException
     {
         stream.write((i) & BYTE);
         stream.write((i >> 8) & BYTE);

@@ -1,11 +1,18 @@
 package org.uct.cs.simplify.filebuilder;
 
+import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
+import org.uct.cs.simplify.ply.datatypes.Face;
+import org.uct.cs.simplify.ply.datatypes.Vertex;
+import org.uct.cs.simplify.ply.header.PLYElement;
+import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
+import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
+import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 
 /**
  * This class is designed to convert the given model from PLY format to a terser binary form.
@@ -27,21 +34,65 @@ import java.nio.channels.FileChannel;
  */
 public class PLYDataCompressor
 {
-    public CompressionResult compress(File plymodel, File outputFile) throws IOException
+    public static CompressionResult compress(File inputFile, File outputFile) throws IOException
     {
-        try (
-            // open file channel to output file
-            FileChannel fc = new FileOutputStream(outputFile).getChannel();
-        )
+        return compress(new PLYReader(inputFile), outputFile);
+    }
+
+    public static CompressionResult compress(PLYReader reader, File outputFile) throws IOException
+    {
+        PLYElement vertexE = reader.getHeader().getElement("vertex");
+        PLYElement faceE = reader.getHeader().getElement("face");
+        long vbuffersize = vertexE.getCount() * (4*3 + 4*3 + 4);
+        long fbuffersize = faceE.getCount() * (4*3);
+
+        try(FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(outputFile)))
         {
-            return null;
+            try(MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+            {
+                Vertex v;
+                for (int i = 0; i < vertexE.getCount(); i++)
+                {
+                    v = vr.get(i);
+                    // write location
+                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.x));
+                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.y));
+                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.z));
+
+                    // write fake normal (this gets overrided in stage 2)
+                    Useful.littleEndianWrite(fostream, 0);
+                    Useful.littleEndianWrite(fostream, 0);
+                    Useful.littleEndianWrite(fostream, 1);
+
+                    // write fake colour information
+                    fostream.write(128);
+                    fostream.write(128);
+                    fostream.write(128);
+                    fostream.write(255);
+                }
+                try(MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
+                {
+                    Face f;
+                    while(fr.hasNext())
+                    {
+                        f = fr.next();
+                        Useful.littleEndianWrite(fostream, f.i);
+                        Useful.littleEndianWrite(fostream, f.j);
+                        Useful.littleEndianWrite(fostream, f.k);
+                    }
+                }
+            }
+
+
         }
+
+        return new CompressionResult(vbuffersize, fbuffersize);
     }
 
     /** Class containing lengths of the vertices and faces regions. A simple wrapper around Pair<long, long> */
-    public class CompressionResult extends Pair<Long, Long>
+    public static class CompressionResult extends Pair<Long, Long>
     {
-        public CompressionResult(long a, long b, File o) { super(a, b); }
+        public CompressionResult(long a, long b) { super(a, b); }
 
         public long getLengthOfVertices() { return this.getFirst(); }
 
