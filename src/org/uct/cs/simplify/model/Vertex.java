@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.ply.datatypes;
+package org.uct.cs.simplify.model;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

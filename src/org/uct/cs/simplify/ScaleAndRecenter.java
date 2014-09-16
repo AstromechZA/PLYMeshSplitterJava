@@ -2,10 +2,10 @@ package org.uct.cs.simplify;
 
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
+import org.uct.cs.simplify.model.BoundsFinder;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.*;
 
 import java.io.File;

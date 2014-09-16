@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.blueprint;
 
-import org.uct.cs.simplify.ply.datatypes.Vertex;
-import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 
 import java.awt.*;
@@ -11,7 +11,7 @@ import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.util.Arrays;
 
-/** Class providing methods to build interesting blueprint-like images from a PLY model. **/
+/** Class providing methods to build interesting blueprint-like images from a PLY model. * */
 public class BluePrintGenerator
 {
     private static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2 * 100);
@@ -19,13 +19,13 @@ public class BluePrintGenerator
     private static final int BYTE = 0xFF;
 
     public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment)
-    throws IOException
+        throws IOException
     {
         return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, CoordinateSpace.X_Y);
     }
 
     public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type)
-    throws IOException
+        throws IOException
     {
         return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
     }
@@ -33,7 +33,7 @@ public class BluePrintGenerator
     public static BufferedImage createImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
     )
-    throws IOException
+        throws IOException
     {
         return createImage(reader, resolution, background, foreground, alphaAdjustment, CoordinateSpace.X_Y);
     }
@@ -41,27 +41,28 @@ public class BluePrintGenerator
     public static BufferedImage createImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, CoordinateSpace type
     )
-    throws IOException
+        throws IOException
     {
         return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type);
     }
 
     /**
-     Return a image with the models geometry projected onto the canvas.
-     @param reader The model reader
-     @param resolution The size of the output image (This is a square image)
-     @param background The background Color
-     @param foreground The forground Color
-     @param alphaAdjustment The blend adjustment (0.1 is good)
-     @param coordinateSpace Which axes to project onto the canvas
-     @return The resulting BufferedImage
-     @throws IOException
+     * Return a image with the models geometry projected onto the canvas.
+     *
+     * @param reader          The model reader
+     * @param resolution      The size of the output image (This is a square image)
+     * @param background      The background Color
+     * @param foreground      The forground Color
+     * @param alphaAdjustment The blend adjustment (0.1 is good)
+     * @param coordinateSpace Which axes to project onto the canvas
+     * @return The resulting BufferedImage
+     * @throws IOException
      */
     private static BufferedImage makeBufferedImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
         CoordinateSpace coordinateSpace
     )
-    throws IOException
+        throws IOException
     {
         IAxisValueGetter avg = parseAVG(coordinateSpace);
 
@@ -95,16 +96,17 @@ public class BluePrintGenerator
                 int ty = (int) (center - (avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio);
 
                 int index = ty * w + tx;
-                pixels[index] = blend(pixels[index], fgi, alphaAdjustment);
+                pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
         }
         return bi;
     }
 
     /**
-     Constructs an AxisValueGetter for the specific coordinate space
-     @param coordinateSpace The coordinate space required.
-     @return The AxisValueGetter object
+     * Constructs an AxisValueGetter for the specific coordinate space
+     *
+     * @param coordinateSpace The coordinate space required.
+     * @return The AxisValueGetter object
      */
     private static IAxisValueGetter parseAVG(CoordinateSpace coordinateSpace)
     {

@@ -1,12 +1,12 @@
 package org.uct.cs.simplify.splitter;
 
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.model.Face;
+import org.uct.cs.simplify.model.MemoryMappedFaceReader;
+import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.datatypes.DataType;
-import org.uct.cs.simplify.ply.datatypes.Face;
-import org.uct.cs.simplify.ply.datatypes.Vertex;
 import org.uct.cs.simplify.ply.header.PLYHeader;
-import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
-import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;

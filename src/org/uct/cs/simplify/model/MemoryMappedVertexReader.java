@@ -1,6 +1,6 @@
-package org.uct.cs.simplify.ply.reader;
+package org.uct.cs.simplify.model;
 
-import org.uct.cs.simplify.ply.datatypes.Vertex;
+import org.uct.cs.simplify.ply.reader.PLYReader;
 
 import java.io.File;
 import java.io.IOException;

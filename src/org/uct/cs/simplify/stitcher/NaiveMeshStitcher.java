@@ -1,14 +1,14 @@
 package org.uct.cs.simplify.stitcher;
 
 import gnu.trove.map.hash.TDoubleIntHashMap;
+import org.uct.cs.simplify.model.Face;
+import org.uct.cs.simplify.model.MemoryMappedFaceReader;
+import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.datatypes.DataType;
-import org.uct.cs.simplify.ply.datatypes.Face;
-import org.uct.cs.simplify.ply.datatypes.Vertex;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
-import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
-import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.TempFileManager;

@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.filebuilder;
 
+import org.uct.cs.simplify.model.BoundsFinder;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.ply.utilities.BoundsFinder;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.File;
@@ -174,7 +174,8 @@ public class PackagedHierarchicalNode
         if (this.children.isEmpty())
         {
             o.add(this);
-        } else
+        }
+        else
         {
             for (PackagedHierarchicalNode child : this.children)
             {
