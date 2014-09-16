@@ -17,7 +17,7 @@ public class PLYElement
 
     public PLYElement(String name, int count)
     {
-        this.name = name;
+        this.name = name.toLowerCase();
         this.count = count;
         this.itemSize = 0;
         this.properties = new ArrayList<>();

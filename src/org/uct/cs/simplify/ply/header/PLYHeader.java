@@ -121,6 +121,7 @@ public class PLYHeader
         {
             // skip comments
             if (line.startsWith("comment")) continue;
+            if (line.startsWith("obj_info")) continue;
 
             // element line shows the start of a new element block
             if (line.startsWith("element"))
@@ -155,19 +156,6 @@ public class PLYHeader
         return sb.toString();
     }
 
-    public static enum PLYFormat
-    {
-        ASCII, BIG_ENDIAN, LITTLE_ENDIAN
-    }
-
-    public static class BadHeaderException extends RuntimeException
-    {
-        public BadHeaderException(String s)
-        {
-            super(s);
-        }
-    }
-
     public static PLYHeader constructBasicHeader(int numVertices, int numFaces)
     {
         List<PLYElement> elements = new ArrayList<>();
@@ -180,6 +168,19 @@ public class PLYHeader
         eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
         elements.add(eFace);
         return new PLYHeader(elements);
+    }
+
+    public static enum PLYFormat
+    {
+        ASCII, BIG_ENDIAN, LITTLE_ENDIAN
+    }
+
+    public static class BadHeaderException extends RuntimeException
+    {
+        public BadHeaderException(String s)
+        {
+            super(s);
+        }
     }
 
 }
