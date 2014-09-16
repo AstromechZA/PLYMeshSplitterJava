@@ -15,7 +15,8 @@ public class Useful
 
     public static String getFilenameWithoutExt(String fn)
     {
-        return fn.substring(0, fn.lastIndexOf('.'));
+        int p = fn.lastIndexOf('.');
+        return (p >= 0) ? fn.substring(0, fn.lastIndexOf('.')) : fn;
     }
 
     public static String formatTime(long ns)

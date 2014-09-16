@@ -12,6 +12,7 @@ import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.TempFile;
+import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
@@ -30,8 +31,8 @@ public class NaiveMeshStitcher
 
         String outputFileBase = Useful.getFilenameWithoutExt(outputFile.getName());
         try (
-            TempFile vertexFile = new TempFile(outputFile.getParent(), outputFileBase + "_v.temp");
-            TempFile faceFile = new TempFile(outputFile.getParent(), outputFileBase + "_f.temp")
+            TempFile vertexFile = (TempFile)TempFileManager.provide(outputFileBase + "_v");
+            TempFile faceFile = (TempFile)TempFileManager.provide(outputFileBase + "_f")
         )
         {
             PLYReader reader1 = new PLYReader(file1);
@@ -49,19 +50,16 @@ public class NaiveMeshStitcher
 
             writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
 
-            System.out.printf("mesh1v : %d%n", reader1.getHeader().getElement("vertex").getCount());
-            System.out.printf("mesh2v : %d%n", reader2.getHeader().getElement("vertex").getCount());
+            System.out.printf("mesh1v : %d%n", mesh1vertices.getCount());
+            System.out.printf("mesh2v : %d%n", mesh2vertices.getCount());
             System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
 
-            System.out.printf("mesh1f : %d%n", reader1.getHeader().getElement("face").getCount());
-            System.out.printf("mesh2f : %d%n", reader2.getHeader().getElement("face").getCount());
+            System.out.printf("mesh1f : %d%n", mesh1faces.getCount());
+            System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
 
-            int numVertices = reader1.getHeader().getElement("vertex").getCount() +
-                reader2.getHeader().getElement("vertex").getCount() -
-                stitchResult.getStitchedCount();
+            int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
 
-            int numFaces = reader1.getHeader().getElement("face").getCount() +
-                reader2.getHeader().getElement("face").getCount();
+            int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
 
             return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
         }

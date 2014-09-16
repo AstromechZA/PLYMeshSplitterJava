@@ -30,7 +30,8 @@ public class ProgressBar implements AutoCloseable
 
     private void printTitle()
     {
-        char[] pad = new char[100 - this.title.length() - 7];
+        int padsize = 100 - this.title.length() - 7;
+        char[] pad = new char[Math.max(padsize, 0)];
         Arrays.fill(pad, '=');
         System.out.printf("===  %s  %s%n", this.title, new String(pad));
     }

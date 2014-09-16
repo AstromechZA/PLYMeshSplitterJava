@@ -3,6 +3,7 @@ package org.uct.cs.simplify.file_builder;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.TempFile;
+import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 import org.uct.cs.simplify.util.XBoundingBox;
 
@@ -20,59 +21,56 @@ public class PackagedHierarchicalFileBuilder
     {
         prepare(tree);
 
-        String tempF = Useful.getFilenameWithoutExt(outputFile.getName()) + ".temp";
-        try (TempFile temp = new TempFile(outputFile.getParent(), tempF))
+        File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
+        try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
         {
-            try (FileChannel fcOUT = new FileOutputStream(temp).getChannel())
+            ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+            processQueue.add(tree);
+
+            long position = 0;
+            while (!processQueue.isEmpty())
             {
-                ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
-                processQueue.add(tree);
+                PackagedHierarchicalNode current = processQueue.removeFirst();
 
-                long position = 0;
-                while (!processQueue.isEmpty())
+                System.out.printf("Writing %s to %s%n", current.getLinkedFile().getPath(), tempBlockFile.getPath());
+                try (FileChannel fcIN = new FileInputStream(current.getLinkedFile()).getChannel())
                 {
-                    PackagedHierarchicalNode current = processQueue.removeFirst();
+                    long length = fcIN.size();
+                    fcOUT.transferFrom(fcIN, position, length);
+                    current.setBlockOffset(position);
+                    current.setBlockLength(length);
+                    position += length;
+                }
 
-                    System.out.printf("Writing %s to %s%n", current.getLinkedFile().getPath(), temp.getPath());
-                    try (FileChannel fcIN = new FileInputStream(current.getLinkedFile()).getChannel())
-                    {
-                        long length = fcIN.size();
-                        fcOUT.transferFrom(fcIN, position, length);
-                        current.setBlockOffset(position);
-                        current.setBlockLength(length);
-                        position += length;
-                    }
-
-                    for (PackagedHierarchicalNode node : current.getChildren())
-                    {
-                        processQueue.add(node);
-                    }
+                for (PackagedHierarchicalNode node : current.getChildren())
+                {
+                    processQueue.add(node);
                 }
             }
+        }
 
-            String jsonheader = PackagedHierarchicalNode.buildJSONHierarchy(tree);
-            System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());
-            try (FileOutputStream fostream = new FileOutputStream(outputFile))
+        String jsonheader = PackagedHierarchicalNode.buildJSONHierarchy(tree);
+        System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());
+        try (FileOutputStream fostream = new FileOutputStream(outputFile))
+        {
+            int l = jsonheader.length();
+            fostream.write(new byte[]{
+                (byte) (l & 0x255),
+                (byte) ((l >> 8) & 0x255),
+                (byte) ((l >> (8 * 2)) & 0x255),
+                (byte) ((l >> (8 * 3)) & 0x255)
+            });
+            fostream.write(jsonheader.getBytes());
+
+            System.out.printf("Writing header (%s)%n", Useful.formatBytes(l));
+
+            try (
+                FileChannel fcOUT = fostream.getChannel();
+                FileChannel fcIN = new FileInputStream(tempBlockFile).getChannel()
+            )
             {
-                int l = jsonheader.length();
-                fostream.write(new byte[]{
-                    (byte) (l & 0x255),
-                    (byte) ((l >> 8) & 0x255),
-                    (byte) ((l >> (8 * 2)) & 0x255),
-                    (byte) ((l >> (8 * 3)) & 0x255)
-                });
-                fostream.write(jsonheader.getBytes());
-
-                System.out.printf("Writing header (%s)%n", Useful.formatBytes(l));
-
-                try (
-                    FileChannel fcOUT = fostream.getChannel();
-                    FileChannel fcIN = new FileInputStream(temp).getChannel()
-                )
-                {
-                    System.out.printf("Writing data (%s)%n", Useful.formatBytes(fcIN.size()));
-                    fcOUT.transferFrom(fcIN, fcOUT.position(), fcIN.size());
-                }
+                System.out.printf("Writing data (%s)%n", Useful.formatBytes(fcIN.size()));
+                fcOUT.transferFrom(fcIN, fcOUT.position(), fcIN.size());
             }
         }
 
@@ -89,7 +87,6 @@ public class PackagedHierarchicalFileBuilder
         catch (InterruptedException e)
         { /* nothing */ }
 
-        long position = 0;
         while (!processQueue.isEmpty())
         {
             PackagedHierarchicalNode current = processQueue.removeFirst();
@@ -112,9 +109,6 @@ public class PackagedHierarchicalFileBuilder
     {
         if (node.hasChildren())
         {
-
-            XBoundingBox bb = node.getBoundingBox().copy();
-
             ArrayList<PackagedHierarchicalNode> children = node.getChildren();
 
             for (PackagedHierarchicalNode c : children)
@@ -125,7 +119,6 @@ public class PackagedHierarchicalFileBuilder
             }
 
             if (node.getLinkedFile().exists()) node.getLinkedFile().delete();
-
 
             File last = children.get(0).getLinkedFile();
             for (int i = 1; i < children.size(); i++)

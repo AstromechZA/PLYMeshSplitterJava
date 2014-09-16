@@ -48,6 +48,32 @@ public class PackagedHierarchicalNode
         this.depth = 0;
     }
 
+    public static String buildJSONHierarchy(PackagedHierarchicalNode root)
+    {
+        int id = 0;
+        HashMap<PackagedHierarchicalNode, Integer> nodeIds = new HashMap<>();
+        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+        processQueue.add(root);
+        while (!processQueue.isEmpty())
+        {
+            PackagedHierarchicalNode current = processQueue.removeFirst();
+            nodeIds.put(current, id++);
+            processQueue.addAll(current.getChildren());
+        }
+
+        StringBuilder s = new StringBuilder("[");
+        boolean first = true;
+        for (PackagedHierarchicalNode node : nodeIds.keySet())
+        {
+            if (first)
+                first = false;
+            else
+                s.append(",");
+            s.append(node.toJSON(nodeIds.get(node), (node.parent == null) ? null : nodeIds.get(node.parent)));
+        }
+        return s + "]";
+    }
+
     public void addChild(PackagedHierarchicalNode node)
     {
         this.children.add(node);
@@ -106,7 +132,7 @@ public class PackagedHierarchicalNode
 
     public long getBlockOffset()
     {
-        return blockOffset;
+        return this.blockOffset;
     }
 
     public void setBlockOffset(long blockOffset)
@@ -116,7 +142,7 @@ public class PackagedHierarchicalNode
 
     public long getBlockLength()
     {
-        return blockLength;
+        return this.blockLength;
     }
 
     public void setBlockLength(long blockLength)
@@ -131,6 +157,7 @@ public class PackagedHierarchicalNode
             String.format("\"parent_id\":%s,", (parentID == null) ? "null" : parentID) +
             String.format("\"num_faces\":%d,", this.numFaces) +
             String.format("\"num_vertices\":%d,", this.numVertices) +
+            String.format("\"file\":\"%s\",", this.linkedFile.getAbsolutePath().replace("\\", "\\\\")) +
             String.format("\"block_offset\":%d,", this.blockOffset) +
             String.format("\"block_length\":%d,", this.blockLength) +
             String.format("\"min_x\":%f,", this.boundingBox.getMinX()) +
@@ -147,8 +174,7 @@ public class PackagedHierarchicalNode
         if (this.children.isEmpty())
         {
             o.add(this);
-        }
-        else
+        } else
         {
             for (PackagedHierarchicalNode child : this.children)
             {
@@ -164,36 +190,10 @@ public class PackagedHierarchicalNode
         return this.getLeafNodes(output);
     }
 
-    public static String buildJSONHierarchy(PackagedHierarchicalNode root)
-    {
-        int id = 0;
-        HashMap<PackagedHierarchicalNode, Integer> nodeIds = new HashMap<>();
-        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
-        processQueue.add(root);
-        while (!processQueue.isEmpty())
-        {
-            PackagedHierarchicalNode current = processQueue.removeFirst();
-            nodeIds.put(current, id++);
-            processQueue.addAll(current.getChildren());
-        }
-
-        StringBuilder s = new StringBuilder("[");
-        boolean first = true;
-        for (PackagedHierarchicalNode node : nodeIds.keySet())
-        {
-            if (first)
-                first = false;
-            else
-                s.append(",");
-            s.append(node.toJSON(nodeIds.get(node), (node.parent == null) ? null : nodeIds.get(node.parent)));
-        }
-        return s + "]";
-    }
-
     public int countDescendants()
     {
         int c = 1;
-        for (PackagedHierarchicalNode child : children)
+        for (PackagedHierarchicalNode child : this.children)
         {
             c += child.countDescendants();
         }
@@ -202,7 +202,7 @@ public class PackagedHierarchicalNode
 
     public int getDepth()
     {
-        return depth;
+        return this.depth;
     }
 
     public void setDepth(int depth)

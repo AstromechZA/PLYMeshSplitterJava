@@ -6,6 +6,7 @@ import org.uct.cs.simplify.splitter.HierarchicalSplitter;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
 import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
@@ -37,6 +38,9 @@ public class Splitter
                 )
             );
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_TO_FIT, cmd.hasOption("swapyz"));
+
+            TempFileManager.setWorkingDirectory(outputDir.toPath());
+            TempFileManager.setDeleteOnExit(false);
 
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
                 scaledFile,

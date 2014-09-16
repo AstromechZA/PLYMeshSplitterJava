@@ -33,40 +33,31 @@ public class NodeSplitter
         // output object for subnodes
         ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
 
-        // calculate the base filename
-        String processFileBase = Useful.getFilenameWithoutExt(parent.getLinkedFile().getName());
-
         // build reader object
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
         for (int nodeID : mr.subNodes.keys())
         {
-            try (
-                TempFile tempFaceFile = new TempFile(
-                    outputDir,
-                    String.format("%s_%s.temp", processFileBase, nodeID)
-                )
-            )
+            File tempFaceFile = TempFileManager.provide();
+            GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
+            if (result.numFaces > 0)
             {
-                GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
-                if (result.numFaces > 0)
-                {
-                    File subNodeFile = new File(outputDir, String.format("%s_%s.ply", processFileBase, nodeID));
+                File subNodeFile = TempFileManager.provide();
 
-                    writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
+                writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
-                    PackagedHierarchicalNode child = new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
-                    child.setDepth(parent.getDepth() + 1);
-                    output.add(child);
-                }
+                PackagedHierarchicalNode child = new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
+                child.setDepth(parent.getDepth() + 1);
+                output.add(child);
             }
+            if(tempFaceFile.exists()) tempFaceFile.delete();
         }
 
         return output;
     }
 
-    private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, TempFile tempFaceFile, GatheringResult result) throws IOException
+    private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, File tempFaceFile, GatheringResult result) throws IOException
     {
         PLYHeader newHeader = PLYHeader.constructBasicHeader(result.numVertices, result.numFaces);
 
