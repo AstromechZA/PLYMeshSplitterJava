@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter.splitrules;
 
-import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 
 public class VertexCountRule implements ISplitRule
 {

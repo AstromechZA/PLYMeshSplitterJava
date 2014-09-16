@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter;
 
-import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.ISplitRule;
 

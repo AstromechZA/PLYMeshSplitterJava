@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter;
 
-import org.uct.cs.simplify.file_builder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.datatypes.Face;
 import org.uct.cs.simplify.ply.datatypes.Vertex;
@@ -51,7 +51,7 @@ public class NodeSplitter
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
             }
-            if(tempFaceFile.exists()) tempFaceFile.delete();
+            if (tempFaceFile.exists()) tempFaceFile.delete();
         }
 
         return output;
@@ -71,7 +71,7 @@ public class NodeSplitter
             )
             {
                 Vertex v;
-                ByteBuffer bb = ByteBuffer.wrap(new byte[3 * DataType.FLOAT.getByteSize()]);
+                ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * DataType.FLOAT.getByteSize() ]);
                 bb.order(ByteOrder.LITTLE_ENDIAN);
                 try (
                     ProgressBar pb = new ProgressBar(

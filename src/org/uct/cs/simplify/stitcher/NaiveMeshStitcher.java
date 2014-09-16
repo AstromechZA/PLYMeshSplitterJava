@@ -11,7 +11,6 @@ import org.uct.cs.simplify.ply.reader.MemoryMappedFaceReader;
 import org.uct.cs.simplify.ply.reader.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
-import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
@@ -30,39 +29,36 @@ public class NaiveMeshStitcher
     {
 
         String outputFileBase = Useful.getFilenameWithoutExt(outputFile.getName());
-        try (
-            TempFile vertexFile = (TempFile)TempFileManager.provide(outputFileBase + "_v");
-            TempFile faceFile = (TempFile)TempFileManager.provide(outputFileBase + "_f")
-        )
-        {
-            PLYReader reader1 = new PLYReader(file1);
-            PLYReader reader2 = new PLYReader(file2);
-            PLYElement mesh1vertices = reader1.getHeader().getElement("vertex");
-            PLYElement mesh1faces = reader1.getHeader().getElement("face");
-            PLYElement mesh2vertices = reader2.getHeader().getElement("vertex");
-            PLYElement mesh2faces = reader2.getHeader().getElement("face");
+        File vertexFile = TempFileManager.provide(outputFileBase + "_v");
+        File faceFile = TempFileManager.provide(outputFileBase + "_f");
 
-            TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
+        PLYReader reader1 = new PLYReader(file1);
+        PLYReader reader2 = new PLYReader(file2);
+        PLYElement mesh1vertices = reader1.getHeader().getElement("vertex");
+        PLYElement mesh1faces = reader1.getHeader().getElement("face");
+        PLYElement mesh2vertices = reader2.getHeader().getElement("vertex");
+        PLYElement mesh2faces = reader2.getHeader().getElement("face");
 
-            writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
+        TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
 
-            VertexStitchResult stitchResult = getStitchTransform(vertexFile, reader2, mesh1Vertices, mesh1vertices.getCount(), mesh2vertices.getCount());
+        writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
 
-            writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
+        VertexStitchResult stitchResult = getStitchTransform(vertexFile, reader2, mesh1Vertices, mesh1vertices.getCount(), mesh2vertices.getCount());
 
-            System.out.printf("mesh1v : %d%n", mesh1vertices.getCount());
-            System.out.printf("mesh2v : %d%n", mesh2vertices.getCount());
-            System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
+        writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
 
-            System.out.printf("mesh1f : %d%n", mesh1faces.getCount());
-            System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
+        System.out.printf("mesh1v : %d%n", mesh1vertices.getCount());
+        System.out.printf("mesh2v : %d%n", mesh2vertices.getCount());
+        System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
 
-            int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
+        System.out.printf("mesh1f : %d%n", mesh1faces.getCount());
+        System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
 
-            int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
+        int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
 
-            return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
-        }
+        int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
+
+        return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
     }
 
     private static VertexStitchResult getStitchTransform(File vertexFile, PLYReader reader2, TDoubleIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices) throws IOException
@@ -134,7 +130,7 @@ public class NaiveMeshStitcher
         }
     }
 
-    private static void writeMesh1ToTempFiles(File file1, TempFile vertexFile, TempFile faceFile, PLYReader reader1) throws IOException
+    private static void writeMesh1ToTempFiles(File file1, File vertexFile, File faceFile, PLYReader reader1) throws IOException
     {
         // write vertices to tempfile1
         ElementDimension vertexE = reader1.getElementDimension("vertex");

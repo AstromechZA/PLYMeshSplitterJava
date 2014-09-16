@@ -1,11 +1,9 @@
-package org.uct.cs.simplify.file_builder;
+package org.uct.cs.simplify.filebuilder;
 
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
-import org.uct.cs.simplify.util.TempFile;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
-import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,6 +52,7 @@ public class PackagedHierarchicalFileBuilder
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
         {
             int l = jsonheader.length();
+            System.out.println("Header length: " + l);
             fostream.write(new byte[]{
                 (byte) (l & 0x255),
                 (byte) ((l >> 8) & 0x255),

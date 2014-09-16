@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.file_builder;
+package org.uct.cs.simplify.filebuilder;
 
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.ply.utilities.BoundsFinder;
