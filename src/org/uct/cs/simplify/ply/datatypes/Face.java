@@ -1,25 +1,13 @@
 package org.uct.cs.simplify.ply.datatypes;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 public class Face
 {
-    private final TIntArrayList vertices;
+    public final int i, j, k;
 
-    public Face(TIntArrayList vertexList)
+    public Face(int i, int j, int k)
     {
-        this.vertices = vertexList;
+        this.i = i;
+        this.j = j;
+        this.k = k;
     }
-
-    public TIntList getVertices()
-    {
-        return this.vertices;
-    }
-
-    public int getNumVertices()
-    {
-        return this.vertices.size();
-    }
-
 }

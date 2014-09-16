@@ -182,24 +182,36 @@ public class NodeSplitter
                 face = faceReader.next();
                 numVerticesOfFaceInSubnode = 0;
 
-                for (int i : face.getVertices().toArray())
-                {
-                    if (memberships.get(i) == subnode) numVerticesOfFaceInSubnode += 1;
-                }
+                if (memberships.get(face.i) == subnode) numVerticesOfFaceInSubnode += 1;
+                if (memberships.get(face.j) == subnode) numVerticesOfFaceInSubnode += 1;
+                if (memberships.get(face.k) == subnode) numVerticesOfFaceInSubnode += 1;
 
                 if (numVerticesOfFaceInSubnode > 1)
                 {
                     numFacesInSubnode++;
-                    bostream.write((byte) face.getNumVertices());
-                    for (int vertex_index : face.getVertices().toArray())
+                    bostream.write((byte) 3);
+
+                    if (!vertexIndexMap.containsKey(face.i))
                     {
-                        if (!vertexIndexMap.containsKey(vertex_index))
-                        {
-                            vertexIndexMap.put(vertex_index, currentVertexIndex);
-                            currentVertexIndex += 1;
-                        }
-                        Useful.littleEndianWrite(bostream, vertexIndexMap.get(vertex_index));
+                        vertexIndexMap.put(face.i, currentVertexIndex);
+                        currentVertexIndex += 1;
                     }
+                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.i));
+
+                    if (!vertexIndexMap.containsKey(face.j))
+                    {
+                        vertexIndexMap.put(face.j, currentVertexIndex);
+                        currentVertexIndex += 1;
+                    }
+                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.j));
+
+                    if (!vertexIndexMap.containsKey(face.k))
+                    {
+                        vertexIndexMap.put(face.k, currentVertexIndex);
+                        currentVertexIndex += 1;
+                    }
+                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.k));
+
                 }
 
                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)

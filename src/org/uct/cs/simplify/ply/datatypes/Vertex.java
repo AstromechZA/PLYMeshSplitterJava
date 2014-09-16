@@ -12,12 +12,10 @@ public class Vertex
 //    public int g;
 //    public int b;
 //    public int a;
-    public final byte[] data;
     public final int hash;
 
     public Vertex(byte[] input)
     {
-        this.data = input;
         ByteBuffer bf = ByteBuffer.wrap(input);
         bf.order(ByteOrder.LITTLE_ENDIAN);
         this.x = bf.getFloat();

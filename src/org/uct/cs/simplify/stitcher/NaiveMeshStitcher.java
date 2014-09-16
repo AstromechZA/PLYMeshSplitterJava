@@ -115,11 +115,11 @@ public class NaiveMeshStitcher
             while (fr.hasNext())
             {
                 face = fr.next();
-                bostream.write((byte) face.getNumVertices());
-                for (int i : face.getVertices().toArray())
-                {
-                    Useful.littleEndianWrite(bostream, indexTransform[ i ]);
-                }
+                bostream.write((byte) 3);
+                Useful.littleEndianWrite(bostream, indexTransform[ face.i ]);
+                Useful.littleEndianWrite(bostream, indexTransform[ face.j ]);
+                Useful.littleEndianWrite(bostream, indexTransform[ face.k ]);
+
                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                 {
                     fostream.write(bostream.toByteArray());
