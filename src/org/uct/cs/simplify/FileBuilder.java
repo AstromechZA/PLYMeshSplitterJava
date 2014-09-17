@@ -28,7 +28,7 @@ public class FileBuilder
             File outputDir = new File(cmd.getOptionValue("output"));
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
-            File scaledFile = TempFileManager.provide("rescaled");
+            File scaledFile = TempFileManager.provide("rescaled", ".ply");
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, true);
 
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
@@ -39,7 +39,6 @@ public class FileBuilder
             );
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
-            TempFileManager.setDeleteOnExit(false);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
         }

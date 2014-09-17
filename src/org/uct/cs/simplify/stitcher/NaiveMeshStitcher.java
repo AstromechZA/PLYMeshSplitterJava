@@ -1,11 +1,10 @@
 package org.uct.cs.simplify.stitcher;
 
-import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TDoubleIntHashMap;
 import org.uct.cs.simplify.model.Face;
 import org.uct.cs.simplify.model.MemoryMappedFaceReader;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
-import org.uct.cs.simplify.ply.datatypes.DataType;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
@@ -16,7 +15,6 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 public class NaiveMeshStitcher
@@ -39,7 +37,7 @@ public class NaiveMeshStitcher
         PLYElement mesh2vertices = reader2.getHeader().getElement("vertex");
         PLYElement mesh2faces = reader2.getHeader().getElement("face");
 
-        TIntIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
+        TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
 
         writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
 
@@ -62,7 +60,7 @@ public class NaiveMeshStitcher
     }
 
     private static VertexStitchResult getStitchTransform(
-        File vertexFile, PLYReader reader2, TIntIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices
+        File vertexFile, PLYReader reader2, TDoubleIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices
     ) throws IOException
     {
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
@@ -74,24 +72,21 @@ public class NaiveMeshStitcher
         )
         {
             Vertex v;
-            ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * DataType.FLOAT.getByteSize() ]);
-            bb.order(ByteOrder.LITTLE_ENDIAN);
             for (int i = 0; i < mesh2NumVertices; i++)
             {
                 v = vr.get(i);
-                if (mesh1VertexMap.containsKey(v.hashCode()))
+                if (mesh1VertexMap.containsKey(v.getHash()))
                 {
-                    mesh2VertexIndices[ i ] = mesh1VertexMap.get(v.hashCode());
+                    mesh2VertexIndices[i] = mesh1VertexMap.get(v.getHash());
                     stitched++;
                 }
                 else
                 {
                     mesh2VertexIndices[ i ] = startingIndex++;
-                    bb.putFloat(v.x);
-                    bb.putFloat(v.y);
-                    bb.putFloat(v.z);
-                    bostream.write(bb.array());
-                    bb.clear();
+
+                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.x));
+                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.y));
+                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.z));
 
                     if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                     {
@@ -142,14 +137,14 @@ public class NaiveMeshStitcher
         copyFileBytesToFile(file1, faceE.getOffset(), faceE.getLength(), faceFile);
     }
 
-    private static TIntIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
+    private static TDoubleIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
     {
-        TIntIntHashMap mesh1Vertices = new TIntIntHashMap(mesh1NumVertices);
+        TDoubleIntHashMap mesh1Vertices = new TDoubleIntHashMap(mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
             for (int i = 0; i < mesh1NumVertices; i++)
             {
-                mesh1Vertices.put(vr.get(i).hashCode(), i);
+                mesh1Vertices.put(vr.get(i).getHash(), i);
             }
         }
         return mesh1Vertices;

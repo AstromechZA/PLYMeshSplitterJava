@@ -94,7 +94,7 @@ public class PackagedHierarchicalFileBuilder
             File last = children.get(0).getLinkedFile();
             for (int i = 1; i < children.size(); i++)
             {
-                File temp = TempFileManager.provide("phf", "tmp");
+                File temp = TempFileManager.provide("phf", ".ply");
 
                 File current = children.get(1).getLinkedFile();
                 System.out.printf("Stitching %s and %s into %s%n", last, current, temp);

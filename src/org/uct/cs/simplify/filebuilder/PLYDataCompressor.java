@@ -55,9 +55,9 @@ public class PLYDataCompressor
                 {
                     v = vr.get(i);
                     // write location
-                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.x));
-                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.y));
-                    Useful.littleEndianWrite(fostream, Float.floatToIntBits(v.z));
+                    Useful.littleEndianWrite(fostream, Float.floatToRawIntBits(v.x));
+                    Useful.littleEndianWrite(fostream, Float.floatToRawIntBits(v.y));
+                    Useful.littleEndianWrite(fostream, Float.floatToRawIntBits(v.z));
 
                     // write fake normal (this gets overrided in stage 2)
                     Useful.littleEndianWrite(fostream, 0);

@@ -7,7 +7,7 @@ public class Vertex
     public final float x;
     public final float y;
     public final float z;
-    public final int hash;
+    public final double hash;
     public byte r = (byte) 128;
     public byte g = (byte) 128;
     public byte b = (byte) 128;
@@ -34,17 +34,16 @@ public class Vertex
         this.hash = hash();
     }
 
-    private int hash()
+    private double hash()
     {
         long bits = 7L;
         bits = 31L * bits + Double.doubleToLongBits(this.x);
         bits = 31L * bits + Double.doubleToLongBits(this.y);
         bits = 31L * bits + Double.doubleToLongBits(this.z);
-        return (int) (bits ^ (bits >> 32));
+        return (double) (bits ^ (bits >> 32));
     }
 
-    @Override
-    public int hashCode()
+    public double getHash()
     {
         return this.hash;
     }
