@@ -34,7 +34,7 @@ public class FileBuilder
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
                 scaledFile,
                 outputDir,
-                new TreeDepthRule(3),
+                new TreeDepthRule(7),
                 new VariableKDTreeMembershipBuilder()
             );
 

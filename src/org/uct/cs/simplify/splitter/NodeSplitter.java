@@ -43,7 +43,7 @@ public class NodeSplitter
             GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
             if (result.numFaces > 0)
             {
-                File subNodeFile = TempFileManager.provide();
+                File subNodeFile = TempFileManager.provide("node", ".ply");
 
                 writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
