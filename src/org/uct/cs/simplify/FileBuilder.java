@@ -39,6 +39,7 @@ public class FileBuilder
             );
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
+            TempFileManager.setDeleteOnExit(false);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
         }

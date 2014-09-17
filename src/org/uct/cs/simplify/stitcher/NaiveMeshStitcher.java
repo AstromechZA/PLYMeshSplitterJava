@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.stitcher;
 
-import gnu.trove.map.hash.TDoubleIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.uct.cs.simplify.model.Face;
 import org.uct.cs.simplify.model.MemoryMappedFaceReader;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
@@ -39,7 +39,7 @@ public class NaiveMeshStitcher
         PLYElement mesh2vertices = reader2.getHeader().getElement("vertex");
         PLYElement mesh2faces = reader2.getHeader().getElement("face");
 
-        TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
+        TIntIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
 
         writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
 
@@ -61,7 +61,9 @@ public class NaiveMeshStitcher
         return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
     }
 
-    private static VertexStitchResult getStitchTransform(File vertexFile, PLYReader reader2, TDoubleIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices) throws IOException
+    private static VertexStitchResult getStitchTransform(
+        File vertexFile, PLYReader reader2, TIntIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices
+    ) throws IOException
     {
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
         int stitched = 0;
@@ -140,9 +142,9 @@ public class NaiveMeshStitcher
         copyFileBytesToFile(file1, faceE.getOffset(), faceE.getLength(), faceFile);
     }
 
-    private static TDoubleIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
+    private static TIntIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
     {
-        TDoubleIntHashMap mesh1Vertices = new TDoubleIntHashMap(mesh1NumVertices);
+        TIntIntHashMap mesh1Vertices = new TIntIntHashMap(mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
             for (int i = 0; i < mesh1NumVertices; i++)

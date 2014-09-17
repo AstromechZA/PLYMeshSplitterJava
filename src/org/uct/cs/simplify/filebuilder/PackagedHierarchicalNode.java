@@ -157,7 +157,7 @@ public class PackagedHierarchicalNode
             String.format("\"parent_id\":%s,", (parentID == null) ? "null" : parentID) +
             String.format("\"num_faces\":%d,", this.numFaces) +
             String.format("\"num_vertices\":%d,", this.numVertices) +
-            //String.format("\"file\":\"%s\",", this.linkedFile.getAbsolutePath().replace("\\", "\\\\")) +
+            String.format("\"file\":\"%s\",", this.linkedFile.getAbsolutePath().replace("\\", "\\\\")) +
             String.format("\"block_offset\":%d,", this.blockOffset) +
             String.format("\"block_length\":%d,", this.blockLength) +
             String.format("\"min_x\":%f,", this.boundingBox.getMinX()) +
