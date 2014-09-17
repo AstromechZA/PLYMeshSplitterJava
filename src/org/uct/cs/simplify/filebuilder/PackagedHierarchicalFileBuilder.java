@@ -73,33 +73,6 @@ public class PackagedHierarchicalFileBuilder
             }
         }
 
-        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
-        processQueue.add(tree);
-
-        // force gc and wait, so we can delete locked files
-        // (this is a remnant of mapped Byte buffers
-        try
-        {
-            System.gc();
-            Thread.sleep(1000);
-        }
-        catch (InterruptedException e)
-        { /* nothing */ }
-
-        while (!processQueue.isEmpty())
-        {
-            PackagedHierarchicalNode current = processQueue.removeFirst();
-            if (current.getLinkedFile().exists())
-            {
-                System.out.printf("Removing %s .. ", current.getLinkedFile().getPath());
-                System.out.printf("%s%n", current.getLinkedFile().delete());
-            }
-            for (PackagedHierarchicalNode node : current.getChildren())
-            {
-                processQueue.add(node);
-            }
-        }
-
         return outputFile;
     }
 
@@ -114,16 +87,15 @@ public class PackagedHierarchicalFileBuilder
             {
                 prepare(c);
 
+
                 // TODO simplify child
             }
-
-            if (node.getLinkedFile().exists()) node.getLinkedFile().delete();
 
             File last = children.get(0).getLinkedFile();
             for (int i = 1; i < children.size(); i++)
             {
-                File temp = File.createTempFile("phf", ".tmp");
-                temp.deleteOnExit();
+                File temp = TempFileManager.provide("phf", "tmp");
+
                 File current = children.get(1).getLinkedFile();
                 System.out.printf("Stitching %s and %s into %s%n", last, current, temp);
                 NaiveMeshStitcher.stitch(last, current, temp);
