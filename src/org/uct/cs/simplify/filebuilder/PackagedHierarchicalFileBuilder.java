@@ -50,12 +50,7 @@ public class PackagedHierarchicalFileBuilder
         {
             int l = jsonheader.length();
             System.out.println("Header length: " + l);
-            fostream.write(new byte[]{
-                (byte) (l & 0xFF),
-                (byte) ((l >> 8) & 0xFF),
-                (byte) ((l >> (8 * 2)) & 0xFF),
-                (byte) ((l >> (8 * 3)) & 0xFF)
-            });
+            Useful.littleEndianWrite(fostream, l);
             fostream.write(jsonheader.getBytes());
 
             System.out.printf("Writing header (%s)%n", Useful.formatBytes(l));
