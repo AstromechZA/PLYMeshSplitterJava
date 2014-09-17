@@ -1,6 +1,5 @@
 package org.uct.cs.simplify.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -46,4 +45,19 @@ public class Useful
         stream.write((i >> (8 * 2)) & BYTE);
         stream.write((i >> (8 * 3)) & BYTE);
     }
+
+    public static int readIntLE(byte[] input, int pos)
+    {
+        int o = input[ pos ] & 0xFF;
+        o |= ((input[ pos + 1 ] & 0xFF) << 8);
+        o |= ((input[ pos + 2 ] & 0xFF) << 16);
+        o |= ((input[ pos + 3 ] & 0xFF) << 24);
+        return o;
+    }
+
+    public static float readFloatLE(byte[] input, int pos)
+    {
+        return Float.intBitsToFloat(readIntLE(input, pos));
+    }
+
 }

@@ -65,10 +65,10 @@ public class PLYDataCompressor
                     Useful.littleEndianWrite(fostream, 1);
 
                     // write fake colour information
-                    fostream.write(128);
-                    fostream.write(128);
-                    fostream.write(128);
-                    fostream.write(255);
+                    fostream.write(v.r);
+                    fostream.write(v.g);
+                    fostream.write(v.b);
+                    fostream.write(v.a);
                 }
                 try(MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
                 {
@@ -82,8 +82,6 @@ public class PLYDataCompressor
                     }
                 }
             }
-
-
         }
 
         return new CompressionResult(vbuffersize, fbuffersize);
