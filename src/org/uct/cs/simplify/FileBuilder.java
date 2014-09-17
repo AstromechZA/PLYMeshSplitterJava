@@ -7,6 +7,7 @@ import org.uct.cs.simplify.splitter.HierarchicalSplitter;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
 import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
@@ -27,22 +28,18 @@ public class FileBuilder
             File outputDir = new File(cmd.getOptionValue("output"));
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
-            File scaledFile = new File(
-                outputDir,
-                String.format(
-                    "%s_rescaled_%d.ply",
-                    Useful.getFilenameWithoutExt(inputFile.getName()),
-                    RESCALE_SIZE
-                )
-            );
+            File scaledFile = TempFileManager.provide("rescaled");
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, true);
 
             PackagedHierarchicalNode tree = HierarchicalSplitter.split(
                 scaledFile,
                 outputDir,
-                new TreeDepthRule(2),
+                new TreeDepthRule(3),
                 new VariableKDTreeMembershipBuilder()
             );
+
+            TempFileManager.setWorkingDirectory(outputDir.toPath());
+            TempFileManager.setDeleteOnExit(false);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
         }
