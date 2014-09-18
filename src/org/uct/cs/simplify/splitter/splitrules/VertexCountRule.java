@@ -14,6 +14,6 @@ public class VertexCountRule implements ISplitRule
     @Override
     public boolean canSplit(PackagedHierarchicalNode node)
     {
-        return node.getNumVertices() > maxVertices;
+        return node.getNumVertices() > this.maxVertices;
     }
 }

@@ -14,6 +14,6 @@ public class TreeDepthRule implements ISplitRule
     @Override
     public boolean canSplit(PackagedHierarchicalNode node)
     {
-        return node.getDepth() < numSplits;
+        return node.getDepth() < this.numSplits;
     }
 }

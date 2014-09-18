@@ -4,14 +4,19 @@ import org.uct.cs.simplify.util.Useful;
 
 public class Vertex
 {
+    private static final byte DEFAULT_RED = (byte) 128;
+    private static final byte DEFAULT_GREEN = (byte) 128;
+    private static final byte DEFAULT_BLUE = (byte) 128;
+    private static final byte DEFAULT_ALPHA = (byte) 255;
+
     public final float x;
     public final float y;
     public final float z;
     public final double hash;
-    public byte r = (byte) 128;
-    public byte g = (byte) 128;
-    public byte b = (byte) 128;
-    public byte a = (byte) 255;
+    public byte r = DEFAULT_RED;
+    public byte g = DEFAULT_GREEN;
+    public byte b = DEFAULT_BLUE;
+    public byte a = DEFAULT_ALPHA;
 
     public Vertex(byte[] input, VertexAttrMap vam)
     {
@@ -31,7 +36,7 @@ public class Vertex
             this.a = input[ vam.alphaOffset ];
         }
 
-        this.hash = hash();
+        this.hash = this.hash();
     }
 
     private double hash()

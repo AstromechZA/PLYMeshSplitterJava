@@ -48,10 +48,10 @@ public class Useful
 
     public static int readIntLE(byte[] input, int pos)
     {
-        int o = input[ pos ] & 0xFF;
-        o |= ((input[ pos + 1 ] & 0xFF) << 8);
-        o |= ((input[ pos + 2 ] & 0xFF) << 16);
-        o |= ((input[ pos + 3 ] & 0xFF) << 24);
+        int o = input[pos] & BYTE;
+        o |= ((input[pos + 1] & BYTE) << 8);
+        o |= ((input[pos + 2] & BYTE) << (8 * 2));
+        o |= ((input[pos + 3] & BYTE) << (8 * 3));
         return o;
     }
 

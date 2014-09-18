@@ -80,6 +80,6 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 
     public int getCount()
     {
-        return count;
+        return this.count;
     }
 }

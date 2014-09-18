@@ -13,6 +13,7 @@ import java.io.IOException;
 public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
 {
     private static final double APPROXIMATION_THRESHOLD = 0.01;
+    private static final double MEDIAN_TARGET = 0.5;
 
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException
@@ -73,12 +74,12 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         approximate = (min + max) / 2;
         ratio = countValuesLessThan(vr, axis, approximate) / nv;
 
-        double minR = 0.5 - approximationThreshold;
-        double maxR = 0.5 + approximationThreshold;
+        double minR = MEDIAN_TARGET - approximationThreshold;
+        double maxR = MEDIAN_TARGET + approximationThreshold;
 
         while (ratio < minR || ratio > maxR)
         {
-            if (ratio > 0.5)
+            if (ratio > MEDIAN_TARGET)
             {
                 max = approximate;
             }

@@ -43,7 +43,7 @@ public class SimplifierWrapper
 
     private static class StreamGobbler extends Thread
     {
-        private StringBuilder sb;
+        private final StringBuilder sb;
         private final InputStream stream;
 
         public StreamGobbler(InputStream in)

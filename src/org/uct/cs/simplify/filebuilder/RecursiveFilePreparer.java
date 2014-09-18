@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class RecursiveFilePreparer
 {
+    private static final int DEFAULT_MIN_FACES = 100_000;
+
     public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
@@ -56,7 +58,7 @@ public class RecursiveFilePreparer
 
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
             int totalFaces = stitchedHeader.getElement("face").getCount();
-            int targetFaces = Math.max(totalFaces / childNodes.size(), 100_000);
+            int targetFaces = Math.max(totalFaces / childNodes.size(), DEFAULT_MIN_FACES);
 
             File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces);
 

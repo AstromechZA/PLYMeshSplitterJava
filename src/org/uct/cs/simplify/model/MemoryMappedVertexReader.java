@@ -15,7 +15,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
     private MappedByteBuffer buffer;
     private RandomAccessFile raf;
     private FileChannel fc;
-    private VertexAttrMap vam;
+    private final VertexAttrMap vam;
 
     public MemoryMappedVertexReader(PLYReader reader, String vertexElementName) throws IOException
     {
