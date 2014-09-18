@@ -148,4 +148,10 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
             return v;
         }
     }
+
+    @Override
+    public int getSplitRatio()
+    {
+        return 8;
+    }
 }

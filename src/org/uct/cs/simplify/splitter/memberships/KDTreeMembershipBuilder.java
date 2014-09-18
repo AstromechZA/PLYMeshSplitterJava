@@ -54,4 +54,10 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
             return new MembershipBuilderResult(subNodes, memberships);
         }
     }
+
+    @Override
+    public int getSplitRatio()
+    {
+        return 2;
+    }
 }

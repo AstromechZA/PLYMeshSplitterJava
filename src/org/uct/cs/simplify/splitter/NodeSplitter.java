@@ -29,6 +29,9 @@ public class NodeSplitter
         IMembershipBuilder membershipBuilder
     ) throws IOException
     {
+        System.out.printf(
+            "Splitting %s into %d subnodes%n", parent.getLinkedFile().getPath(), membershipBuilder.getSplitRatio()
+        );
         // output object for subnodes
         ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
 
@@ -170,7 +173,8 @@ public class NodeSplitter
         try (
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
-            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
+            ProgressBar pb = new ProgressBar("Gathering Vertices & Writing Faces", faceReader.getCount())
         )
         {
             Face face;
@@ -218,6 +222,8 @@ public class NodeSplitter
                     fostream.write(bostream.toByteArray());
                     bostream.reset();
                 }
+
+                pb.tick();
             }
             if (bostream.size() > 0) fostream.write(bostream.toByteArray());
             return new GatheringResult(numFacesInSubnode, vertexIndexMap);

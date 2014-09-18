@@ -112,5 +112,9 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         return v.z;
     }
 
-
+    @Override
+    public int getSplitRatio()
+    {
+        return 2;
+    }
 }

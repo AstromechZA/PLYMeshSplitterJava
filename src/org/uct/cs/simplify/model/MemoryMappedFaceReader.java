@@ -77,4 +77,9 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
         this.fc.close();
         this.raf.close();
     }
+
+    public int getCount()
+    {
+        return count;
+    }
 }

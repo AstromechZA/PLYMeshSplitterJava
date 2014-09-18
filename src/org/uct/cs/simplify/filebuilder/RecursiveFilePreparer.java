@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.filebuilder;
 
+import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
@@ -39,11 +40,9 @@ public class RecursiveFilePreparer
             );
 
             // pre process child nodes
-            int totalFaces = 0;
             ArrayList<PackagedHierarchicalNode> processedNodes = new ArrayList<>();
             for (PackagedHierarchicalNode childNode : childNodes)
             {
-                totalFaces += childNode.getNumFaces();
                 processedNodes.add(prepare(childNode, depth + 1, maxdepth));
             }
 
@@ -55,6 +54,8 @@ public class RecursiveFilePreparer
 
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
+            PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
+            int totalFaces = stitchedHeader.getElement("face").getCount();
             int targetFaces = Math.max(totalFaces / childNodes.size(), 100_000);
 
             File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces);
@@ -62,6 +63,9 @@ public class RecursiveFilePreparer
             PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedModel);
             outputNode.setBoundingBox(inputNode.getBoundingBox());
             outputNode.addChildren(processedNodes);
+
+            System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
+
             return outputNode;
         }
     }

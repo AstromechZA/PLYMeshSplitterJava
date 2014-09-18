@@ -8,4 +8,6 @@ import java.io.IOException;
 public interface IMembershipBuilder
 {
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException;
+
+    public int getSplitRatio();
 }
