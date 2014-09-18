@@ -16,6 +16,7 @@ import org.uct.cs.simplify.util.Useful;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 public class NaiveMeshStitcher
 {
@@ -25,7 +26,6 @@ public class NaiveMeshStitcher
 
     public static PLYHeader stitch(File file1, File file2, File outputFile) throws IOException
     {
-
         String outputFileBase = Useful.getFilenameWithoutExt(outputFile.getName());
         File vertexFile = TempFileManager.provide(outputFileBase + "_v");
         File faceFile = TempFileManager.provide(outputFileBase + "_f");
@@ -45,12 +45,11 @@ public class NaiveMeshStitcher
 
         writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
 
-        System.out.printf("mesh1v : %d%n", mesh1vertices.getCount());
-        System.out.printf("mesh2v : %d%n", mesh2vertices.getCount());
-        System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
-
-        System.out.printf("mesh1f : %d%n", mesh1faces.getCount());
-        System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
+//        System.out.printf("mesh1v : %d%n", mesh1vertices.getCount());
+//        System.out.printf("mesh2v : %d%n", mesh2vertices.getCount());
+//        System.out.printf("stitched : %d%n", stitchResult.getStitchedCount());
+//        System.out.printf("mesh1f : %d%n", mesh1faces.getCount());
+//        System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
 
         int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
 
@@ -210,6 +209,21 @@ public class NaiveMeshStitcher
         }
 
         return new PLYHeader(outputFile);
+    }
+
+    public static File stitch(ArrayList<File> files) throws IOException
+    {
+        File last = files.get(0);
+        for (int i = 1; i < files.size(); i++)
+        {
+            File temp = TempFileManager.provide("phf", ".ply");
+            File current = files.get(i);
+            System.out.printf("Stitching %s and %s into %s%n", last, current, temp);
+            NaiveMeshStitcher.stitch(last, current, temp);
+            last = temp;
+        }
+
+        return last;
     }
 
     private static class VertexStitchResult extends Pair<Integer, int[]>

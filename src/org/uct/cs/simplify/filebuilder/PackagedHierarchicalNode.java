@@ -21,12 +21,12 @@ public class PackagedHierarchicalNode
     private long blockOffset, blockLength;
     private int depth;
 
-    public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File linkedFile)
+    public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File f)
     {
         this.numFaces = numF;
         this.numVertices = numV;
         this.boundingBox = bb;
-        this.linkedFile = linkedFile;
+        this.linkedFile = f;
         this.parent = null;
         this.children = new ArrayList<>();
         this.blockOffset = 0;
@@ -34,13 +34,13 @@ public class PackagedHierarchicalNode
         this.depth = 0;
     }
 
-    public PackagedHierarchicalNode(File linkedFile) throws IOException
+    public PackagedHierarchicalNode(File f) throws IOException
     {
-        PLYReader r = new PLYReader(linkedFile);
+        PLYReader r = new PLYReader(f);
         this.numFaces = r.getHeader().getElement("face").getCount();
         this.numVertices = r.getHeader().getElement("vertex").getCount();
         this.boundingBox = BoundsFinder.getBoundingBox(r);
-        this.linkedFile = linkedFile;
+        this.linkedFile = f;
         this.parent = null;
         this.children = new ArrayList<>();
         this.blockOffset = 0;
@@ -214,5 +214,10 @@ public class PackagedHierarchicalNode
     public boolean hasChildren()
     {
         return !this.children.isEmpty();
+    }
+
+    public void addChildren(ArrayList<PackagedHierarchicalNode> children)
+    {
+        children.forEach(this::addChild);
     }
 }

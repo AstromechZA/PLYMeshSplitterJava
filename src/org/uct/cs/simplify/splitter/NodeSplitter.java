@@ -26,8 +26,7 @@ public class NodeSplitter
 
     public static ArrayList<PackagedHierarchicalNode> split(
         PackagedHierarchicalNode parent,
-        IMembershipBuilder membershipBuilder,
-        File outputDir
+        IMembershipBuilder membershipBuilder
     ) throws IOException
     {
         // output object for subnodes

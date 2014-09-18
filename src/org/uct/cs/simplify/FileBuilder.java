@@ -3,9 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalFileBuilder;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.splitter.HierarchicalSplitter;
-import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
-import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
+import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.util.MemStatRecorder;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Timer;
@@ -28,17 +26,15 @@ public class FileBuilder
             File outputDir = new File(cmd.getOptionValue("output"));
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
+            TempFileManager.setWorkingDirectory(outputDir.toPath());
+
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
+
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, true);
 
-            PackagedHierarchicalNode tree = HierarchicalSplitter.split(
-                scaledFile,
-                outputDir,
-                new TreeDepthRule(7),
-                new VariableKDTreeMembershipBuilder()
-            );
+            PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
 
-            TempFileManager.setWorkingDirectory(outputDir.toPath());
+            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, 2);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
         }

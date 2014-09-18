@@ -25,8 +25,7 @@ public class HierarchicalSplitter
 
             ArrayList<PackagedHierarchicalNode> children = NodeSplitter.split(
                 currentNode,
-                membershipBuilder,
-                outputDir
+                membershipBuilder
             );
 
             for (PackagedHierarchicalNode child : children)
