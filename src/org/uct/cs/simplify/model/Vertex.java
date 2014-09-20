@@ -2,6 +2,8 @@ package org.uct.cs.simplify.model;
 
 import org.uct.cs.simplify.util.Useful;
 
+import java.nio.ByteBuffer;
+
 public class Vertex
 {
     private static final byte DEFAULT_RED = (byte) 128;
@@ -26,14 +28,35 @@ public class Vertex
 
         if (vam.hasColour)
         {
-            this.r = input[ vam.redOffset ];
-            this.g = input[ vam.greenOffset ];
-            this.b = input[ vam.blueOffset ];
+            this.r = input[vam.redOffset];
+            this.g = input[vam.greenOffset];
+            this.b = input[vam.blueOffset];
         }
 
         if (vam.hasAlpha)
         {
-            this.a = input[ vam.alphaOffset ];
+            this.a = input[vam.alphaOffset];
+        }
+
+        this.hash = this.hash();
+    }
+
+    public Vertex(ByteBuffer input, VertexAttrMap vam)
+    {
+        this.x = Useful.readFloatLE(input, vam.xOffset);
+        this.y = Useful.readFloatLE(input, vam.yOffset);
+        this.z = Useful.readFloatLE(input, vam.zOffset);
+
+        if (vam.hasColour)
+        {
+            this.r = input.get(vam.redOffset);
+            this.g = input.get(vam.greenOffset);
+            this.b = input.get(vam.blueOffset);
+        }
+
+        if (vam.hasAlpha)
+        {
+            this.a = input.get(vam.alphaOffset);
         }
 
         this.hash = this.hash();

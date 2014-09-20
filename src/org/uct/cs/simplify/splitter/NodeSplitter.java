@@ -1,11 +1,8 @@
 package org.uct.cs.simplify.splitter;
 
+import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.model.Face;
-import org.uct.cs.simplify.model.MemoryMappedFaceReader;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
-import org.uct.cs.simplify.model.Vertex;
-import org.uct.cs.simplify.ply.datatypes.DataType;
+import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
@@ -13,8 +10,6 @@ import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
 import org.uct.cs.simplify.util.*;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -61,20 +56,16 @@ public class NodeSplitter
 
     private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, File tempFaceFile, GatheringResult result) throws IOException
     {
-        PLYHeader newHeader = PLYHeader.constructBasicHeader(result.numVertices, result.numFaces);
-
-        try (FileOutputStream fostream = new FileOutputStream(subNodeFile))
+        try (FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(subNodeFile)))
         {
-            fostream.write((newHeader + "\n").getBytes());
-
-            try (
-                MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
-                ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
-            )
+            try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
             {
                 Vertex v;
-                ByteBuffer bb = ByteBuffer.wrap(new byte[ 3 * DataType.FLOAT.getByteSize() ]);
-                bb.order(ByteOrder.LITTLE_ENDIAN);
+
+                VertexAttrMap vam = vr.getVam();
+                PLYHeader newHeader = PLYHeader.constructHeader(result.numVertices, result.numFaces, vam);
+                fostream.write((newHeader + "\n").getBytes());
+
                 try (
                     ProgressBar pb = new ProgressBar(
                         String.format("%s: Writing Vertices", Useful.getFilenameWithoutExt(subNodeFile.getName())),
@@ -86,27 +77,33 @@ public class NodeSplitter
                     {
                         pb.tick();
                         v = vr.get(i);
-                        bb.putFloat(v.x);
-                        bb.putFloat(v.y);
-                        bb.putFloat(v.z);
 
-                        bostream.write(bb.array());
-                        bb.clear();
+                        Useful.writeFloatLE(fostream, v.x);
+                        Useful.writeFloatLE(fostream, v.y);
+                        Useful.writeFloatLE(fostream, v.z);
 
-                        if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
+                        if (vam.hasColour)
                         {
-                            fostream.write(bostream.toByteArray());
-                            bostream.reset();
+                            fostream.write(v.r);
+                            fostream.write(v.g);
+                            fostream.write(v.b);
+                        }
+
+                        if (vam.hasAlpha)
+                        {
+                            fostream.write(v.a);
                         }
                     }
-                    if (bostream.size() > 0) fostream.write(bostream.toByteArray());
                 }
             }
+        }
 
-            try (FileChannel fc = new FileInputStream(tempFaceFile).getChannel())
-            {
-                fostream.getChannel().transferFrom(fc, fostream.getChannel().position(), fc.size());
-            }
+        try (
+            FileChannel fcIN = new FileInputStream(tempFaceFile).getChannel();
+            FileChannel fcOUT = new FileOutputStream(subNodeFile, true).getChannel()
+        )
+        {
+            fcIN.transferTo(0, fcIN.size(), fcOUT);
         }
     }
 
@@ -199,21 +196,21 @@ public class NodeSplitter
                         vertexIndexMap.put(face.i, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.i));
+                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.i));
 
                     if (!vertexIndexMap.containsKey(face.j))
                     {
                         vertexIndexMap.put(face.j, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.j));
+                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.j));
 
                     if (!vertexIndexMap.containsKey(face.k))
                     {
                         vertexIndexMap.put(face.k, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.littleEndianWrite(bostream, vertexIndexMap.get(face.k));
+                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.k));
 
                 }
 

@@ -57,10 +57,10 @@ public class RecursiveFilePreparer
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
-            int totalFaces = stitchedHeader.getElement("face").getCount();
-            int targetFaces = Math.max(totalFaces / childNodes.size(), DEFAULT_MIN_FACES);
+            long totalFaces = stitchedHeader.getElement("face").getCount();
+            long targetFaces = Math.max(totalFaces / childNodes.size(), DEFAULT_MIN_FACES);
 
-            File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces);
+            File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, (int) targetFaces);
 
             PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedModel);
             outputNode.setBoundingBox(inputNode.getBoundingBox());

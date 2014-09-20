@@ -1,16 +1,20 @@
 package org.uct.cs.simplify;
 
+import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.model.BoundsFinder;
-import org.uct.cs.simplify.ply.datatypes.DataType;
+import org.uct.cs.simplify.model.Vertex;
+import org.uct.cs.simplify.model.VertexAttrMap;
+import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -53,73 +57,80 @@ public class ScaleAndRecenter
 
         // debug
         System.out.println("Rescaling and Centering...");
-        System.out.printf("Input File: %s%n", reader.getFile());
-        System.out.printf("Output File: %s%n", outputFile);
+        System.out.printf("%s -> %s%n", reader.getFile(), outputFile);
         System.out.printf("Scale ratio: %f%n", scale);
         System.out.printf("Swapping YZ axis: %s%n", swapYZ);
 
-        try (
-            RandomAccessFile rafIN = new RandomAccessFile(reader.getFile(), "r");
-            FileChannel fcIN = rafIN.getChannel();
-            RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw");
-            FileChannel fcOUT = rafOUT.getChannel()
-        )
+        try (FileChannel fcIN = new FileInputStream(reader.getFile()).getChannel())
         {
-
-            int numVertices = reader.getHeader().getElement("vertex").getCount();
-            int numFaces = reader.getHeader().getElement("face").getCount();
-
-            // construct new header
-            PLYHeader header = PLYHeader.constructBasicHeader(numVertices, numFaces);
-            fcOUT.write(ByteBuffer.wrap((header + "\n").getBytes()));
-
+            PLYElement vertexE = reader.getHeader().getElement("vertex");
+            PLYElement faceE = reader.getHeader().getElement("face");
+            int numVertices = vertexE.getCount();
+            int numFaces = faceE.getCount();
             long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
             long vertexElementLength = reader.getElementDimension("vertex").getLength();
 
-            int blockSize = reader.getHeader().getElement("vertex").getItemSize();
-
-            ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(blockSize);
-            ByteBuffer blockBufferOUT = ByteBuffer.allocateDirect(3 * DataType.FLOAT.getByteSize());
-            blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
-            blockBufferOUT.order(ByteOrder.LITTLE_ENDIAN);
-
-            try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
+            try (FastBufferedOutputStream bufostream = new FastBufferedOutputStream(new FileOutputStream(outputFile)))
             {
-                fcIN.position(vertexElementBegin);
-                float x, y, z, t;
-                for (int n = 0; n < numVertices; n++)
+                VertexAttrMap vam = new VertexAttrMap(vertexE);
+                // construct new header
+                PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
+
+                bufostream.write((header + "\n").getBytes());
+
+                ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(vertexE.getItemSize());
+                blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
+
+                try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
-                    fcIN.read(blockBufferIN);
-                    blockBufferIN.flip();
-                    x = (float) ((blockBufferIN.getFloat() + translate.getX()) * scale);
-                    y = (float) ((blockBufferIN.getFloat() + translate.getY()) * scale);
-                    z = (float) ((blockBufferIN.getFloat() + translate.getZ()) * scale);
-
-                    if (swapYZ)
+                    fcIN.position(vertexElementBegin);
+                    float x, y, z, t;
+                    Vertex v;
+                    for (int n = 0; n < numVertices; n++)
                     {
-                        t = z;
-                        z = -y;
-                        y = t;
+                        fcIN.read(blockBufferIN);
+                        blockBufferIN.flip();
+
+                        v = new Vertex(blockBufferIN, vam);
+
+                        x = (float) ((v.x + translate.getX()) * scale);
+                        y = (float) ((v.y + translate.getY()) * scale);
+                        z = (float) ((v.z + translate.getZ()) * scale);
+
+                        if (swapYZ)
+                        {
+                            t = z;
+                            z = -y;
+                            y = t;
+                        }
+
+                        Useful.writeIntLE(bufostream, Float.floatToIntBits(x));
+                        Useful.writeIntLE(bufostream, Float.floatToIntBits(y));
+                        Useful.writeIntLE(bufostream, Float.floatToIntBits(z));
+
+                        if (vam.hasColour)
+                        {
+                            bufostream.write(v.r);
+                            bufostream.write(v.g);
+                            bufostream.write(v.b);
+                        }
+
+                        if (vam.hasAlpha)
+                        {
+                            bufostream.write(v.a);
+                        }
+
+                        blockBufferIN.clear();
+                        progress.tick();
                     }
-
-                    blockBufferOUT.putFloat(x);
-                    blockBufferOUT.putFloat(y);
-                    blockBufferOUT.putFloat(z);
-
-                    blockBufferOUT.flip();
-
-                    fcOUT.write(blockBufferOUT);
-
-                    blockBufferIN.clear();
-                    blockBufferOUT.clear();
-
-                    progress.tick();
                 }
             }
 
-            // copy remainder
-            long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
-            copyNBytes(fcIN, fcOUT, fileRemainder);
+            try (FileChannel fcOUT = new FileOutputStream(outputFile, true).getChannel())
+            {
+                long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
+                fcIN.transferTo(fcIN.position(), fileRemainder, fcOUT);
+            }
         }
 
         double minX = (bb.getMinX() - center.getX()) * scale;
@@ -141,35 +152,6 @@ public class ScaleAndRecenter
         }
 
         return new XBoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
-    }
-
-    private static void copyNBytes(FileChannel input, FileChannel output, long n) throws IOException
-    {
-        if (n == 0) return;
-
-        int bufsize = COPYBYTES_BUF_SIZE;
-        long div = n / bufsize;
-        int rem = (int) (n % bufsize);
-
-        ProgressBar pb = new ProgressBar("Copying Edges", div + 1);
-        ByteBuffer temp = ByteBuffer.allocate(bufsize);
-        for (long i = 0; i < div; i++)
-        {
-            input.read(temp);
-            temp.flip();
-            while (temp.hasRemaining()) output.write(temp);
-            temp.clear();
-            pb.tick();
-        }
-        if (rem > 0)
-        {
-            temp = ByteBuffer.allocate(rem);
-            input.read(temp);
-            temp.flip();
-            while (temp.hasRemaining()) output.write(temp);
-            pb.tick();
-        }
-        pb.close();
     }
 
     public static void main(String[] args)

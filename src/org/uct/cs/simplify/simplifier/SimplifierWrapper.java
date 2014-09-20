@@ -15,7 +15,7 @@ public class SimplifierWrapper
         Runtime r = Runtime.getRuntime();
         Process proc = r.exec(
             String.format(
-                "%s %s %s %d -By -Ty",
+                "%s %s %s %d -By",
                 PATH_TO_EXECUTABLE,
                 input.getAbsolutePath(),
                 tt.getAbsolutePath(),
