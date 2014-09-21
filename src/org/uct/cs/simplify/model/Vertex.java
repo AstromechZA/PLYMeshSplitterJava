@@ -103,9 +103,9 @@ public class Vertex
 
     public void writeToStream(OutputStream stream, VertexAttrMap vam) throws IOException
     {
-        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.x));
-        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.y));
-        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.z));
+        Useful.writeFloatLE(stream, this.x);
+        Useful.writeFloatLE(stream, this.y);
+        Useful.writeFloatLE(stream, this.z);
 
         if (vam.hasColour)
         {

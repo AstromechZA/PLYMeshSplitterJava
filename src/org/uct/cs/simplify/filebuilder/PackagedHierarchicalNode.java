@@ -92,19 +92,9 @@ public class PackagedHierarchicalNode
         return this.numVertices;
     }
 
-    public void setNumVertices(int numVertices)
-    {
-        this.numVertices = numVertices;
-    }
-
     public long getNumFaces()
     {
         return this.numFaces;
-    }
-
-    public void setNumFaces(int numFaces)
-    {
-        this.numFaces = numFaces;
     }
 
     public XBoundingBox getBoundingBox()
@@ -122,29 +112,9 @@ public class PackagedHierarchicalNode
         return this.linkedFile;
     }
 
-    public void setLinkedFile(File linkedFile)
-    {
-        this.linkedFile = linkedFile;
-    }
-
-    public void setParent(PackagedHierarchicalNode parent)
-    {
-        this.parent = parent;
-    }
-
-    public long getBlockOffset()
-    {
-        return this.blockOffset;
-    }
-
     public void setBlockOffset(long blockOffset)
     {
         this.blockOffset = blockOffset;
-    }
-
-    public long getBlockLength()
-    {
-        return this.blockLength;
     }
 
     public void setBlockLength(long blockLength)
@@ -171,33 +141,12 @@ public class PackagedHierarchicalNode
                 '}';
     }
 
-    public ArrayList<PackagedHierarchicalNode> getLeafNodes(ArrayList<PackagedHierarchicalNode> o)
-    {
-        if (this.children.isEmpty())
-        {
-            o.add(this);
-        } else
-        {
-            for (PackagedHierarchicalNode child : this.children)
-            {
-                child.getLeafNodes(o);
-            }
-        }
-        return o;
-    }
-
-    public ArrayList<PackagedHierarchicalNode> getLeafNodes()
-    {
-        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>(100);
-        return this.getLeafNodes(output);
-    }
-
-    public int countDescendants()
+    public int countSelfPlusDescendants()
     {
         int c = 1;
         for (PackagedHierarchicalNode child : this.children)
         {
-            c += child.countDescendants();
+            c += child.countSelfPlusDescendants();
         }
         return c;
     }

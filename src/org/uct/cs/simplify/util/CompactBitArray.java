@@ -28,11 +28,6 @@ public class CompactBitArray
         this.bitMask = (1 << this.bits) - 1;
     }
 
-    public CompactBitArray(int length)
-    {
-        this(1, length);
-    }
-
     public long size()
     {
         return this.length;
@@ -70,6 +65,4 @@ public class CompactBitArray
         int newData = (v & this.bitMask) << positionIndex;
         this.data[ (int) blockIndex ] = oldData | newData;
     }
-
-
 }

@@ -52,11 +52,6 @@ public class PLYHeader
         return this.file;
     }
 
-    public PLYFormat getFormat()
-    {
-        return this.format;
-    }
-
     public LinkedHashMap<String, PLYElement> getElements()
     {
         return this.elements;

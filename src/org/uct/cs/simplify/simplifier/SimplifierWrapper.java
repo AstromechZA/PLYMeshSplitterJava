@@ -6,7 +6,7 @@ import java.io.*;
 
 public class SimplifierWrapper
 {
-    private static final String PATH_TO_EXECUTABLE = "./simplifier/SimplFy";
+    private static final String PATH_TO_EXECUTABLE = "./simplifier/tridecimator";
 
     public static File simplify(File input, int numFaces) throws IOException, InterruptedException
     {

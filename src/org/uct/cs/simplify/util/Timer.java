@@ -6,12 +6,6 @@ public class Timer implements AutoCloseable
     private final String text;
     private final long starttime;
 
-    public Timer()
-    {
-        this.text = "Timer";
-        this.starttime = System.nanoTime();
-    }
-
     public Timer(String text)
     {
         this.text = text;
