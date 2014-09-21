@@ -14,7 +14,7 @@ public class Stitcher
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer("Total"); StatRecorder ignored2 = new StatRecorder())
+        try (StatRecorder ignored = new StatRecorder())
         {
             File file1 = new File(cmd.getOptionValue("filename1"));
             File file2 = new File(cmd.getOptionValue("filename2"));

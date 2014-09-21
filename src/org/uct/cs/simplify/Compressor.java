@@ -14,7 +14,7 @@ public class Compressor
         File input = new File("temp/compressor/test.ply");
         File output = new File("temp/compressor/o.dat");
 
-        try(StatRecorder ignored = new StatRecorder(); Timer t = new Timer())
+        try(StatRecorder ignored = new StatRecorder())
         {
             PLYDataCompressor.compress(input, output);
         }

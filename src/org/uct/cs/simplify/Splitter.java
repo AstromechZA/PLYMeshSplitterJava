@@ -22,7 +22,7 @@ public class Splitter
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer("Total"); StatRecorder ignored2 = new StatRecorder())
+        try (StatRecorder ignored = new StatRecorder())
         {
             File inputFile = new File(cmd.getOptionValue("filename"));
             File outputDir = new File(new File(cmd.getOptionValue("output")).getCanonicalPath());

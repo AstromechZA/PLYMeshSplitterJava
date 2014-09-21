@@ -43,7 +43,7 @@ public class Blueprintify
     {
         CommandLine cmd = parseArgs(args);
 
-        try (Timer ignored = new Timer(); StatRecorder ignored2 = new StatRecorder())
+        try (StatRecorder ignored = new StatRecorder())
         {
             int resolution = cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION;
             float alphamod = cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD;
