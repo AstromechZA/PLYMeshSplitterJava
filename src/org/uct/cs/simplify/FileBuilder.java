@@ -4,7 +4,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalFileBuilder;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
-import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -20,14 +20,13 @@ public class FileBuilder
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer("Total"); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (StatRecorder ignored = new StatRecorder())
         {
             File inputFile = new File(cmd.getOptionValue("input"));
             File outputDir = new File(cmd.getOptionValue("output"));
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
-            TempFileManager.setDeleteOnExit(false);
 
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
 
@@ -37,7 +36,7 @@ public class FileBuilder
 
             PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
 
-            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, 2);
+            PackagedHierarchicalNode tree = RecursiveFilePreparer.buildNodes(seed, 2);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
         }

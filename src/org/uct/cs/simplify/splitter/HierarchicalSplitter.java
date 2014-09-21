@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 public class HierarchicalSplitter
 {
+    @SuppressWarnings("CollectionWithoutInitialCapacity")
     public static PackagedHierarchicalNode split(File inputFile, File outputDir, ISplitRule rule, IMembershipBuilder membershipBuilder) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());

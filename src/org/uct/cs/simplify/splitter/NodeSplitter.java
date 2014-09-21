@@ -28,12 +28,13 @@ public class NodeSplitter
             "Splitting %s into %d subnodes%n", parent.getLinkedFile().getPath(), membershipBuilder.getSplitRatio()
         );
         // output object for subnodes
-        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
 
         // build reader object
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
+
+        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
             File tempFaceFile = TempFileManager.provide();

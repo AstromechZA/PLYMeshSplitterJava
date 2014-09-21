@@ -20,6 +20,7 @@ public class PLYElement
         this.name = name.toLowerCase();
         this.count = count;
         this.itemSize = 0;
+        //noinspection CollectionWithoutInitialCapacity
         this.properties = new ArrayList<>();
     }
 

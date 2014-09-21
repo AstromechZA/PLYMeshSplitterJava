@@ -16,7 +16,7 @@ public class BluePrintGenerator
 {
     private static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2 * 100);
     private static final Color DEFAULT_FOREGROUND = Color.white;
-    private static final int BYTE = 0xFF;
+    private static final int BYTE_MASK = 0xFF;
 
     public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type)
         throws IOException
@@ -132,17 +132,17 @@ public class BluePrintGenerator
     private static int blend(int bgi, int fgi, float amount)
     {
         float namount = 1 - amount;
-        int dr = (bgi >> (8 * 2)) & BYTE;
-        int dg = (bgi >> 8) & BYTE;
-        int db = bgi & BYTE;
+        int dr = (bgi >> (8 * 2)) & BYTE_MASK;
+        int dg = (bgi >> 8) & BYTE_MASK;
+        int db = bgi & BYTE_MASK;
 
-        int sr = (fgi >> (8 * 2)) & BYTE;
-        int sg = (fgi >> 8) & BYTE;
-        int sb = fgi & BYTE;
+        int sr = (fgi >> (8 * 2)) & BYTE_MASK;
+        int sg = (fgi >> 8) & BYTE_MASK;
+        int sb = fgi & BYTE_MASK;
 
-        int rr = (int) ((sr * amount) + (dr * namount)) & BYTE;
-        int rg = (int) ((sg * amount) + (dg * namount)) & BYTE;
-        int rb = (int) ((sb * amount) + (db * namount)) & BYTE;
+        int rr = (int) ((sr * amount) + (dr * namount)) & BYTE_MASK;
+        int rg = (int) ((sg * amount) + (dg * namount)) & BYTE_MASK;
+        int rb = (int) ((sb * amount) + (db * namount)) & BYTE_MASK;
 
         return (rr << (8 * 2)) + (rg << 8) + rb;
     }

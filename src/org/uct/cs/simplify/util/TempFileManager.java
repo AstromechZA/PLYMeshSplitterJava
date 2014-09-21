@@ -10,7 +10,7 @@ import java.nio.file.Path;
  */
 public class TempFileManager
 {
-    private static Path workingDirectory;
+    private static Path workingDirectory = null;
     private static boolean deleteOnExit = true;
 
     public static Path getWorkingDirectory() throws IOException

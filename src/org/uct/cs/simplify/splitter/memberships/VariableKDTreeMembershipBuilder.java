@@ -51,9 +51,7 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         }
     }
 
-    private static double calculateMedianInRegion(
-        MemoryMappedVertexReader vr, XBoundingBox bb, SplittingAxis axis, double approximationThreshold
-    )
+    private static double calculateMedianInRegion(MemoryMappedVertexReader vr, XBoundingBox bb, SplittingAxis axis, double approxThreshold)
     {
         double min, max, approximate, ratio;
         switch (axis)
@@ -76,8 +74,8 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         approximate = (min + max) / 2;
         ratio = countValuesLessThan(vr, axis, approximate) / nv;
 
-        double minR = MEDIAN_TARGET - approximationThreshold;
-        double maxR = MEDIAN_TARGET + approximationThreshold;
+        double minR = MEDIAN_TARGET - approxThreshold;
+        double maxR = MEDIAN_TARGET + approxThreshold;
 
         while (ratio < minR || ratio > maxR)
         {

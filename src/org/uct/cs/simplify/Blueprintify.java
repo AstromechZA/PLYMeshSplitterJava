@@ -3,7 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
@@ -27,9 +27,10 @@ public class Blueprintify
     public static void run(PLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
     {
 
+        File outputFile;
         for (BluePrintGenerator.CoordinateSpace coordinateSpace : BluePrintGenerator.CoordinateSpace.values())
         {
-            File outputFile = new File(outputDir, reader.getFile().getName() + "." + coordinateSpace.name() + "." + OUTPUT_FORMAT);
+            outputFile = new File(outputDir, reader.getFile().getName() + '.' + coordinateSpace.name() + '.' + OUTPUT_FORMAT);
             BufferedImage bi = BluePrintGenerator.createImage(reader, resolution, alphamod, coordinateSpace);
             ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
@@ -42,7 +43,7 @@ public class Blueprintify
     {
         CommandLine cmd = parseArgs(args);
 
-        try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (Timer ignored = new Timer(); StatRecorder ignored2 = new StatRecorder())
         {
             int resolution = cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION;
             float alphamod = cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD;

@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("CollectionWithoutInitialCapacity")
 public class PLYHeader
 {
     private static final String HEADER_REGEXP = "[\\s\\S]*?end_header.*?\n";
@@ -150,7 +151,7 @@ public class PLYHeader
 
     public static PLYHeader constructHeader(int numVertices, int numFaces, VertexAttrMap vam)
     {
-        List<PLYElement> elements = new ArrayList<>();
+        List<PLYElement> elements = new ArrayList<>(7);
         PLYElement eVertex = new PLYElement("vertex", numVertices);
         eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
         eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));

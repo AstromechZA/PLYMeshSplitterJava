@@ -13,7 +13,7 @@ public class Useful
     private static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
     private static final long KILOBYTE = 1024;
     private static final long MEGABYTE = 1048576;
-    private static final int BYTE = 255;
+    private static final int BYTE_MASK = 255;
 
     public static String getFilenameWithoutExt(String fn)
     {
@@ -41,10 +41,10 @@ public class Useful
 
     public static void writeIntLE(OutputStream stream, int i) throws IOException
     {
-        stream.write(i & BYTE);
-        stream.write((i >> 8) & BYTE);
-        stream.write((i >> (8 * 2)) & BYTE);
-        stream.write((i >> (8 * 3)) & BYTE);
+        stream.write(i & BYTE_MASK);
+        stream.write((i >> 8) & BYTE_MASK);
+        stream.write((i >> (8 * 2)) & BYTE_MASK);
+        stream.write((i >> (8 * 3)) & BYTE_MASK);
     }
 
     public static void writeFloatLE(OutputStream stream, float f) throws IOException
@@ -54,10 +54,10 @@ public class Useful
 
     public static int readIntLE(byte[] input, int pos)
     {
-        int o = input[pos] & BYTE;
-        o |= (input[pos + 1] & BYTE) << 8;
-        o |= (input[pos + 2] & BYTE) << (8 * 2);
-        o |= (input[pos + 3] & BYTE) << (8 * 3);
+        int o = input[pos] & BYTE_MASK;
+        o |= (input[pos + 1] & BYTE_MASK) << 8;
+        o |= (input[pos + 2] & BYTE_MASK) << (8 * 2);
+        o |= (input[pos + 3] & BYTE_MASK) << (8 * 3);
         return o;
     }
 
@@ -68,10 +68,10 @@ public class Useful
 
     public static int readIntLE(ByteBuffer input, int pos)
     {
-        int o = input.get(pos) & BYTE;
-        o |= (input.get(pos + 1) & BYTE) << 8;
-        o |= (input.get(pos + 2) & BYTE) << (8 * 2);
-        o |= (input.get(pos + 3) & BYTE) << (8 * 3);
+        int o = input.get(pos) & BYTE_MASK;
+        o |= (input.get(pos + 1) & BYTE_MASK) << 8;
+        o |= (input.get(pos + 2) & BYTE_MASK) << (8 * 2);
+        o |= (input.get(pos + 3) & BYTE_MASK) << (8 * 3);
         return o;
     }
 

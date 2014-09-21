@@ -15,7 +15,7 @@ public class RecursiveFilePreparer
 {
     private static final int DEFAULT_MIN_FACES = 100_000;
 
-    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth)
+    public static PackagedHierarchicalNode buildNodes(PackagedHierarchicalNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
         return prepare(inputNode, 0, maxdepth);
@@ -43,13 +43,13 @@ public class RecursiveFilePreparer
             );
 
             // pre process child nodes
-            List<PackagedHierarchicalNode> processedNodes = new ArrayList<>();
+            List<PackagedHierarchicalNode> processedNodes = new ArrayList<>(childNodes.size());
             for (PackagedHierarchicalNode childNode : childNodes)
             {
                 processedNodes.add(prepare(childNode, depth + 1, maxdepth));
             }
 
-            List<File> processedFiles = new ArrayList<>();
+            List<File> processedFiles = new ArrayList<>(processedNodes.size());
             for (PackagedHierarchicalNode n : processedNodes)
             {
                 processedFiles.add(n.getLinkedFile());

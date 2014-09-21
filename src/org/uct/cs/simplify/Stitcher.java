@@ -2,7 +2,7 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
-import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public class Stitcher
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer("Total"); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (Timer ignored = new Timer("Total"); StatRecorder ignored2 = new StatRecorder())
         {
             File file1 = new File(cmd.getOptionValue("filename1"));
             File file2 = new File(cmd.getOptionValue("filename2"));

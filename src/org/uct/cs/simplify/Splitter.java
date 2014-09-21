@@ -5,7 +5,7 @@ import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
-import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
@@ -22,7 +22,7 @@ public class Splitter
     {
         CommandLine cmd = getCommandLine(args);
 
-        try (Timer ignored = new Timer("Total"); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (Timer ignored = new Timer("Total"); StatRecorder ignored2 = new StatRecorder())
         {
             File inputFile = new File(cmd.getOptionValue("filename"));
             File outputDir = new File(new File(cmd.getOptionValue("output")).getCanonicalPath());

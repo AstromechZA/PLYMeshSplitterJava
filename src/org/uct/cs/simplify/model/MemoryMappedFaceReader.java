@@ -12,7 +12,7 @@ import java.util.Iterator;
 
 public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 {
-    private static final int BYTE = 0xFF;
+    private static final int BYTE_MASK = 0xFF;
 
     private int index;
     private int count;
@@ -45,7 +45,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
 
     public Face next()
     {
-        int vertexCount = this.buffer.get() & BYTE;
+        int vertexCount = this.buffer.get() & BYTE_MASK;
 
         int i = this.buffer.getInt();
         int j = this.buffer.getInt();

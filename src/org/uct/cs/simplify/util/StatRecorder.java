@@ -3,24 +3,26 @@ package org.uct.cs.simplify.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemStatRecorder implements AutoCloseable
+public class StatRecorder implements AutoCloseable
 {
     private static final int DEFAULT_INTERVAL_MS = 50;
 
-    private int intervalMs;
-    private List<Pair<Long, Long>> recordings;
-    private Thread backgroundThread;
+    private final int intervalMs;
+    private final List<Pair<Long, Long>> recordings;
+    private final Thread backgroundThread;
+    private final long startTime;
 
-    public MemStatRecorder()
+    public StatRecorder()
     {
-        this.construct(DEFAULT_INTERVAL_MS);
+        this(DEFAULT_INTERVAL_MS);
     }
 
-    private void construct(int intervalMs)
+    public StatRecorder(int intervalMs)
     {
+        this.startTime = System.nanoTime();
         if (intervalMs < 10) throw new IllegalArgumentException("intervalMS is too small!");
         this.intervalMs = intervalMs;
-        this.recordings = new ArrayList<>();
+        this.recordings = new ArrayList<>(1000);
         this.backgroundThread = new Thread(new MemRecorderThread(this));
         this.backgroundThread.start();
     }
@@ -46,6 +48,7 @@ public class MemStatRecorder implements AutoCloseable
         }
 
         double average = total / (double) this.recordings.size();
+        long elapsed = System.nanoTime() - this.startTime;
 
         System.out.printf("%n=== Memory Stats =========%n");
         System.out.printf("Mem : Start :   %s%n", Useful.formatBytes(start));
@@ -53,6 +56,7 @@ public class MemStatRecorder implements AutoCloseable
         System.out.printf("Mem : Average : %s%n", Useful.formatBytes(average));
         System.out.printf("Mem : Max :     %s%n", Useful.formatBytes(max));
         System.out.printf("Mem : End :     %s%n", Useful.formatBytes(end));
+        System.out.printf("Time:           %s%n", Useful.formatTime(elapsed));
         System.out.printf("==========================%n");
     }
 
@@ -68,9 +72,9 @@ public class MemStatRecorder implements AutoCloseable
 
     private static class MemRecorderThread implements Runnable
     {
-        private final MemStatRecorder parent;
+        private final StatRecorder parent;
 
-        public MemRecorderThread(MemStatRecorder mr)
+        public MemRecorderThread(StatRecorder mr)
         {
             this.parent = mr;
         }

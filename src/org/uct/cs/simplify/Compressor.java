@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.uct.cs.simplify.filebuilder.PLYDataCompressor;
-import org.uct.cs.simplify.util.MemStatRecorder;
+import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public class Compressor
         File input = new File("temp/compressor/test.ply");
         File output = new File("temp/compressor/o.dat");
 
-        try(MemStatRecorder ignored = new MemStatRecorder(); Timer t = new Timer())
+        try(StatRecorder ignored = new StatRecorder(); Timer t = new Timer())
         {
             PLYDataCompressor.compress(input, output);
         }

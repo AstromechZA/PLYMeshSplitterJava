@@ -20,7 +20,7 @@ public class PLYReader
     {
         this.header = h;
         this.file = h.getFile();
-        this.elementDimensions = new LinkedHashMap<>();
+        this.elementDimensions = new LinkedHashMap<>(2);
 
         this.positionScan();
     }

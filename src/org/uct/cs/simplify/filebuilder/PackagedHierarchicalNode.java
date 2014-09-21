@@ -29,7 +29,7 @@ public class PackagedHierarchicalNode
         this.boundingBox = bb;
         this.linkedFile = f;
         this.parent = null;
-        this.children = new ArrayList<>();
+        this.children = new ArrayList<>(8);
         this.blockOffset = 0;
         this.blockLength = 0;
         this.depth = 0;
@@ -43,12 +43,13 @@ public class PackagedHierarchicalNode
         this.boundingBox = BoundsFinder.getBoundingBox(r);
         this.linkedFile = f;
         this.parent = null;
-        this.children = new ArrayList<>();
+        this.children = new ArrayList<>(8);
         this.blockOffset = 0;
         this.blockLength = 0;
         this.depth = 0;
     }
 
+    @SuppressWarnings("CollectionWithoutInitialCapacity")
     public static String buildJSONHierarchy(PackagedHierarchicalNode root)
     {
         int id = 0;
@@ -69,7 +70,7 @@ public class PackagedHierarchicalNode
             if (first)
                 first = false;
             else
-                s.append(",");
+                s.append(',');
             s.append(node.toJSON(nodeIds.get(node), (node.parent == null) ? null : nodeIds.get(node.parent)));
         }
         return s + "]";
@@ -153,7 +154,7 @@ public class PackagedHierarchicalNode
 
     public String toJSON(int id, Integer parentID)
     {
-        return "{" +
+        return '{' +
             String.format("\"id\":%d,", id) +
             String.format("\"parent_id\":%s,", (parentID == null) ? "null" : parentID) +
             String.format("\"num_faces\":%d,", this.numFaces) +
@@ -167,7 +168,7 @@ public class PackagedHierarchicalNode
             String.format("\"max_x\":%f,", this.boundingBox.getMaxX()) +
             String.format("\"max_y\":%f,", this.boundingBox.getMaxY()) +
             String.format("\"max_z\":%f", this.boundingBox.getMaxZ()) +
-            "}";
+                '}';
     }
 
     public ArrayList<PackagedHierarchicalNode> getLeafNodes(ArrayList<PackagedHierarchicalNode> o)
@@ -187,7 +188,7 @@ public class PackagedHierarchicalNode
 
     public ArrayList<PackagedHierarchicalNode> getLeafNodes()
     {
-        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>();
+        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>(100);
         return this.getLeafNodes(output);
     }
 

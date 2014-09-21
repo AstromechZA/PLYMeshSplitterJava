@@ -155,7 +155,7 @@ public class ScaleAndRecenter
 
     public static void main(String[] args)
     {
-        try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
+        try (Timer ignored = new Timer(); StatRecorder ignored2 = new StatRecorder())
         {
             CommandLine cmd = parseArgs(args);
             int rescaleToSize = cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE;

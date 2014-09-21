@@ -17,7 +17,7 @@ public class PackagedHierarchicalFileBuilder
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
         try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
         {
-            ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
+            ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>(100);
             processQueue.add(tree);
 
             long position = 0;

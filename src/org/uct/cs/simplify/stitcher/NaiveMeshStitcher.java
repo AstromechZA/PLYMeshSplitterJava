@@ -13,14 +13,11 @@ import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
 
 public class NaiveMeshStitcher
 {
-    public static final int COPYBYTES_BUF_SIZE = 4096;
-
     public static PLYHeader stitch(File file1, File file2, File outputFile) throws IOException
     {
         String outputFileBase = Useful.getFilenameWithoutExt(outputFile.getName());
@@ -119,15 +116,23 @@ public class NaiveMeshStitcher
         }
     }
 
-    private static void writeMesh1ToTempFiles(File file1, File vertexFile, File faceFile, PLYReader reader1) throws IOException
+    private static void writeMesh1ToTempFiles(File inputFile, File vertexFile, File faceFile, PLYReader reader) throws IOException
     {
-        // write vertices to tempfile1
-        ElementDimension vertexE = reader1.getElementDimension("vertex");
-        copyFileBytesToFile(file1, vertexE.getOffset(), vertexE.getLength(), vertexFile);
+        ElementDimension vertexE = reader.getElementDimension("vertex");
+        ElementDimension faceE = reader.getElementDimension("face");
 
-        // write faces to tempfile2
-        ElementDimension faceE = reader1.getElementDimension("face");
-        copyFileBytesToFile(file1, faceE.getOffset(), faceE.getLength(), faceFile);
+        try(FileChannel fcIN = new RandomAccessFile(inputFile, "r").getChannel())
+        {
+            try(FileChannel fcOUT = new FileOutputStream(vertexFile).getChannel())
+            {
+                fcIN.transferTo(vertexE.getOffset(), vertexE.getLength(), fcOUT);
+            }
+
+            try(FileChannel fcOUT = new FileOutputStream(faceFile).getChannel())
+            {
+                fcIN.transferTo(faceE.getOffset(), faceE.getLength(), fcOUT);
+            }
+        }
     }
 
     private static TDoubleIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
@@ -141,39 +146,6 @@ public class NaiveMeshStitcher
             }
         }
         return mesh1Vertices;
-    }
-
-    private static void copyFileBytesToFile(File inputFile, Long offset, Long length, File outputFile) throws IOException
-    {
-        try (
-            RandomAccessFile rafIN = new RandomAccessFile(inputFile, "r");
-            FileChannel fcIN = rafIN.getChannel();
-            RandomAccessFile rafOUT = new RandomAccessFile(outputFile, "rw");
-            FileChannel fcOUT = rafOUT.getChannel()
-        )
-        {
-            fcIN.position(offset);
-
-            int bufsize = COPYBYTES_BUF_SIZE;
-            long div = length / bufsize;
-            int rem = (int) (length % bufsize);
-
-            ByteBuffer temp = ByteBuffer.allocate(bufsize);
-            for (long i = 0; i < div; i++)
-            {
-                fcIN.read(temp);
-                temp.flip();
-                while (temp.hasRemaining()) fcOUT.write(temp);
-                temp.clear();
-            }
-            if (rem > 0)
-            {
-                temp = ByteBuffer.allocate(rem);
-                fcIN.read(temp);
-                temp.flip();
-                while (temp.hasRemaining()) fcOUT.write(temp);
-            }
-        }
     }
 
     private static PLYHeader writeFinalPLYModel(
