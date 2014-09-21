@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.model;
 
+import javafx.geometry.Point3D;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.IOException;
@@ -13,10 +14,11 @@ public class Vertex
     private static final byte DEFAULT_BLUE = (byte) 128;
     private static final byte DEFAULT_ALPHA = (byte) 255;
 
-    public final float x;
-    public final float y;
-    public final float z;
-    private final double hash;
+    public float x;
+    public float y;
+    public float z;
+    private boolean staleHash = true;
+    private double hash;
     public byte r = DEFAULT_RED;
     public byte g = DEFAULT_GREEN;
     public byte b = DEFAULT_BLUE;
@@ -60,8 +62,22 @@ public class Vertex
         {
             this.a = input.get(vam.alphaOffset);
         }
+    }
 
-        this.hash = this.hash();
+    public void transform(Point3D translate, float scale)
+    {
+        this.x = (float) ((this.x + translate.getX()) * scale);
+        this.y = (float) ((this.y + translate.getY()) * scale);
+        this.z = (float) ((this.z + translate.getZ()) * scale);
+        this.staleHash = false;
+    }
+
+    public void swapYZ()
+    {
+        float t = this.z;
+        this.z = -this.y;
+        this.y = t;
+        this.staleHash = false;
     }
 
     @SuppressWarnings("MagicNumber")
@@ -74,8 +90,14 @@ public class Vertex
         return (double) (bits ^ (bits >> 32));
     }
 
+    @SuppressWarnings("MagicNumber")
     public double getHash()
     {
+        if (this.staleHash)
+        {
+            this.hash = this.hash();
+            this.staleHash = false;
+        }
         return this.hash;
     }
 

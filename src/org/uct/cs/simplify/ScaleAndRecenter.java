@@ -83,7 +83,6 @@ public class ScaleAndRecenter
                 try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
                     fcIN.position(vertexElementBegin);
-                    float x, y, z, t;
                     Vertex v;
                     for (int n = 0; n < numVertices; n++)
                     {
@@ -91,33 +90,9 @@ public class ScaleAndRecenter
                         blockBufferIN.flip();
 
                         v = new Vertex(blockBufferIN, vam);
-
-                        x = (float) ((v.x + translate.getX()) * scale);
-                        y = (float) ((v.y + translate.getY()) * scale);
-                        z = (float) ((v.z + translate.getZ()) * scale);
-
-                        if (swapYZ)
-                        {
-                            t = z;
-                            z = -y;
-                            y = t;
-                        }
-
-                        Useful.writeIntLE(bufostream, Float.floatToIntBits(x));
-                        Useful.writeIntLE(bufostream, Float.floatToIntBits(y));
-                        Useful.writeIntLE(bufostream, Float.floatToIntBits(z));
-
-                        if (vam.hasColour)
-                        {
-                            bufostream.write(v.r);
-                            bufostream.write(v.g);
-                            bufostream.write(v.b);
-                        }
-
-                        if (vam.hasAlpha)
-                        {
-                            bufostream.write(v.a);
-                        }
+                        v.transform(translate, (float)scale);
+                        if (swapYZ) v.swapYZ();
+                        v.writeToStream(bufostream, vam);
 
                         blockBufferIN.clear();
                         progress.tick();
