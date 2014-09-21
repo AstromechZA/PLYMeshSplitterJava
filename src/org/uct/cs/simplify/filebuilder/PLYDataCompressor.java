@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public class PLYDataCompressor
 {
-    private static final int BYTES_PER_VERTEX = 28;
+    private static final int BYTES_PER_VERTEX = 16;
     private static final int BYTES_PER_FACE = 12;
 
     public static CompressionResult compress(File inputFile, File outputFile) throws IOException

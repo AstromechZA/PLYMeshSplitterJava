@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class PLYHeader
 {
-
+    private static final String HEADER_REGEXP = "[\\s\\S]*?end_header.*?\n";
     private static final int EXPECTED_HEADER_LENGTH = 1024;
     private final File file;
     private PLYFormat format;
@@ -56,7 +56,7 @@ public class PLYHeader
         return this.format;
     }
 
-    public Map<String, PLYElement> getElements()
+    public LinkedHashMap<String, PLYElement> getElements()
     {
         return this.elements;
     }
@@ -68,7 +68,7 @@ public class PLYHeader
 
     private static String isolateHeader(String input) throws BadHeaderException
     {
-        Pattern p = Pattern.compile("[\\s\\S]*?end_header.*?\n", Pattern.MULTILINE | Pattern.UNIX_LINES);
+        Pattern p = Pattern.compile(HEADER_REGEXP, Pattern.MULTILINE | Pattern.UNIX_LINES);
         Matcher m = p.matcher(input);
         if (!m.find()) throw new BadHeaderException("PLY header could not be found");
         return m.group();
