@@ -5,7 +5,6 @@ import javafx.geometry.Point3D;
 
 public class XBoundingBox extends BoundingBox
 {
-
     public XBoundingBox(
         double minX,
         double minY,
@@ -16,15 +15,6 @@ public class XBoundingBox extends BoundingBox
         double depth)
     {
         super(minX, minY, minZ, width, height, depth);
-    }
-
-    public XBoundingBox(
-        double minX,
-        double minY,
-        double width,
-        double height)
-    {
-        super(minX, minY, width, height);
     }
 
     public static XBoundingBox fromTo(
@@ -48,10 +38,4 @@ public class XBoundingBox extends BoundingBox
             (this.getMinZ() + this.getMaxZ()) / 2
         );
     }
-
-    public XBoundingBox copy()
-    {
-        return new XBoundingBox(this.getMinX(), this.getMinY(), this.getMinZ(), this.getWidth(), this.getHeight(), this.getDepth());
-    }
-
 }

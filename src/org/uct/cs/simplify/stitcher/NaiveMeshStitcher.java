@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.stitcher;
 
+import gnu.trove.map.TDoubleIntMap;
 import gnu.trove.map.hash.TDoubleIntHashMap;
 import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -13,7 +14,7 @@ import org.uct.cs.simplify.util.Useful;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
+import java.util.List;
 
 public class NaiveMeshStitcher
 {
@@ -56,7 +57,7 @@ public class NaiveMeshStitcher
     }
 
     private static VertexStitchResult getStitchTransform(
-        File vertexFile, PLYReader reader2, TDoubleIntHashMap mesh1VertexMap, int startingIndex, int mesh2NumVertices
+        File vertexFile, PLYReader reader2, TDoubleIntMap mesh1VertexMap, int startingIndex, int mesh2NumVertices
     ) throws IOException
     {
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
@@ -210,7 +211,7 @@ public class NaiveMeshStitcher
         return new PLYHeader(outputFile);
     }
 
-    public static File stitch(ArrayList<File> files) throws IOException
+    public static File stitch(List<File> files) throws IOException
     {
         File last = files.get(0);
         for (int i = 1; i < files.size(); i++)

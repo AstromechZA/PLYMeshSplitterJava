@@ -44,12 +44,8 @@ public class Blueprintify
 
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
         {
-            int resolution = (
-                cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION
-            );
-            float alphamod = (
-                cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD
-            );
+            int resolution = cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION;
+            float alphamod = cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD;
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
 

@@ -36,7 +36,7 @@ public class SimplifierWrapper
 
         if (code != 0)
         {
-            throw new UnknownError("Simplify failed! : " + stdOutGobble.toString() + errorGobble.toString());
+            throw new UnknownError("Simplify failed! : " + stdOutGobble + errorGobble);
         }
         return tt;
     }
@@ -56,9 +56,9 @@ public class SimplifierWrapper
         {
             try
             {
-                InputStreamReader reader = new InputStreamReader((this.stream));
+                InputStreamReader reader = new InputStreamReader(this.stream);
                 BufferedReader br = new BufferedReader(reader);
-                String line = null;
+                String line ;
                 while ((line = br.readLine()) != null)
                 {
                     this.sb.append(line);

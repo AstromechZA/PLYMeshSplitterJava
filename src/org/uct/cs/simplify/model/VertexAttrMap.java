@@ -52,8 +52,8 @@ public class VertexAttrMap
         }
 
         // work out if there are successful colour and alpha descriptions
-        this.hasColour = (this.redOffset > -1 && this.greenOffset > -1 && this.blueOffset > -1);
-        this.hasAlpha = (this.alphaOffset > -1);
+        this.hasColour = this.redOffset > -1 && this.greenOffset > -1 && this.blueOffset > -1;
+        this.hasAlpha = this.alphaOffset > -1;
     }
 
 

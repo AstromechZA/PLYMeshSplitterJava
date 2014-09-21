@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,13 +37,7 @@ public class PLYHeader
         }
     }
 
-    public PLYHeader(String headerContent)
-    {
-        this.file = null;
-        this.constructFromString(headerContent);
-    }
-
-    public PLYHeader(List<PLYElement> elements)
+    public PLYHeader(Iterable<PLYElement> elements)
     {
         this.file = null;
         this.format = PLYFormat.LITTLE_ENDIAN;
@@ -65,7 +56,7 @@ public class PLYHeader
         return this.format;
     }
 
-    public LinkedHashMap<String, PLYElement> getElements()
+    public Map<String, PLYElement> getElements()
     {
         return this.elements;
     }
@@ -85,12 +76,12 @@ public class PLYHeader
 
     private static PLYFormat parseFormat(String input)
     {
-        input = input.trim().toLowerCase();
-        if (input.startsWith("format"))
+        String input1 = input.trim().toLowerCase();
+        if (input1.startsWith("format"))
         {
-            if (input.contains("ascii")) return PLYFormat.ASCII;
-            if (input.contains("little")) return PLYFormat.LITTLE_ENDIAN;
-            if (input.contains("big")) return PLYFormat.BIG_ENDIAN;
+            if (input1.contains("ascii")) return PLYFormat.ASCII;
+            if (input1.contains("little")) return PLYFormat.LITTLE_ENDIAN;
+            if (input1.contains("big")) return PLYFormat.BIG_ENDIAN;
         }
         throw new BadHeaderException("Unidentified PLYFormat");
     }
@@ -118,7 +109,7 @@ public class PLYHeader
 
         PLYElement current = null;
         String line;
-        while (s.hasNextLine() && (line = s.nextLine()) != null)
+        while (s.hasNextLine() && ((line = s.nextLine()) != null))
         {
             // skip comments
             if (line.startsWith("comment")) continue;
@@ -157,11 +148,6 @@ public class PLYHeader
         return sb.toString();
     }
 
-    public static PLYHeader constructHeader(int numVertices, int numFaces)
-    {
-        return constructHeader(numVertices, numFaces, null);
-    }
-
     public static PLYHeader constructHeader(int numVertices, int numFaces, VertexAttrMap vam)
     {
         List<PLYElement> elements = new ArrayList<>();
@@ -189,7 +175,7 @@ public class PLYHeader
         return new PLYHeader(elements);
     }
 
-    public static enum PLYFormat
+    public enum PLYFormat
     {
         ASCII, BIG_ENDIAN, LITTLE_ENDIAN
     }

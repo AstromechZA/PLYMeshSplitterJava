@@ -9,6 +9,7 @@ import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecursiveFilePreparer
 {
@@ -42,13 +43,13 @@ public class RecursiveFilePreparer
             );
 
             // pre process child nodes
-            ArrayList<PackagedHierarchicalNode> processedNodes = new ArrayList<>();
+            List<PackagedHierarchicalNode> processedNodes = new ArrayList<>();
             for (PackagedHierarchicalNode childNode : childNodes)
             {
                 processedNodes.add(prepare(childNode, depth + 1, maxdepth));
             }
 
-            ArrayList<File> processedFiles = new ArrayList<>();
+            List<File> processedFiles = new ArrayList<>();
             for (PackagedHierarchicalNode n : processedNodes)
             {
                 processedFiles.add(n.getLinkedFile());

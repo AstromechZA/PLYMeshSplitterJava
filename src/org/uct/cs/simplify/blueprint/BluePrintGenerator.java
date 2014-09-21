@@ -18,24 +18,10 @@ public class BluePrintGenerator
     private static final Color DEFAULT_FOREGROUND = Color.white;
     private static final int BYTE = 0xFF;
 
-    public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment)
-        throws IOException
-    {
-        return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, CoordinateSpace.X_Y);
-    }
-
     public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type)
         throws IOException
     {
         return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
-    }
-
-    public static BufferedImage createImage(
-        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment
-    )
-        throws IOException
-    {
-        return createImage(reader, resolution, background, foreground, alphaAdjustment, CoordinateSpace.X_Y);
     }
 
     public static BufferedImage createImage(
@@ -92,8 +78,8 @@ public class BluePrintGenerator
             {
                 v = vr.get(i);
 
-                int tx = (int) (center + (avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio);
-                int ty = (int) (center - (avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio);
+                int tx = (int) (center + ((avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio));
+                int ty = (int) (center - ((avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio));
 
                 int index = ty * w + tx;
                 pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
@@ -148,17 +134,17 @@ public class BluePrintGenerator
         float namount = 1 - amount;
         int dr = (bgi >> (8 * 2)) & BYTE;
         int dg = (bgi >> 8) & BYTE;
-        int db = (bgi) & BYTE;
+        int db = bgi & BYTE;
 
         int sr = (fgi >> (8 * 2)) & BYTE;
         int sg = (fgi >> 8) & BYTE;
-        int sb = (fgi) & BYTE;
+        int sb = fgi & BYTE;
 
-        int rr = (int) (sr * amount + dr * namount) & BYTE;
-        int rg = (int) (sg * amount + dg * namount) & BYTE;
-        int rb = (int) (sb * amount + db * namount) & BYTE;
+        int rr = (int) ((sr * amount) + (dr * namount)) & BYTE;
+        int rg = (int) ((sg * amount) + (dg * namount)) & BYTE;
+        int rb = (int) ((sb * amount) + (db * namount)) & BYTE;
 
-        return (rr << (8 * 2)) + (rg << 8) + (rb);
+        return (rr << (8 * 2)) + (rg << 8) + rb;
     }
 
     public enum CoordinateSpace
@@ -166,11 +152,11 @@ public class BluePrintGenerator
         X_Y, X_Z, Y_Z
     }
 
-    public static interface IAxisValueGetter
+    public interface IAxisValueGetter
     {
-        public float getPrimaryAxisValue(Vertex v);
+        float getPrimaryAxisValue(Vertex v);
 
-        public float getSecondaryAxisValue(Vertex v);
+        float getSecondaryAxisValue(Vertex v);
     }
 
     public static class XYAxisValueGetter implements IAxisValueGetter

@@ -48,7 +48,6 @@ public class NodeSplitter
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
             }
-            if (tempFaceFile.exists()) tempFaceFile.delete();
         }
 
         return output;
@@ -104,57 +103,6 @@ public class NodeSplitter
         )
         {
             fcIN.transferTo(0, fcIN.size(), fcOUT);
-        }
-    }
-
-    private static CompactBitArray getSubnodeMemberships(PLYReader reader, XBoundingBox bb) throws IOException
-    {
-        int num_vertices = reader.getHeader().getElement("vertex").getCount();
-        CompactBitArray output = new CompactBitArray(num_vertices);
-
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
-        {
-            if (bb.getWidth() > bb.getHeight() && bb.getWidth() > bb.getDepth())
-                putSubnodeMembershipsX(vr, output, bb.getCenter().getX());
-            else if (bb.getHeight() > bb.getWidth() && bb.getHeight() > bb.getDepth())
-                putSubnodeMembershipsY(vr, output, bb.getCenter().getY());
-            else
-                putSubnodeMembershipsZ(vr, output, bb.getCenter().getZ());
-        }
-
-        return output;
-    }
-
-    private static void putSubnodeMembershipsX(
-        MemoryMappedVertexReader vReader, CompactBitArray bitArray, double splitPoint
-    )
-    {
-        long l = bitArray.size();
-        for (int i = 0; i < l; i++)
-        {
-            if (vReader.get(i).x > splitPoint) bitArray.set(i, 1);
-        }
-    }
-
-    private static void putSubnodeMembershipsY(
-        MemoryMappedVertexReader vReader, CompactBitArray bitArray, double splitPoint
-    )
-    {
-        long l = bitArray.size();
-        for (int i = 0; i < l; i++)
-        {
-            if (vReader.get(i).y > splitPoint) bitArray.set(i, 1);
-        }
-    }
-
-    private static void putSubnodeMembershipsZ(
-        MemoryMappedVertexReader vReader, CompactBitArray bitArray, double splitPoint
-    )
-    {
-        long l = bitArray.size();
-        for (int i = 0; i < l; i++)
-        {
-            if (vReader.get(i).z > splitPoint) bitArray.set(i, 1);
         }
     }
 

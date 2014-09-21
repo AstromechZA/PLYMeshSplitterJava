@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class FileBuilder
 {
-    public static final int RESCALE_SIZE = 1024;
+    private static final int RESCALE_SIZE = 1024;
 
     public static void main(String[] args) throws IOException
     {

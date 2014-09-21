@@ -14,7 +14,7 @@ public class Vertex
     public final float x;
     public final float y;
     public final float z;
-    public final double hash;
+    private final double hash;
     public byte r = DEFAULT_RED;
     public byte g = DEFAULT_GREEN;
     public byte b = DEFAULT_BLUE;
@@ -62,6 +62,7 @@ public class Vertex
         this.hash = this.hash();
     }
 
+    @SuppressWarnings("MagicNumber")
     private double hash()
     {
         long bits = 7L;

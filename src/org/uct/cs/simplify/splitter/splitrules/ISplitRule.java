@@ -4,5 +4,5 @@ import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
 
 public interface ISplitRule
 {
-    public boolean canSplit(PackagedHierarchicalNode node);
+    boolean canSplit(PackagedHierarchicalNode node);
 }

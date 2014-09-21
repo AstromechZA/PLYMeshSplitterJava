@@ -17,19 +17,14 @@ public class MemoryMappedVertexReader implements AutoCloseable
     private FileChannel fc;
     private final VertexAttrMap vam;
 
-    public MemoryMappedVertexReader(PLYReader reader, String vertexElementName) throws IOException
-    {
-        this.vam = new VertexAttrMap(reader.getHeader().getElement(vertexElementName));
-        int c = reader.getHeader().getElement(vertexElementName).getCount();
-        long p = reader.getElementDimension(vertexElementName).getOffset();
-        int blockSize = reader.getHeader().getElement(vertexElementName).getItemSize();
-
-        this.construct(reader.getFile(), p, c, blockSize);
-    }
-
     public MemoryMappedVertexReader(PLYReader reader) throws IOException
     {
-        this(reader, "vertex");
+        this.vam = new VertexAttrMap(reader.getHeader().getElement("vertex"));
+        int c = reader.getHeader().getElement("vertex").getCount();
+        long p = reader.getElementDimension("vertex").getOffset();
+        int blockSize = reader.getHeader().getElement("vertex").getItemSize();
+
+        this.construct(reader.getFile(), p, c, blockSize);
     }
 
     private void construct(File f, long position, int count, int blockSize) throws IOException

@@ -9,7 +9,7 @@ public class uintDataTypeReader implements IDataTypeReader
     @Override
     public double read(ByteBuffer b)
     {
-        return ((long) b.getInt() & LONG);
+        return (long) b.getInt() & LONG;
     }
 
     @Override

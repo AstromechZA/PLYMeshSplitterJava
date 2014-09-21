@@ -16,17 +16,12 @@ public class MemStatRecorder implements AutoCloseable
         this.construct(DEFAULT_INTERVAL_MS);
     }
 
-    public MemStatRecorder(int intervalMs)
-    {
-        this.construct(intervalMs);
-    }
-
     private void construct(int intervalMs)
     {
         if (intervalMs < 10) throw new IllegalArgumentException("intervalMS is too small!");
         this.intervalMs = intervalMs;
         this.recordings = new ArrayList<>();
-        this.backgroundThread = (new Thread(new MemRecorderThread(this)));
+        this.backgroundThread = new Thread(new MemRecorderThread(this));
         this.backgroundThread.start();
     }
 

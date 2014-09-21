@@ -9,7 +9,7 @@ public class ucharDataTypeReader implements IDataTypeReader
     @Override
     public double read(ByteBuffer b)
     {
-        return ((short) b.get() & BYTE);
+        return (short) b.get() & BYTE;
     }
 
     @Override

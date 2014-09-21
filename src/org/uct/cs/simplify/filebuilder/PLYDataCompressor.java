@@ -31,6 +31,9 @@ import java.io.IOException;
  */
 public class PLYDataCompressor
 {
+    private static final int BYTES_PER_VERTEX = 28;
+    private static final int BYTES_PER_FACE = 12;
+
     public static CompressionResult compress(File inputFile, File outputFile) throws IOException
     {
         return compress(new PLYReader(inputFile), outputFile);
@@ -40,8 +43,8 @@ public class PLYDataCompressor
     {
         PLYElement vertexE = reader.getHeader().getElement("vertex");
         PLYElement faceE = reader.getHeader().getElement("face");
-        long vbuffersize = vertexE.getCount() * (4 * 3 + 4 * 3 + 4);
-        long fbuffersize = faceE.getCount() * (4 * 3);
+        long vbuffersize = vertexE.getCount() * BYTES_PER_VERTEX;
+        long fbuffersize = faceE.getCount() * BYTES_PER_FACE;
 
         try (FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(outputFile)))
         {

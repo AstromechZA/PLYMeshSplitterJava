@@ -9,7 +9,7 @@ public class ushortDataTypeReader implements IDataTypeReader
     @Override
     public double read(ByteBuffer b)
     {
-        return ((int) b.getChar() & SHORT);
+        return (int) b.getChar() & SHORT;
     }
 
     @Override

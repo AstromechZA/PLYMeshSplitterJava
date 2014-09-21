@@ -22,7 +22,6 @@ import java.nio.channels.FileChannel;
 public class ScaleAndRecenter
 {
     private static final int DEFAULT_RESCALE_SIZE = 1024;
-    private static final int COPYBYTES_BUF_SIZE = 4096;
 
     public static XBoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
@@ -159,9 +158,7 @@ public class ScaleAndRecenter
         try (Timer ignored = new Timer(); MemStatRecorder ignored2 = new MemStatRecorder())
         {
             CommandLine cmd = parseArgs(args);
-            int rescaleToSize = (
-                cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE
-            );
+            int rescaleToSize = cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE;
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
 

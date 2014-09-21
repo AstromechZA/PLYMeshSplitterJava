@@ -66,7 +66,7 @@ public class CompactBitArray
         int positionIndex = (int) (i % this.blocksPerInt) * this.blockLength;
 
         int wiper = this.bitMask << positionIndex;
-        int oldData = ~((~block) | wiper);
+        int oldData = ~(~block | wiper);
         int newData = (v & this.bitMask) << positionIndex;
         this.data[ (int) blockIndex ] = oldData | newData;
     }

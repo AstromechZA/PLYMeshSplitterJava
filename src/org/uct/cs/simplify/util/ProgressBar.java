@@ -11,16 +11,10 @@ public class ProgressBar implements AutoCloseable
     private int progressTicks;
     private int position;
 
-
     public ProgressBar(String title, long maxTicks)
     {
-        this(title, maxTicks, '|');
-    }
-
-    public ProgressBar(String title, long maxTicks, char progressChar)
-    {
         this.title = title;
-        this.progressChar = progressChar;
+        this.progressChar = '|';
         this.maxTicks = maxTicks;
         this.position = 0;
         this.progressTicks = 0;
@@ -40,7 +34,7 @@ public class ProgressBar implements AutoCloseable
     {
         this.progressTicks += 1;
 
-        int newPosition = (int) (((100 * this.progressTicks) / this.maxTicks));
+        int newPosition = (int) ((100 * this.progressTicks) / this.maxTicks);
         int toPrint = newPosition - this.position;
         if (toPrint > 0)
         {

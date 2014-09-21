@@ -16,12 +16,6 @@ public class BoundsFinder
         return getBoundingBoxInner(reader, 1);
     }
 
-    public static XBoundingBox getBoundingBox(PLYReader reader, int nth) throws IOException
-    {
-        if (nth <= 0 || nth >= 100) throw new IllegalArgumentException("Nth skipper must be 1-99");
-        return getBoundingBoxInner(reader, nth);
-    }
-
     private static XBoundingBox getBoundingBoxInner(PLYReader reader, int nth) throws IOException
     {
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))

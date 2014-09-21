@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 
 public interface IDataTypeReader
 {
-    public double read(ByteBuffer b);
+    double read(ByteBuffer b);
 
-    public int bytesAtATime();
+    int bytesAtATime();
 
-    public static IDataTypeReader getReaderForType(DataType dt)
+    static IDataTypeReader getReaderForType(DataType dt)
     {
         if (dt == DataType.CHAR) return new charDataTypeReader();
         if (dt == DataType.UCHAR) return new ucharDataTypeReader();

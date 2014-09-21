@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class PackagedHierarchicalNode
 {
@@ -17,7 +18,7 @@ public class PackagedHierarchicalNode
     private XBoundingBox boundingBox;
     private File linkedFile;
     private PackagedHierarchicalNode parent;
-    private ArrayList<PackagedHierarchicalNode> children;
+    private final ArrayList<PackagedHierarchicalNode> children;
     private long blockOffset, blockLength;
     private int depth;
 
@@ -77,10 +78,10 @@ public class PackagedHierarchicalNode
     public void addChild(PackagedHierarchicalNode node)
     {
         this.children.add(node);
-        node.setParent(this);
+        node.parent = this;
     }
 
-    public ArrayList<PackagedHierarchicalNode> getChildren()
+    public List<PackagedHierarchicalNode> getChildren()
     {
         return this.children;
     }
@@ -215,7 +216,7 @@ public class PackagedHierarchicalNode
         return !this.children.isEmpty();
     }
 
-    public void addChildren(ArrayList<PackagedHierarchicalNode> children)
+    public void addChildren(List<PackagedHierarchicalNode> children)
     {
         children.forEach(this::addChild);
     }

@@ -20,11 +20,6 @@ public enum SplittingAxis
         return SplittingAxis.Z;
     }
 
-    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, SplittingAxis axis)
-    {
-        return splitBBIntoSubnodes(boundingBox, axis, boundingBox.getCenter());
-    }
-
     public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, SplittingAxis axis, double onPoint)
     {
         return splitBBIntoSubnodes(boundingBox, axis, new Point3D(onPoint, onPoint, onPoint));

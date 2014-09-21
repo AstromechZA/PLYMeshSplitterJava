@@ -41,7 +41,7 @@ public class Useful
 
     public static void writeIntLE(OutputStream stream, int i) throws IOException
     {
-        stream.write((i) & BYTE);
+        stream.write(i & BYTE);
         stream.write((i >> 8) & BYTE);
         stream.write((i >> (8 * 2)) & BYTE);
         stream.write((i >> (8 * 3)) & BYTE);
@@ -55,9 +55,9 @@ public class Useful
     public static int readIntLE(byte[] input, int pos)
     {
         int o = input[pos] & BYTE;
-        o |= ((input[pos + 1] & BYTE) << 8);
-        o |= ((input[pos + 2] & BYTE) << (8 * 2));
-        o |= ((input[pos + 3] & BYTE) << (8 * 3));
+        o |= (input[pos + 1] & BYTE) << 8;
+        o |= (input[pos + 2] & BYTE) << (8 * 2);
+        o |= (input[pos + 3] & BYTE) << (8 * 3);
         return o;
     }
 
@@ -69,9 +69,9 @@ public class Useful
     public static int readIntLE(ByteBuffer input, int pos)
     {
         int o = input.get(pos) & BYTE;
-        o |= ((input.get(pos + 1) & BYTE) << 8);
-        o |= ((input.get(pos + 2) & BYTE) << (8 * 2));
-        o |= ((input.get(pos + 3) & BYTE) << (8 * 3));
+        o |= (input.get(pos + 1) & BYTE) << 8;
+        o |= (input.get(pos + 2) & BYTE) << (8 * 2);
+        o |= (input.get(pos + 3) & BYTE) << (8 * 3);
         return o;
     }
 
