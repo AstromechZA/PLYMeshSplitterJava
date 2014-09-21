@@ -60,8 +60,6 @@ public class NodeSplitter
         {
             try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
             {
-                Vertex v;
-
                 VertexAttrMap vam = vr.getVam();
                 PLYHeader newHeader = PLYHeader.constructHeader(result.numVertices, result.numFaces, vam);
                 fostream.write((newHeader + "\n").getBytes());
@@ -76,23 +74,7 @@ public class NodeSplitter
                     for (int i : result.vertexIndexMap.keySet())
                     {
                         pb.tick();
-                        v = vr.get(i);
-
-                        Useful.writeFloatLE(fostream, v.x);
-                        Useful.writeFloatLE(fostream, v.y);
-                        Useful.writeFloatLE(fostream, v.z);
-
-                        if (vam.hasColour)
-                        {
-                            fostream.write(v.r);
-                            fostream.write(v.g);
-                            fostream.write(v.b);
-                        }
-
-                        if (vam.hasAlpha)
-                        {
-                            fostream.write(v.a);
-                        }
+                        vr.get(i).writeToStream(fostream, vam);
                     }
                 }
             }

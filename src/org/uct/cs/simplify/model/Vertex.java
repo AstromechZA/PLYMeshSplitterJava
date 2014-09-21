@@ -2,6 +2,8 @@ package org.uct.cs.simplify.model;
 
 import org.uct.cs.simplify.util.Useful;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 public class Vertex
@@ -77,4 +79,22 @@ public class Vertex
         return this.hash;
     }
 
+    public void writeToStream(OutputStream stream, VertexAttrMap vam) throws IOException
+    {
+        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.x));
+        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.y));
+        Useful.writeIntLE(stream, Float.floatToRawIntBits(this.z));
+
+        if (vam.hasColour)
+        {
+            stream.write(this.r);
+            stream.write(this.g);
+            stream.write(this.b);
+        }
+
+        if (vam.hasAlpha)
+        {
+            stream.write(this.a);
+        }
+    }
 }

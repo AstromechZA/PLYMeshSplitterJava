@@ -59,7 +59,7 @@ public class NaiveMeshStitcher
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
         int stitched = 0;
         try (
-            FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(vertexFile, true));
+            FastBufferedOutputStream ostream = new FastBufferedOutputStream(new FileOutputStream(vertexFile, true));
             MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader2)
         )
         {
@@ -75,22 +75,7 @@ public class NaiveMeshStitcher
                 else
                 {
                     mesh2VertexIndices[ i ] = startingIndex++;
-
-                    Useful.writeIntLE(fostream, Float.floatToRawIntBits(v.x));
-                    Useful.writeIntLE(fostream, Float.floatToRawIntBits(v.y));
-                    Useful.writeIntLE(fostream, Float.floatToRawIntBits(v.z));
-
-                    if (outVam.hasColour)
-                    {
-                        fostream.write(v.r);
-                        fostream.write(v.g);
-                        fostream.write(v.b);
-                    }
-
-                    if (outVam.hasAlpha)
-                    {
-                        fostream.write(v.a);
-                    }
+                    v.writeToStream(ostream, outVam);
                 }
             }
         }
