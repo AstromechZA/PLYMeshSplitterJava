@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.ply.header;
 
+import org.uct.cs.simplify.model.VertexAttrMap;
 import org.uct.cs.simplify.ply.datatypes.DataType;
 
 import java.io.File;
@@ -156,13 +157,31 @@ public class PLYHeader
         return sb.toString();
     }
 
-    public static PLYHeader constructBasicHeader(int numVertices, int numFaces)
+    public static PLYHeader constructHeader(int numVertices, int numFaces)
+    {
+        return constructHeader(numVertices, numFaces, null);
+    }
+
+    public static PLYHeader constructHeader(int numVertices, int numFaces, VertexAttrMap vam)
     {
         List<PLYElement> elements = new ArrayList<>();
         PLYElement eVertex = new PLYElement("vertex", numVertices);
         eVertex.addProperty(new PLYProperty("x", DataType.FLOAT));
         eVertex.addProperty(new PLYProperty("y", DataType.FLOAT));
         eVertex.addProperty(new PLYProperty("z", DataType.FLOAT));
+        if (vam != null)
+        {
+            if (vam.hasColour)
+            {
+                eVertex.addProperty(new PLYProperty("red", DataType.UCHAR));
+                eVertex.addProperty(new PLYProperty("green", DataType.UCHAR));
+                eVertex.addProperty(new PLYProperty("blue", DataType.UCHAR));
+            }
+            if (vam.hasAlpha)
+            {
+                eVertex.addProperty(new PLYProperty("alpha", DataType.UCHAR));
+            }
+        }
         elements.add(eVertex);
         PLYElement eFace = new PLYElement("face", numFaces);
         eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));

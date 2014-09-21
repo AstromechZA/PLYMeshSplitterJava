@@ -23,11 +23,18 @@ public class Timer implements AutoCloseable
         return System.nanoTime() - this.starttime;
     }
 
-    @Override
-    public void close()
+    public long stop()
     {
         long elapsed = System.nanoTime() - this.starttime;
         System.out.printf("Timer : %s : %s%n", this.text, Useful.formatTime(elapsed));
+        return elapsed;
+    }
+
+
+    @Override
+    public void close()
+    {
+        this.stop();
     }
 
 

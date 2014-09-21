@@ -25,7 +25,7 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
             ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
         )
         {
-            int c = vr.getCount();
+            long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(1, c);
             switch (longest)
             {

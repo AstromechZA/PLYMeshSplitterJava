@@ -24,7 +24,7 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
             double splitPoint = calculateMedianInRegion(vr, boundingBox, longest, APPROXIMATION_THRESHOLD);
             TIntObjectMap<XBoundingBox> subNodes = SplittingAxis.splitBBIntoSubnodes(boundingBox, longest, splitPoint);
 
-            int c = vr.getCount();
+            long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(1, c);
             switch (longest)
             {
@@ -51,7 +51,9 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         }
     }
 
-    private static double calculateMedianInRegion(MemoryMappedVertexReader vr, XBoundingBox bb, SplittingAxis axis, double approximationThreshold)
+    private static double calculateMedianInRegion(
+        MemoryMappedVertexReader vr, XBoundingBox bb, SplittingAxis axis, double approximationThreshold
+    )
     {
         double min, max, approximate, ratio;
         switch (axis)
@@ -82,8 +84,7 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
             if (ratio > MEDIAN_TARGET)
             {
                 max = approximate;
-            }
-            else
+            } else
             {
                 min = approximate;
             }
@@ -94,11 +95,11 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         return approximate;
     }
 
-    private static int countValuesLessThan(MemoryMappedVertexReader vr, SplittingAxis axis, double value)
+    private static long countValuesLessThan(MemoryMappedVertexReader vr, SplittingAxis axis, double value)
     {
-        int c = vr.getCount();
-        int count = 0;
-        for (int i = 0; i < c; i++)
+        long c = vr.getCount();
+        long count = 0;
+        for (long i = 0; i < c; i++)
         {
             if (getValueFromVertex(vr.get(i), axis) < value) count++;
         }

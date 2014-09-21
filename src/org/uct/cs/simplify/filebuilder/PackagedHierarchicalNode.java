@@ -12,8 +12,8 @@ import java.util.HashMap;
 
 public class PackagedHierarchicalNode
 {
-    private int numVertices;
-    private int numFaces;
+    private long numVertices;
+    private long numFaces;
     private XBoundingBox boundingBox;
     private File linkedFile;
     private PackagedHierarchicalNode parent;
@@ -21,7 +21,7 @@ public class PackagedHierarchicalNode
     private long blockOffset, blockLength;
     private int depth;
 
-    public PackagedHierarchicalNode(XBoundingBox bb, int numV, int numF, File f)
+    public PackagedHierarchicalNode(XBoundingBox bb, long numV, long numF, File f)
     {
         this.numFaces = numF;
         this.numVertices = numV;
@@ -85,7 +85,7 @@ public class PackagedHierarchicalNode
         return this.children;
     }
 
-    public int getNumVertices()
+    public long getNumVertices()
     {
         return this.numVertices;
     }
@@ -95,7 +95,7 @@ public class PackagedHierarchicalNode
         this.numVertices = numVertices;
     }
 
-    public int getNumFaces()
+    public long getNumFaces()
     {
         return this.numFaces;
     }
@@ -174,8 +174,7 @@ public class PackagedHierarchicalNode
         if (this.children.isEmpty())
         {
             o.add(this);
-        }
-        else
+        } else
         {
             for (PackagedHierarchicalNode child : this.children)
             {

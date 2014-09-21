@@ -1,10 +1,7 @@
 package org.uct.cs.simplify.stitcher;
 
 import gnu.trove.map.hash.TDoubleIntHashMap;
-import org.uct.cs.simplify.model.Face;
-import org.uct.cs.simplify.model.MemoryMappedFaceReader;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
-import org.uct.cs.simplify.model.Vertex;
+import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
@@ -52,10 +49,10 @@ public class NaiveMeshStitcher
 //        System.out.printf("mesh2f : %d%n", mesh2faces.getCount());
 
         int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
-
         int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
 
-        return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces);
+        VertexAttrMap outVam = new VertexAttrMap(mesh1vertices);
+        return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces, outVam);
     }
 
     private static VertexStitchResult getStitchTransform(
@@ -83,9 +80,9 @@ public class NaiveMeshStitcher
                 {
                     mesh2VertexIndices[ i ] = startingIndex++;
 
-                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.x));
-                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.y));
-                    Useful.littleEndianWrite(bostream, Float.floatToRawIntBits(v.z));
+                    Useful.writeIntLE(bostream, Float.floatToRawIntBits(v.x));
+                    Useful.writeIntLE(bostream, Float.floatToRawIntBits(v.y));
+                    Useful.writeIntLE(bostream, Float.floatToRawIntBits(v.z));
 
                     if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                     {
@@ -112,9 +109,9 @@ public class NaiveMeshStitcher
             {
                 face = fr.next();
                 bostream.write((byte) 3);
-                Useful.littleEndianWrite(bostream, indexTransform[ face.i ]);
-                Useful.littleEndianWrite(bostream, indexTransform[ face.j ]);
-                Useful.littleEndianWrite(bostream, indexTransform[ face.k ]);
+                Useful.writeIntLE(bostream, indexTransform[face.i]);
+                Useful.writeIntLE(bostream, indexTransform[face.j]);
+                Useful.writeIntLE(bostream, indexTransform[face.k]);
 
                 if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
                 {
@@ -182,9 +179,11 @@ public class NaiveMeshStitcher
         }
     }
 
-    private static PLYHeader writeFinalPLYModel(File outputFile, File vertexFile, File faceFile, int numVertices, int numFaces) throws IOException
+    private static PLYHeader writeFinalPLYModel(
+        File outputFile, File vertexFile, File faceFile, int numVertices, int numFaces, VertexAttrMap outVam
+    ) throws IOException
     {
-        PLYHeader newHeader = PLYHeader.constructBasicHeader(numVertices, numFaces);
+        PLYHeader newHeader = PLYHeader.constructHeader(numVertices, numFaces, outVam);
 
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
         {

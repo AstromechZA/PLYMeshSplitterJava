@@ -27,10 +27,13 @@ public class FileBuilder
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
+            TempFileManager.setDeleteOnExit(false);
 
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
 
+            Timer scaleTimer = new Timer("Rescaling");
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, true);
+            scaleTimer.close();
 
             PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
 

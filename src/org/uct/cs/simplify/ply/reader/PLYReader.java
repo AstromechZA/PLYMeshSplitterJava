@@ -46,8 +46,8 @@ public class PLYReader
     }
 
     /**
-     * We need some way of simply identifying the location and size of PLY elements. This method
-     * fills the elementDimensions object.
+     We need some way of simply identifying the location and size of PLY elements. This method fills the
+     elementDimensions object.
      */
     private void positionScan() throws IOException
     {
@@ -77,19 +77,22 @@ public class PLYReader
                 if (i == numElements - 1)
                 {
                     long elementSize = payloadSize - cursor;
-                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions
+                        .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
                     break;
                 } else if (e.getItemSize() != null)
                 {
                     long elementSize = e.getCount() * e.getItemSize();
-                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions
+                        .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
                 } else
                 {
                     long elementSize = calculateSizeOfListElement(e, buffer);
-                    this.elementDimensions.put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
+                    this.elementDimensions
+                        .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
                     cursor += elementSize;
                     buffer.position(cursor);
@@ -103,8 +106,8 @@ public class PLYReader
     {
         long total = 0;
 
-        int numItems = e.getCount();
-        for (int i = 0; i < numItems; i++)
+        long numItems = e.getCount();
+        for (long i = 0; i < numItems; i++)
         {
             for (PLYPropertyBase p : e.getProperties())
             {

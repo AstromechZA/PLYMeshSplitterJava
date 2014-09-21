@@ -2,6 +2,7 @@ package org.uct.cs.simplify.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class Useful
 {
@@ -38,12 +39,17 @@ public class Useful
         return String.format("%.2f B", bytes);
     }
 
-    public static void littleEndianWrite(OutputStream stream, int i) throws IOException
+    public static void writeIntLE(OutputStream stream, int i) throws IOException
     {
         stream.write((i) & BYTE);
         stream.write((i >> 8) & BYTE);
         stream.write((i >> (8 * 2)) & BYTE);
         stream.write((i >> (8 * 3)) & BYTE);
+    }
+
+    public static void writeFloatLE(OutputStream stream, float f) throws IOException
+    {
+        writeIntLE(stream, Float.floatToIntBits(f));
     }
 
     public static int readIntLE(byte[] input, int pos)
@@ -56,6 +62,20 @@ public class Useful
     }
 
     public static float readFloatLE(byte[] input, int pos)
+    {
+        return Float.intBitsToFloat(readIntLE(input, pos));
+    }
+
+    public static int readIntLE(ByteBuffer input, int pos)
+    {
+        int o = input.get(pos) & BYTE;
+        o |= ((input.get(pos + 1) & BYTE) << 8);
+        o |= ((input.get(pos + 2) & BYTE) << (8 * 2));
+        o |= ((input.get(pos + 3) & BYTE) << (8 * 3));
+        return o;
+    }
+
+    public static float readFloatLE(ByteBuffer input, int pos)
     {
         return Float.intBitsToFloat(readIntLE(input, pos));
     }

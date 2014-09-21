@@ -48,10 +48,10 @@ public class MemoryMappedVertexReader implements AutoCloseable
         return this.count;
     }
 
-    public Vertex get(int i)
+    public Vertex get(long i)
     {
-        int index = i * this.blockSize;
-        this.buffer.position(index);
+        long index = i * this.blockSize;
+        this.buffer.position((int) index);
         byte[] b = new byte[ this.blockSize ];
         this.buffer.get(b, 0, this.blockSize);
         return new Vertex(b, this.vam);
@@ -63,5 +63,10 @@ public class MemoryMappedVertexReader implements AutoCloseable
         this.buffer.clear();
         this.fc.close();
         this.raf.close();
+    }
+
+    public VertexAttrMap getVam()
+    {
+        return this.vam;
     }
 }

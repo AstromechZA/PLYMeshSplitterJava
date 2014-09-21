@@ -113,7 +113,7 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
         )
         {
 
-            int c = vr.getCount();
+            long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(3, c);
             OctantFinder ofinder = new OctantFinder(center);
             Vertex v;
