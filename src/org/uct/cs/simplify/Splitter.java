@@ -7,7 +7,6 @@ import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
 import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;

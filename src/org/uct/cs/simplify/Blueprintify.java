@@ -4,7 +4,6 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.StatRecorder;
-import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

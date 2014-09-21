@@ -3,7 +3,6 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.StatRecorder;
-import org.uct.cs.simplify.util.Timer;
 
 import java.io.File;
 import java.io.IOException;
