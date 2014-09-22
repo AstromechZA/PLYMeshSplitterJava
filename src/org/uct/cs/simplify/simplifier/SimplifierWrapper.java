@@ -1,12 +1,13 @@
 package org.uct.cs.simplify.simplifier;
 
+import org.uct.cs.simplify.util.OSDetect;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import java.io.*;
 
 public class SimplifierWrapper
 {
-    private static final String PATH_TO_EXECUTABLE = "./simplifier/tridecimator";
+    private static final String PATH_TO_EXECUTABLE = "./simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
 
     public static File simplify(File input, int numFaces) throws IOException, InterruptedException
     {
