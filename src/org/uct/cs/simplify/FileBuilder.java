@@ -39,11 +39,14 @@ public class FileBuilder
             PackagedHierarchicalNode tree = RecursiveFilePreparer.buildNodes(seed, 2);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
+
+            TempFileManager.clear();
         }
         catch (InterruptedException | IllegalArgumentException e)
         {
             e.printStackTrace();
         }
+
     }
 
     private static CommandLine getCommandLine(String[] args)

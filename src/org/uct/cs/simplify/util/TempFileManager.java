@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 
 /**
  Class for managing temporary files generated during processing
@@ -12,6 +13,7 @@ public class TempFileManager
 {
     private static Path workingDirectory = null;
     private static boolean deleteOnExit = true;
+    private static ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
 
     public static Path getWorkingDirectory() throws IOException
     {
@@ -61,8 +63,41 @@ public class TempFileManager
     public static File provide(String pref, String suff, boolean deleteOnExit) throws IOException
     {
         Path f = Files.createTempFile(getWorkingDirectory(), pref, suff);
-        if(deleteOnExit) f.toFile().deleteOnExit();
+        if (deleteOnExit)
+        {
+            filesToDelete.add(f);
+        }
         return f.toFile();
     }
 
+    public static void clear() throws InterruptedException
+    {
+        System.gc();
+
+        int errorlimit = 10;
+        while (!filesToDelete.isEmpty())
+        {
+            Path p = filesToDelete.removeFirst();
+            try
+            {
+                Files.deleteIfExists(p);
+            }
+            catch (IOException e)
+            {
+                filesToDelete.addLast(p);
+
+                if (errorlimit-- == 0) break;
+                Thread.sleep(500);
+            }
+        }
+
+        if (!filesToDelete.isEmpty())
+        {
+            System.out.printf("Failed to clean up %d files. Please delete these manually:%n", filesToDelete.size());
+            for (Path path : filesToDelete)
+            {
+                System.out.print(path);
+            }
+        }
+    }
 }
