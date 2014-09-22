@@ -1,6 +1,5 @@
 package org.uct.cs.simplify;
 
-import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.model.BoundsFinder;
@@ -9,12 +8,12 @@ import org.uct.cs.simplify.model.VertexAttrMap;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.*;
+import org.uct.cs.simplify.util.ProgressBar;
+import org.uct.cs.simplify.util.StatRecorder;
+import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.XBoundingBox;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -69,7 +68,7 @@ public class ScaleAndRecenter
             long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
             long vertexElementLength = reader.getElementDimension("vertex").getLength();
 
-            try (FastBufferedOutputStream bufostream = new FastBufferedOutputStream(new FileOutputStream(outputFile)))
+            try (BufferedOutputStream bufostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
             {
                 VertexAttrMap vam = new VertexAttrMap(vertexE);
                 // construct new header

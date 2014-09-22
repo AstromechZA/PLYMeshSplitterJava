@@ -1,6 +1,5 @@
 package org.uct.cs.simplify.filebuilder;
 
-import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import org.uct.cs.simplify.model.Face;
 import org.uct.cs.simplify.model.MemoryMappedFaceReader;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
@@ -10,6 +9,7 @@ import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.Useful;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class PLYDataCompressor
         long vbuffersize = vertexE.getCount() * BYTES_PER_VERTEX;
         long fbuffersize = faceE.getCount() * BYTES_PER_FACE;
 
-        try (FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(outputFile)))
+        try (BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
         {
             try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
             {

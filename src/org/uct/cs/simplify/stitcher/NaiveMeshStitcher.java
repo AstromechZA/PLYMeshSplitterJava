@@ -1,7 +1,6 @@
 package org.uct.cs.simplify.stitcher;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
@@ -58,7 +57,7 @@ public class NaiveMeshStitcher
         int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
         int stitched = 0;
         try (
-            FastBufferedOutputStream ostream = new FastBufferedOutputStream(new FileOutputStream(vertexFile, true));
+            BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(vertexFile, true));
             MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader2)
         )
         {
@@ -85,7 +84,7 @@ public class NaiveMeshStitcher
     {
         try (
             MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader);
-            FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(faceFile, true))
+            BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(faceFile, true))
         )
         {
             Face face;
@@ -125,12 +124,9 @@ public class NaiveMeshStitcher
         TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap(mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
-            Vertex v;
             for (int i = 0; i < mesh1NumVertices; i++)
             {
-                v = vr.get(i);
-                if (mesh1Vertices.containsKey(v)) System.out.println("collision");
-                mesh1Vertices.put(v, i);
+                mesh1Vertices.put(vr.get(i), i);
             }
         }
         return mesh1Vertices;

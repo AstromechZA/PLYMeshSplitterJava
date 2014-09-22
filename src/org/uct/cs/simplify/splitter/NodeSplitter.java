@@ -1,13 +1,18 @@
 package org.uct.cs.simplify.splitter;
 
-import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
-import org.uct.cs.simplify.model.*;
+import org.uct.cs.simplify.model.Face;
+import org.uct.cs.simplify.model.MemoryMappedFaceReader;
+import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.VertexAttrMap;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
-import org.uct.cs.simplify.util.*;
+import org.uct.cs.simplify.util.CompactBitArray;
+import org.uct.cs.simplify.util.ProgressBar;
+import org.uct.cs.simplify.util.TempFileManager;
+import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -56,7 +61,7 @@ public class NodeSplitter
 
     private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, File tempFaceFile, GatheringResult result) throws IOException
     {
-        try (FastBufferedOutputStream fostream = new FastBufferedOutputStream(new FileOutputStream(subNodeFile)))
+        try (BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(subNodeFile)))
         {
             try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
             {
