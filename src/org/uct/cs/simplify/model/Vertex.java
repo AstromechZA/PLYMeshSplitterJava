@@ -10,19 +10,16 @@ import java.nio.ByteBuffer;
 public class Vertex
 {
     private static final byte DEFAULT_RED = (byte) 128;
+    public byte r = DEFAULT_RED;
     private static final byte DEFAULT_GREEN = (byte) 128;
+    public byte g = DEFAULT_GREEN;
     private static final byte DEFAULT_BLUE = (byte) 128;
+    public byte b = DEFAULT_BLUE;
     private static final byte DEFAULT_ALPHA = (byte) 255;
-
+    public byte a = DEFAULT_ALPHA;
     public float x;
     public float y;
     public float z;
-    private boolean staleHash = true;
-    private double hash;
-    public byte r = DEFAULT_RED;
-    public byte g = DEFAULT_GREEN;
-    public byte b = DEFAULT_BLUE;
-    public byte a = DEFAULT_ALPHA;
 
     public Vertex(byte[] input, VertexAttrMap vam)
     {
@@ -41,8 +38,6 @@ public class Vertex
         {
             this.a = input[vam.alphaOffset];
         }
-
-        this.hash = this.hash();
     }
 
     public Vertex(ByteBuffer input, VertexAttrMap vam)
@@ -69,7 +64,6 @@ public class Vertex
         this.x = (float) ((this.x + translate.getX()) * scale);
         this.y = (float) ((this.y + translate.getY()) * scale);
         this.z = (float) ((this.z + translate.getZ()) * scale);
-        this.staleHash = false;
     }
 
     public void swapYZ()
@@ -77,28 +71,24 @@ public class Vertex
         float t = this.z;
         this.z = -this.y;
         this.y = t;
-        this.staleHash = false;
     }
 
-    @SuppressWarnings("MagicNumber")
-    private double hash()
+    @Override
+    public boolean equals(Object o)
     {
-        long bits = 7L;
-        bits = 31L * bits + Double.doubleToLongBits(this.x);
-        bits = 31L * bits + Double.doubleToLongBits(this.y);
-        bits = 31L * bits + Double.doubleToLongBits(this.z);
-        return (double) (bits ^ (bits >> 32));
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Vertex vertex = (Vertex) o;
+        return Float.compare(vertex.x, x) == 0 && Float.compare(vertex.y, y) == 0 && Float.compare(vertex.z, z) == 0;
     }
 
-    @SuppressWarnings("MagicNumber")
-    public double getHash()
+    @Override
+    public int hashCode()
     {
-        if (this.staleHash)
-        {
-            this.hash = this.hash();
-            this.staleHash = false;
-        }
-        return this.hash;
+        int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
+        result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
+        return 31 * result + (z != +0.0f ? Float.floatToIntBits(z) : 0);
     }
 
     public void writeToStream(OutputStream stream, VertexAttrMap vam) throws IOException

@@ -1,7 +1,6 @@
 package org.uct.cs.simplify.stitcher;
 
-import gnu.trove.map.TDoubleIntMap;
-import gnu.trove.map.hash.TDoubleIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import it.unimi.dsi.fastutil.io.FastBufferedOutputStream;
 import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYElement;
@@ -33,7 +32,7 @@ public class NaiveMeshStitcher
 
         VertexAttrMap outVam = new VertexAttrMap(mesh1vertices);
 
-        TDoubleIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
+        TObjectIntHashMap mesh1Vertices = buildMesh1VertexMap(reader1, mesh1vertices.getCount());
 
         writeMesh1ToTempFiles(file1, vertexFile, faceFile, reader1);
 
@@ -50,7 +49,7 @@ public class NaiveMeshStitcher
     private static VertexStitchResult getStitchTransform(
             File vertexFile,
             PLYReader reader2,
-            TDoubleIntMap mesh1VertexMap,
+            TObjectIntHashMap mesh1VertexMap,
             int startingIndex,
             int mesh2NumVertices,
             VertexAttrMap outVam
@@ -67,9 +66,9 @@ public class NaiveMeshStitcher
             for (int i = 0; i < mesh2NumVertices; i++)
             {
                 v = vr.get(i);
-                if (mesh1VertexMap.containsKey(v.getHash()))
+                if (mesh1VertexMap.containsKey(v))
                 {
-                    mesh2VertexIndices[i] = mesh1VertexMap.get(v.getHash());
+                    mesh2VertexIndices[ i ] = mesh1VertexMap.get(v);
                     stitched++;
                 }
                 else
@@ -120,14 +119,18 @@ public class NaiveMeshStitcher
         }
     }
 
-    private static TDoubleIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
+    @SuppressWarnings("unchecked")
+    private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
     {
-        TDoubleIntHashMap mesh1Vertices = new TDoubleIntHashMap(mesh1NumVertices);
+        TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap(mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
+            Vertex v;
             for (int i = 0; i < mesh1NumVertices; i++)
             {
-                mesh1Vertices.put(vr.get(i).getHash(), i);
+                v = vr.get(i);
+                if (mesh1Vertices.containsKey(v)) System.out.println("collision");
+                mesh1Vertices.put(v, i);
             }
         }
         return mesh1Vertices;
