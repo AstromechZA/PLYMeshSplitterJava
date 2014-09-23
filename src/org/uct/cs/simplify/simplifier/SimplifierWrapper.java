@@ -9,14 +9,18 @@ public class SimplifierWrapper
 {
     private static final String PATH_TO_EXECUTABLE = "./simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
 
-    public static File simplify(File input, int numFaces) throws IOException, InterruptedException
+    public static File simplify(File input, long numFaces, boolean preserveBoundary) throws IOException, InterruptedException
     {
         File tt = TempFileManager.provide("simp", ".ply");
         System.out.printf("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
+
+        String flags = "";
+        if (preserveBoundary) flags += " -By";
+
         Process proc = r.exec(
             String.format(
-                "%s %s %s %d -By",
+                "%s %s %s %d" + flags,
                 PATH_TO_EXECUTABLE,
                 input.getAbsolutePath(),
                 tt.getAbsolutePath(),

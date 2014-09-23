@@ -61,7 +61,7 @@ public class RecursiveFilePreparer
             long totalFaces = stitchedHeader.getElement("face").getCount();
             long targetFaces = Math.max(totalFaces / childNodes.size(), DEFAULT_MIN_FACES);
 
-            File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, (int) targetFaces);
+            File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
             PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedModel);
             outputNode.setBoundingBox(inputNode.getBoundingBox());

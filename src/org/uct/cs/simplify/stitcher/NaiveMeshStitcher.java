@@ -42,6 +42,8 @@ public class NaiveMeshStitcher
         int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
         int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
 
+        System.out.printf("Stitched %d vertices.%n", stitchResult.getStitchedCount());
+
         return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces, outVam);
     }
 
