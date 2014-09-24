@@ -27,6 +27,10 @@ public class FileBuilder
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
+            if (cmd.hasOption('k'))
+            {
+                TempFileManager.setDeleteOnExit(false);
+            }
 
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
 
@@ -62,6 +66,9 @@ public class FileBuilder
         Option outputFile = new Option("o", "output", true, "path to output directory");
         outputFile.setRequired(true);
         options.addOption(outputFile);
+
+        Option keepTempFiles = new Option("k", "keeptemp", false, "keep any temporary files generated during phf compilation");
+        options.addOption(keepTempFiles);
 
         CommandLine cmd;
         try

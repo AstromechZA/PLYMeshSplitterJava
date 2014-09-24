@@ -82,7 +82,8 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
             if (ratio > MEDIAN_TARGET)
             {
                 max = approximate;
-            } else
+            }
+            else
             {
                 min = approximate;
             }
@@ -103,7 +104,6 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         }
         return count;
     }
-
 
     private static double getValueFromVertex(Vertex v, SplittingAxis a)
     {
