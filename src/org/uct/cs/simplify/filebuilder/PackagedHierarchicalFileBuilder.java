@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.ArrayDeque;
 
 public class PackagedHierarchicalFileBuilder
 {
@@ -17,27 +16,17 @@ public class PackagedHierarchicalFileBuilder
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
         try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
         {
-            ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>(100);
-            processQueue.add(tree);
-
             long position = 0;
-            while (!processQueue.isEmpty())
+            for (PackagedHierarchicalNode node : tree.collectAllNodes())
             {
-                PackagedHierarchicalNode current = processQueue.removeFirst();
-
-                System.out.printf("Writing %s to %s%n", current.getLinkedFile().getPath(), tempBlockFile.getPath());
-                try (FileChannel fcIN = new FileInputStream(current.getLinkedFile()).getChannel())
+                System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
+                try (FileChannel fcIN = new FileInputStream(node.getLinkedFile()).getChannel())
                 {
                     long length = fcIN.size();
                     fcOUT.transferFrom(fcIN, position, length);
-                    current.setBlockOffset(position);
-                    current.setBlockLength(length);
+                    node.setBlockOffset(position);
+                    node.setBlockLength(length);
                     position += length;
-                }
-
-                for (PackagedHierarchicalNode node : current.getChildren())
-                {
-                    processQueue.add(node);
                 }
             }
         }

@@ -6,19 +6,16 @@ import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class PackagedHierarchicalNode
 {
+    private final ArrayList<PackagedHierarchicalNode> children;
     private long numVertices;
     private long numFaces;
     private XBoundingBox boundingBox;
     private File linkedFile;
     private PackagedHierarchicalNode parent;
-    private final ArrayList<PackagedHierarchicalNode> children;
     private long blockOffset, blockLength;
     private int depth;
 
@@ -54,13 +51,9 @@ public class PackagedHierarchicalNode
     {
         int id = 0;
         HashMap<PackagedHierarchicalNode, Integer> nodeIds = new HashMap<>();
-        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
-        processQueue.add(root);
-        while (!processQueue.isEmpty())
+        for (PackagedHierarchicalNode node : root.collectAllNodes())
         {
-            PackagedHierarchicalNode current = processQueue.removeFirst();
-            nodeIds.put(current, id++);
-            processQueue.addAll(current.getChildren());
+            nodeIds.put(node, id++);
         }
 
         StringBuilder s = new StringBuilder("[");
@@ -169,5 +162,24 @@ public class PackagedHierarchicalNode
     public void addChildren(List<PackagedHierarchicalNode> children)
     {
         children.forEach(this::addChild);
+    }
+
+    public List<PackagedHierarchicalNode> collectAllNodes()
+    {
+        List<PackagedHierarchicalNode> o = new ArrayList<>(100);
+
+        Deque<PackagedHierarchicalNode> q = new ArrayDeque<>(100);
+
+        o.add(this);
+        q.add(this);
+
+        while (!q.isEmpty())
+        {
+            PackagedHierarchicalNode n = q.removeFirst();
+            o.addAll(n.children);
+            q.addAll(n.children);
+        }
+
+        return o;
     }
 }
