@@ -76,8 +76,8 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
 
         double minR = MEDIAN_TARGET - approxThreshold;
         double maxR = MEDIAN_TARGET + approxThreshold;
-
-        while (ratio < minR || ratio > maxR)
+        int iterations = 0;
+        while (iterations < 10 && (ratio < minR || ratio > maxR))
         {
             if (ratio > MEDIAN_TARGET)
             {
@@ -90,7 +90,9 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
 
             approximate = (min + max) / 2;
             ratio = countValuesLessThan(vr, axis, approximate) / nv;
+            iterations++;
         }
+        System.out.printf("Found median of %d values after %d iterations.%n", vr.getCount(), iterations);
         return approximate;
     }
 
