@@ -39,13 +39,13 @@ public class RecursiveFilePreparer
         if (depth == maxdepth)
         {
             // simply copy the node and return
-            return new PackagedHierarchicalNode(
-                inputNode.getBoundingBox(),
-                inputNode.getNumVertices(),
-                inputNode.getNumFaces(),
-                inputNode.getLinkedFile()
-            );
-        } else
+            File leafFile = inputNode.getLinkedFile();
+            return (tightBoundingBoxes)
+                ? new PackagedHierarchicalNode(leafFile)
+                : new PackagedHierarchicalNode(leafFile, inputNode.getBoundingBox());
+
+        }
+        else
         {
             IMembershipBuilder splitType = new VariableKDTreeMembershipBuilder();
 
@@ -71,11 +71,11 @@ public class RecursiveFilePreparer
             long totalFaces = stitchedHeader.getElement("face").getCount();
             long targetFaces = totalFaces / splitType.getSplitRatio();
 
-            File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
+            File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
             PackagedHierarchicalNode outputNode = (tightBoundingBoxes)
-                ? new PackagedHierarchicalNode(simplifiedModel)
-                : new PackagedHierarchicalNode(simplifiedModel, inputNode.getBoundingBox());
+                ? new PackagedHierarchicalNode(simplifiedFile)
+                : new PackagedHierarchicalNode(simplifiedFile, inputNode.getBoundingBox());
             outputNode.addChildren(processedNodes);
 
             System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
