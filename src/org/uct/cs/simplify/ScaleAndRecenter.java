@@ -101,8 +101,10 @@ public class ScaleAndRecenter
 
             try (FileChannel fcOUT = new FileOutputStream(outputFile, true).getChannel())
             {
+                System.out.print("Transferring face elements...");
                 long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
                 fcIN.transferTo(fcIN.position(), fileRemainder, fcOUT);
+                System.out.println("done.");
             }
         }
 
