@@ -15,14 +15,26 @@ public class RecursiveFilePreparer
 {
     private static final int DEFAULT_MIN_FACES = 100_000;
 
-    public static PackagedHierarchicalNode buildNodes(PackagedHierarchicalNode inputNode, int maxdepth)
+    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth);
+        return prepare(inputNode, 0, maxdepth, false);
+    }
+
+    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth, boolean tightBoundingBoxes)
+        throws IOException, InterruptedException
+    {
+        return prepare(inputNode, 0, maxdepth, tightBoundingBoxes);
     }
 
     public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int depth, int maxdepth)
     throws IOException, InterruptedException
+    {
+        return prepare(inputNode, depth, maxdepth, false);
+    }
+
+    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int depth, int maxdepth, boolean tightBoundingBoxes)
+        throws IOException, InterruptedException
     {
         // stopping condition
         if (depth == maxdepth)
@@ -63,8 +75,9 @@ public class RecursiveFilePreparer
 
             File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
-            PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedModel);
-            outputNode.setBoundingBox(inputNode.getBoundingBox());
+            PackagedHierarchicalNode outputNode = (tightBoundingBoxes)
+                ? new PackagedHierarchicalNode(simplifiedModel)
+                : new PackagedHierarchicalNode(simplifiedModel, inputNode.getBoundingBox());
             outputNode.addChildren(processedNodes);
 
             System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());

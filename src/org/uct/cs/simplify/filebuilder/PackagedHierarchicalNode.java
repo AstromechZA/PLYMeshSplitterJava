@@ -46,6 +46,20 @@ public class PackagedHierarchicalNode
         this.depth = 0;
     }
 
+    public PackagedHierarchicalNode(File f, XBoundingBox bb) throws IOException
+    {
+        PLYReader r = new PLYReader(f);
+        this.numFaces = r.getHeader().getElement("face").getCount();
+        this.numVertices = r.getHeader().getElement("vertex").getCount();
+        this.boundingBox = bb;
+        this.linkedFile = f;
+        this.parent = null;
+        this.children = new ArrayList<>(8);
+        this.blockOffset = 0;
+        this.blockLength = 0;
+        this.depth = 0;
+    }
+
     @SuppressWarnings("CollectionWithoutInitialCapacity")
     public static String buildJSONHierarchy(PackagedHierarchicalNode root)
     {

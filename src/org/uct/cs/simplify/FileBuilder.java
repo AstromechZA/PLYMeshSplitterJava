@@ -27,7 +27,7 @@ public class FileBuilder
             File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
 
             TempFileManager.setWorkingDirectory(outputDir.toPath());
-            if (cmd.hasOption('k'))
+            if (cmd.hasOption("keeptemp"))
             {
                 TempFileManager.setDeleteOnExit(false);
             }
@@ -35,12 +35,12 @@ public class FileBuilder
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
 
             Timer scaleTimer = new Timer("Rescaling");
-            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, true);
+            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, cmd.hasOption("swapyz"));
             scaleTimer.close();
 
             PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
 
-            PackagedHierarchicalNode tree = RecursiveFilePreparer.buildNodes(seed, 2);
+            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, 2, true);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
 
@@ -69,6 +69,9 @@ public class FileBuilder
 
         Option keepTempFiles = new Option("k", "keeptemp", false, "keep any temporary files generated during phf compilation");
         options.addOption(keepTempFiles);
+
+        Option swapYZ = new Option("s", "swapyz", false, "Rotate model 90 around X. (convert coordinate frame)");
+        options.addOption(swapYZ);
 
         CommandLine cmd;
         try
