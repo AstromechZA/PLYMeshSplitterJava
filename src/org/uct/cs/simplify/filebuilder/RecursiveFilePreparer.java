@@ -39,11 +39,7 @@ public class RecursiveFilePreparer
         if (depth == maxdepth)
         {
             // simply copy the node and return
-            File leafFile = inputNode.getLinkedFile();
-            return (tightBoundingBoxes)
-                ? new PackagedHierarchicalNode(leafFile)
-                : new PackagedHierarchicalNode(leafFile, inputNode.getBoundingBox());
-
+            return new PackagedHierarchicalNode(inputNode.getLinkedFile());
         }
         else
         {
@@ -55,15 +51,10 @@ public class RecursiveFilePreparer
             // pre process child nodes
             List<PackagedHierarchicalNode> processedNodes = new ArrayList<>(childNodes.size());
             for (PackagedHierarchicalNode childNode : childNodes)
-            {
                 processedNodes.add(prepare(childNode, depth + 1, maxdepth));
-            }
 
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
-            for (PackagedHierarchicalNode n : processedNodes)
-            {
-                processedFiles.add(n.getLinkedFile());
-            }
+            for (PackagedHierarchicalNode n : processedNodes) processedFiles.add(n.getLinkedFile());
 
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
@@ -73,13 +64,10 @@ public class RecursiveFilePreparer
 
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
-            PackagedHierarchicalNode outputNode = (tightBoundingBoxes)
-                ? new PackagedHierarchicalNode(simplifiedFile)
-                : new PackagedHierarchicalNode(simplifiedFile, inputNode.getBoundingBox());
+            PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedFile);
             outputNode.addChildren(processedNodes);
 
             System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
-
             return outputNode;
         }
     }
