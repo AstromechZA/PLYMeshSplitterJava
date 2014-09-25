@@ -39,6 +39,8 @@ public class NodeSplitter
 
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
 
+        System.out.println("Subnode memberships created.");
+
         ArrayList<PackagedHierarchicalNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
