@@ -10,6 +10,7 @@ import org.uct.cs.simplify.util.Timer;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class FileBuilder
@@ -19,6 +20,7 @@ public class FileBuilder
     public static void main(String[] args) throws IOException
     {
         CommandLine cmd = getCommandLine(args);
+
 
         try (StatRecorder ignored = new StatRecorder())
         {
@@ -40,9 +42,20 @@ public class FileBuilder
 
             PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
 
-            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, 2, true);
+            int treedepthv = Integer.parseInt(cmd.getOptionValue("treedepth"));
+            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, treedepthv, true);
 
             PackagedHierarchicalFileBuilder.compile(tree, outputFile);
+
+            if (cmd.hasOption("dumpjson"))
+            {
+                String json = PackagedHierarchicalNode.buildJSONHierarchy(tree);
+                File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
+                try (FileWriter fw = new FileWriter(headerFile))
+                {
+                    fw.write(json);
+                }
+            }
 
             TempFileManager.clear();
         }
@@ -50,7 +63,6 @@ public class FileBuilder
         {
             e.printStackTrace();
         }
-
     }
 
     private static CommandLine getCommandLine(String[] args)
@@ -67,20 +79,32 @@ public class FileBuilder
         outputFile.setRequired(true);
         options.addOption(outputFile);
 
+        Option treedepth = new Option("d", "treedepth", true, "Dump the JSON header into separate file");
+        treedepth.setRequired(true);
+        treedepth.setType(Number.class);
+        options.addOption(treedepth);
+
         Option keepTempFiles = new Option("k", "keeptemp", false, "keep any temporary files generated during phf compilation");
         options.addOption(keepTempFiles);
 
         Option swapYZ = new Option("s", "swapyz", false, "Rotate model 90 around X. (convert coordinate frame)");
         options.addOption(swapYZ);
 
+        Option dumpJSON = new Option("j", "dumpjson", false, "Dump the JSON header into separate file");
+        options.addOption(dumpJSON);
+
+
         CommandLine cmd;
         try
         {
             cmd = clp.parse(options, args);
+            long treedepthv = (Long) cmd.getParsedOptionValue("treedepth");
+            if (treedepthv < 2 || treedepthv > 20) throw new ParseException("treedepth must be > 1 and < 21");
             return cmd;
         }
         catch (ParseException e)
         {
+            System.out.printf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("filebuilder --input <path> --output <path>", options);
             System.exit(1);

@@ -3,6 +3,7 @@ package org.uct.cs.simplify.filebuilder;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
+import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 
@@ -46,11 +47,10 @@ public class RecursiveFilePreparer
             );
         } else
         {
+            IMembershipBuilder splitType = new VariableKDTreeMembershipBuilder();
+
             // split current node into a list of subnodes
-            ArrayList<PackagedHierarchicalNode> childNodes = NodeSplitter.split(
-                inputNode,
-                new VariableKDTreeMembershipBuilder()
-            );
+            ArrayList<PackagedHierarchicalNode> childNodes = NodeSplitter.split(inputNode, splitType);
 
             // pre process child nodes
             List<PackagedHierarchicalNode> processedNodes = new ArrayList<>(childNodes.size());
@@ -69,7 +69,7 @@ public class RecursiveFilePreparer
 
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
             long totalFaces = stitchedHeader.getElement("face").getCount();
-            long targetFaces = totalFaces / childNodes.size();
+            long targetFaces = totalFaces / splitType.getSplitRatio();
 
             File simplifiedModel = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
