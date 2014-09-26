@@ -50,7 +50,8 @@ public class OutputValidator
                 {
                     check(currentPosition, node.blockOffset);
 
-                    check(node.blockLength, node.numVertices * 16 + node.numFaces * 12);
+                    long l = node.numVertices * 12 + ((hasVertexColour) ? node.numVertices * 4 : 0) + node.numFaces * 12;
+                    check(node.blockLength, l);
 
                     for (int i = 0; i < node.numVertices; i++)
                     {
