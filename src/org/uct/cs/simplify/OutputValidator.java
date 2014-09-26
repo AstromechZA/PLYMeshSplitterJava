@@ -3,6 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.BufferedInputStream;
@@ -43,53 +44,55 @@ public class OutputValidator
             Collections.sort(nodes);
 
             long currentPosition = 0;
-            for (SomeNode node : nodes)
+            try (ProgressBar pb = new ProgressBar("Checking Nodes", nodes.size()))
             {
-                check(currentPosition, node.blockOffset);
-
-                check(node.blockLength, node.numVertices * 16 + node.numFaces * 12);
-
-                for (int i = 0; i < node.numVertices; i++)
+                for (SomeNode node : nodes)
                 {
-                    float x = Useful.readFloatLE(istream);
-                    float y = Useful.readFloatLE(istream);
-                    float z = Useful.readFloatLE(istream);
-                }
+                    check(currentPosition, node.blockOffset);
 
-                if (hasVertexColour)
-                {
+                    check(node.blockLength, node.numVertices * 16 + node.numFaces * 12);
+
                     for (int i = 0; i < node.numVertices; i++)
                     {
-                        byte r = (byte) istream.read();
-                        byte g = (byte) istream.read();
-                        byte b = (byte) istream.read();
-                        byte a = (byte) istream.read();
-
-                        check(r, g);
-                        check(g, b);
-                        check(a, (byte) 255);
+                        float x = Useful.readFloatLE(istream);
+                        float y = Useful.readFloatLE(istream);
+                        float z = Useful.readFloatLE(istream);
                     }
-                }
 
-                for (int i = 0; i < node.numFaces; i++)
-                {
-                    int f = Useful.readIntLE(istream);
-                    int g = Useful.readIntLE(istream);
-                    int h = Useful.readIntLE(istream);
+                    if (hasVertexColour)
+                    {
+                        for (int i = 0; i < node.numVertices; i++)
+                        {
+                            byte r = (byte) istream.read();
+                            byte g = (byte) istream.read();
+                            byte b = (byte) istream.read();
+                            byte a = (byte) istream.read();
 
-                    checkLt(f, node.numVertices);
-                    checkLt(g, node.numVertices);
-                    checkLt(h, node.numVertices);
+                            check(r, g);
+                            check(g, b);
+                            check(a, (byte) 255);
+                        }
+                    }
+
+                    for (int i = 0; i < node.numFaces; i++)
+                    {
+                        int f = Useful.readIntLE(istream);
+                        int g = Useful.readIntLE(istream);
+                        int h = Useful.readIntLE(istream);
+
+                        checkLt(f, node.numVertices);
+                        checkLt(g, node.numVertices);
+                        checkLt(h, node.numVertices);
+                    }
+                    currentPosition += node.blockLength;
+                    pb.tick();
                 }
-                currentPosition += node.blockLength;
             }
-
             check(istream.available(), 0);
 
             check(streamLength, currentPosition + 4 + jsonHeader.length());
 
             System.out.println("All checks passed successfully");
-
         }
     }
 
