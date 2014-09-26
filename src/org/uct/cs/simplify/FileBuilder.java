@@ -45,15 +45,14 @@ public class FileBuilder
             int treedepthv = Integer.parseInt(cmd.getOptionValue("treedepth"));
             PHFNode tree = RecursiveFilePreparer.prepare(seed, treedepthv, true);
 
-            PHFBuilder.compile(tree, outputFile, PHFBuilder.CompilationMode.COMPRESSED_ARRAY);
+            String jsonHeader = PHFBuilder.compile(tree, outputFile, PHFBuilder.CompilationMode.COMPRESSED_ARRAY);
 
             if (cmd.hasOption("dumpjson"))
             {
-                String json = PHFNode.buildJSONHierarchy(tree);
                 File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
                 {
-                    fw.write(json);
+                    fw.write(jsonHeader);
                 }
             }
 

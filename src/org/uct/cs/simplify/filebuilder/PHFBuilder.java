@@ -8,7 +8,7 @@ import java.nio.channels.FileChannel;
 
 public class PHFBuilder
 {
-    public static File compile(PHFNode tree, File outputFile, CompilationMode mode) throws IOException
+    public static String compile(PHFNode tree, File outputFile, CompilationMode mode) throws IOException
     {
         System.out.printf("Compressing Hierarchical tree into %s using mode: %s%n", outputFile, mode);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
@@ -55,7 +55,11 @@ public class PHFBuilder
             throw new RuntimeException("No compression mode provided!");
         }
 
-        String jsonheader = PHFNode.buildJSONHierarchy(tree);
+        String jsonheader = "{" +
+            String.format("\"vertex_colour\":%b, ", true) +
+            String.format("\"nodes\":%s, ", PHFNode.buildJSONHierarchy(tree)) +
+            "}";
+
         System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
         {
@@ -76,7 +80,7 @@ public class PHFBuilder
             }
         }
 
-        return outputFile;
+        return jsonheader;
     }
 
     public enum CompilationMode
