@@ -57,6 +57,10 @@ public class OutputValidator
                         float x = Useful.readFloatLE(istream);
                         float y = Useful.readFloatLE(istream);
                         float z = Useful.readFloatLE(istream);
+
+                        checkInRange(node.min_x - 1, x, node.max_x + 1);
+                        checkInRange(node.min_y - 1, y, node.max_y + 1);
+                        checkInRange(node.min_z - 1, z, node.max_z + 1);
                     }
 
                     if (hasVertexColour)
@@ -114,6 +118,11 @@ public class OutputValidator
         return true;
     }
 
+    private static boolean checkInRange(double a, double v, double b)
+    {
+        if (v > b || v < a) throw new RuntimeException(String.format("%s is out of range %s..%s", v, a, b));
+        return true;
+    }
 
     private static CommandLine getCommandLine(String[] args)
     {
