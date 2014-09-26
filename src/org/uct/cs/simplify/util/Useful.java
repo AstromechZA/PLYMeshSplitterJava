@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
@@ -80,4 +81,25 @@ public class Useful
         return Float.intBitsToFloat(readIntLE(input, pos));
     }
 
+    public static int readIntLE(InputStream istream) throws IOException
+    {
+        int o = istream.read() & BYTE_MASK;
+        o |= (istream.read() & BYTE_MASK) << 8;
+        o |= (istream.read() & BYTE_MASK) << (8 * 2);
+        o |= (istream.read() & BYTE_MASK) << (8 * 3);
+        return o;
+    }
+
+    public static String readString(InputStream istream, int length) throws IOException
+    {
+        byte[] buff = new byte[ length ];
+        istream.read(buff);
+        return new String(buff);
+    }
+
+    public static float readFloatLE(InputStream istream) throws IOException
+    {
+        return Float.intBitsToFloat(readIntLE(istream));
+    }
 }
+
