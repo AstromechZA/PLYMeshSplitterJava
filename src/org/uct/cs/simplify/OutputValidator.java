@@ -46,6 +46,9 @@ public class OutputValidator
             for (SomeNode node : nodes)
             {
                 check(currentPosition, node.blockOffset);
+
+                check(node.blockLength, node.numVertices * 16 + node.numFaces * 12);
+
                 for (int i = 0; i < node.numVertices; i++)
                 {
                     float x = Useful.readFloatLE(istream);
