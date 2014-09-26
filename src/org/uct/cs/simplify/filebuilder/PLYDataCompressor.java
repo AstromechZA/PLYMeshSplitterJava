@@ -65,17 +65,19 @@ public class PLYDataCompressor
             for (int i = 0; i < vertexE.getCount(); i++)
             {
                 v = vr.get(i);
-                v.writeToStream(ostream, vr.getVam());
-
                 Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.x));
                 Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.y));
                 Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.z));
-
+            }
+            for (int i = 0; i < vertexE.getCount(); i++)
+            {
+                v = vr.get(i);
                 ostream.write(v.r);
                 ostream.write(v.g);
                 ostream.write(v.b);
                 ostream.write(v.a);
             }
+
             try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
             {
                 Face f;

@@ -20,8 +20,6 @@ public class FileBuilder
     public static void main(String[] args) throws IOException
     {
         CommandLine cmd = getCommandLine(args);
-
-
         try (StatRecorder ignored = new StatRecorder())
         {
             File inputFile = new File(cmd.getOptionValue("input"));
