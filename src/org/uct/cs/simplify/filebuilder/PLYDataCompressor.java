@@ -65,9 +65,9 @@ public class PLYDataCompressor
             for (int i = 0; i < vertexE.getCount(); i++)
             {
                 v = vr.get(i);
-                Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.x));
-                Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.y));
-                Useful.writeIntLE(ostream, Float.floatToRawIntBits(v.z));
+                Useful.writeFloatLE(ostream, v.x);
+                Useful.writeFloatLE(ostream, v.y);
+                Useful.writeFloatLE(ostream, v.z);
             }
             for (int i = 0; i < vertexE.getCount(); i++)
             {

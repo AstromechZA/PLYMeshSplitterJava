@@ -17,22 +17,10 @@ public class RecursiveFilePreparer
     public static PHFNode prepare(PHFNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, false);
-    }
-
-    public static PHFNode prepare(PHFNode inputNode, int maxdepth, boolean tightBoundingBoxes)
-        throws IOException, InterruptedException
-    {
-        return prepare(inputNode, 0, maxdepth, tightBoundingBoxes);
+        return prepare(inputNode, 0, maxdepth);
     }
 
     public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth)
-    throws IOException, InterruptedException
-    {
-        return prepare(inputNode, depth, maxdepth, false);
-    }
-
-    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth, boolean tightBoundingBoxes)
         throws IOException, InterruptedException
     {
         // stopping condition
