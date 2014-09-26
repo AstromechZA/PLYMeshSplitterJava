@@ -15,7 +15,7 @@ public class SimplifierWrapper
         System.out.printf("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
 
-        String flags = " -P";
+        String flags = " -P -Ty";
         if (preserveBoundary) flags += " -By";
 
         Process proc = r.exec(
