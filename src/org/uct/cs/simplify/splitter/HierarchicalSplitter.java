@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter;
 
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.ISplitRule;
 
@@ -12,24 +12,24 @@ import java.util.ArrayList;
 public class HierarchicalSplitter
 {
     @SuppressWarnings("CollectionWithoutInitialCapacity")
-    public static PackagedHierarchicalNode split(File inputFile, File outputDir, ISplitRule rule, IMembershipBuilder membershipBuilder) throws IOException
+    public static PHFNode split(File inputFile, File outputDir, ISplitRule rule, IMembershipBuilder membershipBuilder) throws IOException
     {
         System.out.printf("Intput File: %s%n", inputFile.getAbsolutePath());
         System.out.printf("Output Directory: %s%n", outputDir.getAbsolutePath());
 
-        ArrayDeque<PackagedHierarchicalNode> processQueue = new ArrayDeque<>();
-        PackagedHierarchicalNode root = new PackagedHierarchicalNode(inputFile);
+        ArrayDeque<PHFNode> processQueue = new ArrayDeque<>();
+        PHFNode root = new PHFNode(inputFile);
         processQueue.add(root);
         while (!processQueue.isEmpty())
         {
-            PackagedHierarchicalNode currentNode = processQueue.removeFirst();
+            PHFNode currentNode = processQueue.removeFirst();
 
-            ArrayList<PackagedHierarchicalNode> children = NodeSplitter.split(
+            ArrayList<PHFNode> children = NodeSplitter.split(
                 currentNode,
                 membershipBuilder
             );
 
-            for (PackagedHierarchicalNode child : children)
+            for (PHFNode child : children)
             {
                 currentNode.addChild(child);
                 if (rule.canSplit(child)) processQueue.add(child);

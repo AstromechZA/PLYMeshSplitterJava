@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter;
 
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.model.Face;
 import org.uct.cs.simplify.model.MemoryMappedFaceReader;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
@@ -24,8 +24,8 @@ public class NodeSplitter
     private static final int DEFAULT_BYTEOSBUF_SIZE = 524288;
     private static final int DEFAULT_BYTEOSBUF_TAIL = 16;
 
-    public static ArrayList<PackagedHierarchicalNode> split(
-        PackagedHierarchicalNode parent,
+    public static ArrayList<PHFNode> split(
+        PHFNode parent,
         IMembershipBuilder membershipBuilder
     ) throws IOException
     {
@@ -41,7 +41,7 @@ public class NodeSplitter
 
         System.out.println("Subnode memberships created.");
 
-        ArrayList<PackagedHierarchicalNode> output = new ArrayList<>(mr.subNodes.size());
+        ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
             File tempFaceFile = TempFileManager.provide();
@@ -52,7 +52,7 @@ public class NodeSplitter
 
                 writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
-                PackagedHierarchicalNode child = new PackagedHierarchicalNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
+                PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
             }

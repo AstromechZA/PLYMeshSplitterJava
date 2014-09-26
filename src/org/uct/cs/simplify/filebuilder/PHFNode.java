@@ -8,18 +8,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class PackagedHierarchicalNode
+public class PHFNode
 {
-    private final ArrayList<PackagedHierarchicalNode> children;
+    private final ArrayList<PHFNode> children;
     private long numVertices;
     private long numFaces;
     private XBoundingBox boundingBox;
     private File linkedFile;
-    private PackagedHierarchicalNode parent;
+    private PHFNode parent;
     private long blockOffset, blockLength;
     private int depth;
 
-    public PackagedHierarchicalNode(XBoundingBox bb, long numV, long numF, File f)
+    public PHFNode(XBoundingBox bb, long numV, long numF, File f)
     {
         this.numFaces = numF;
         this.numVertices = numV;
@@ -32,7 +32,7 @@ public class PackagedHierarchicalNode
         this.depth = 0;
     }
 
-    public PackagedHierarchicalNode(File f) throws IOException
+    public PHFNode(File f) throws IOException
     {
         PLYReader r = new PLYReader(f);
         this.numFaces = r.getHeader().getElement("face").getCount();
@@ -46,7 +46,7 @@ public class PackagedHierarchicalNode
         this.depth = 0;
     }
 
-    public PackagedHierarchicalNode(File f, XBoundingBox bb) throws IOException
+    public PHFNode(File f, XBoundingBox bb) throws IOException
     {
         PLYReader r = new PLYReader(f);
         this.numFaces = r.getHeader().getElement("face").getCount();
@@ -61,18 +61,18 @@ public class PackagedHierarchicalNode
     }
 
     @SuppressWarnings("CollectionWithoutInitialCapacity")
-    public static String buildJSONHierarchy(PackagedHierarchicalNode root)
+    public static String buildJSONHierarchy(PHFNode root)
     {
         int id = 0;
-        HashMap<PackagedHierarchicalNode, Integer> nodeIds = new HashMap<>();
-        for (PackagedHierarchicalNode node : root.collectAllNodes())
+        HashMap<PHFNode, Integer> nodeIds = new HashMap<>();
+        for (PHFNode node : root.collectAllNodes())
         {
             nodeIds.put(node, id++);
         }
 
         StringBuilder s = new StringBuilder("[");
         boolean first = true;
-        for (PackagedHierarchicalNode node : nodeIds.keySet())
+        for (PHFNode node : nodeIds.keySet())
         {
             if (first)
                 first = false;
@@ -83,13 +83,13 @@ public class PackagedHierarchicalNode
         return s + "]";
     }
 
-    public void addChild(PackagedHierarchicalNode node)
+    public void addChild(PHFNode node)
     {
         this.children.add(node);
         node.parent = this;
     }
 
-    public List<PackagedHierarchicalNode> getChildren()
+    public List<PHFNode> getChildren()
     {
         return this.children;
     }
@@ -145,13 +145,13 @@ public class PackagedHierarchicalNode
             String.format("\"max_x\":%f,", this.boundingBox.getMaxX()) +
             String.format("\"max_y\":%f,", this.boundingBox.getMaxY()) +
             String.format("\"max_z\":%f", this.boundingBox.getMaxZ()) +
-                '}';
+            '}';
     }
 
     public int countSelfPlusDescendants()
     {
         int c = 1;
-        for (PackagedHierarchicalNode child : this.children)
+        for (PHFNode child : this.children)
         {
             c += child.countSelfPlusDescendants();
         }
@@ -173,23 +173,23 @@ public class PackagedHierarchicalNode
         return !this.children.isEmpty();
     }
 
-    public void addChildren(List<PackagedHierarchicalNode> children)
+    public void addChildren(List<PHFNode> children)
     {
         children.forEach(this::addChild);
     }
 
-    public List<PackagedHierarchicalNode> collectAllNodes()
+    public List<PHFNode> collectAllNodes()
     {
-        List<PackagedHierarchicalNode> o = new ArrayList<>(100);
+        List<PHFNode> o = new ArrayList<>(100);
 
-        Deque<PackagedHierarchicalNode> q = new ArrayDeque<>(100);
+        Deque<PHFNode> q = new ArrayDeque<>(100);
 
         o.add(this);
         q.add(this);
 
         while (!q.isEmpty())
         {
-            PackagedHierarchicalNode n = q.removeFirst();
+            PHFNode n = q.removeFirst();
             o.addAll(n.children);
             q.addAll(n.children);
         }

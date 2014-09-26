@@ -1,8 +1,8 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalFileBuilder;
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PHFBuilder;
+import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.util.StatRecorder;
 import org.uct.cs.simplify.util.TempFileManager;
@@ -40,16 +40,16 @@ public class FileBuilder
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, cmd.hasOption("swapyz"));
             scaleTimer.close();
 
-            PackagedHierarchicalNode seed = new PackagedHierarchicalNode(scaledFile);
+            PHFNode seed = new PHFNode(scaledFile);
 
             int treedepthv = Integer.parseInt(cmd.getOptionValue("treedepth"));
-            PackagedHierarchicalNode tree = RecursiveFilePreparer.prepare(seed, treedepthv, true);
+            PHFNode tree = RecursiveFilePreparer.prepare(seed, treedepthv, true);
 
-            PackagedHierarchicalFileBuilder.compile(tree, outputFile);
+            PHFBuilder.compile(tree, outputFile, PHFBuilder.CompilationMode.COMPRESSED_ARRAY);
 
             if (cmd.hasOption("dumpjson"))
             {
-                String json = PackagedHierarchicalNode.buildJSONHierarchy(tree);
+                String json = PHFNode.buildJSONHierarchy(tree);
                 File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
                 {

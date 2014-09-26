@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.splitter.HierarchicalSplitter;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.splitrules.TreeDepthRule;
@@ -41,7 +41,7 @@ public class Splitter
             TempFileManager.setWorkingDirectory(outputDir.toPath());
             TempFileManager.setDeleteOnExit(false);
 
-            PackagedHierarchicalNode tree = HierarchicalSplitter.split(
+            PHFNode tree = HierarchicalSplitter.split(
                 scaledFile,
                 outputDir,
                 new TreeDepthRule(3),
@@ -56,7 +56,7 @@ public class Splitter
             System.out.printf("Writing json to %s%n", outJson.getAbsolutePath());
             try (PrintWriter pw = new PrintWriter(outJson))
             {
-                pw.print(PackagedHierarchicalNode.buildJSONHierarchy(tree));
+                pw.print(PHFNode.buildJSONHierarchy(tree));
             }
         }
         catch (IOException | InterruptedException | IllegalArgumentException e)

@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter.splitrules;
 
-import org.uct.cs.simplify.filebuilder.PackagedHierarchicalNode;
+import org.uct.cs.simplify.filebuilder.PHFNode;
 
 public class VertexCountRule implements ISplitRule
 {
@@ -12,7 +12,7 @@ public class VertexCountRule implements ISplitRule
     }
 
     @Override
-    public boolean canSplit(PackagedHierarchicalNode node)
+    public boolean canSplit(PHFNode node)
     {
         return node.getNumVertices() > this.maxVertices;
     }

@@ -14,47 +14,46 @@ import java.util.List;
 
 public class RecursiveFilePreparer
 {
-    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth)
+    public static PHFNode prepare(PHFNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
         return prepare(inputNode, 0, maxdepth, false);
     }
 
-    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int maxdepth, boolean tightBoundingBoxes)
+    public static PHFNode prepare(PHFNode inputNode, int maxdepth, boolean tightBoundingBoxes)
         throws IOException, InterruptedException
     {
         return prepare(inputNode, 0, maxdepth, tightBoundingBoxes);
     }
 
-    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int depth, int maxdepth)
+    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth)
     throws IOException, InterruptedException
     {
         return prepare(inputNode, depth, maxdepth, false);
     }
 
-    public static PackagedHierarchicalNode prepare(PackagedHierarchicalNode inputNode, int depth, int maxdepth, boolean tightBoundingBoxes)
+    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth, boolean tightBoundingBoxes)
         throws IOException, InterruptedException
     {
         // stopping condition
         if (depth == maxdepth)
         {
             // simply copy the node and return
-            return new PackagedHierarchicalNode(inputNode.getLinkedFile());
+            return new PHFNode(inputNode.getLinkedFile());
         }
         else
         {
             IMembershipBuilder splitType = new VariableKDTreeMembershipBuilder();
 
             // split current node into a list of subnodes
-            ArrayList<PackagedHierarchicalNode> childNodes = NodeSplitter.split(inputNode, splitType);
+            ArrayList<PHFNode> childNodes = NodeSplitter.split(inputNode, splitType);
 
             // pre process child nodes
-            List<PackagedHierarchicalNode> processedNodes = new ArrayList<>(childNodes.size());
-            for (PackagedHierarchicalNode childNode : childNodes)
-                processedNodes.add(prepare(childNode, depth + 1, maxdepth));
+            List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
+            for (PHFNode childNode : childNodes) processedNodes.add(prepare(childNode, depth + 1, maxdepth));
 
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
-            for (PackagedHierarchicalNode n : processedNodes) processedFiles.add(n.getLinkedFile());
+            for (PHFNode n : processedNodes) processedFiles.add(n.getLinkedFile());
 
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
@@ -64,7 +63,7 @@ public class RecursiveFilePreparer
 
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
 
-            PackagedHierarchicalNode outputNode = new PackagedHierarchicalNode(simplifiedFile);
+            PHFNode outputNode = new PHFNode(simplifiedFile);
             outputNode.addChildren(processedNodes);
 
             System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
