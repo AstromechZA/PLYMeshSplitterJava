@@ -19,69 +19,75 @@ public class OutputValidator
     {
         CommandLine cmd = getCommandLine(args);
 
-        BufferedInputStream istream = new BufferedInputStream(new FileInputStream(new File(cmd.getOptionValue("input"))));
-
-        int headerLength = Useful.readIntLE(istream);
-        String jsonHeader = Useful.readString(istream, headerLength);
-        System.out.printf("header length: %s%n", headerLength);
-
-        JSONObject o = new JSONObject(jsonHeader);
-
-        boolean hasVertexColour = o.getBoolean("vertex_colour");
-        System.out.printf("vertex_colour: %b%n", hasVertexColour);
-
-        JSONArray nodesJ = o.getJSONArray("nodes");
-        System.out.printf("number of nodes: %d%n", nodesJ.length());
-
-        List<SomeNode> nodes = new ArrayList<>();
-        for (int i = 0; i < nodesJ.length(); i++)
+        try (BufferedInputStream istream = new BufferedInputStream(new FileInputStream(new File(cmd.getOptionValue("input")))))
         {
-            nodes.add(new SomeNode(nodesJ.getJSONObject(i)));
-        }
+            int streamLength = istream.available();
+            int headerLength = Useful.readIntLE(istream);
+            String jsonHeader = Useful.readString(istream, headerLength);
+            System.out.printf("header length: %s%n", headerLength);
 
-        Collections.sort(nodes);
+            JSONObject o = new JSONObject(jsonHeader);
 
-        for (SomeNode node : nodes)
-        {
-            for (int i = 0; i < node.numVertices; i++)
+            boolean hasVertexColour = o.getBoolean("vertex_colour");
+            System.out.printf("vertex_colour: %b%n", hasVertexColour);
+
+            JSONArray nodesJ = o.getJSONArray("nodes");
+            System.out.printf("number of nodes: %d%n", nodesJ.length());
+
+            List<SomeNode> nodes = new ArrayList<>();
+            for (int i = 0; i < nodesJ.length(); i++)
             {
-                float x = Useful.readFloatLE(istream);
-                float y = Useful.readFloatLE(istream);
-                float z = Useful.readFloatLE(istream);
+                nodes.add(new SomeNode(nodesJ.getJSONObject(i)));
             }
 
-            if (hasVertexColour)
+            Collections.sort(nodes);
+
+            long currentPosition = 0;
+            for (SomeNode node : nodes)
             {
+                check(currentPosition, node.blockOffset);
                 for (int i = 0; i < node.numVertices; i++)
                 {
-                    byte r = (byte) istream.read();
-                    byte g = (byte) istream.read();
-                    byte b = (byte) istream.read();
-                    byte a = (byte) istream.read();
-
-                    check(r, g);
-                    check(g, b);
-                    check(a, (byte) 255);
+                    float x = Useful.readFloatLE(istream);
+                    float y = Useful.readFloatLE(istream);
+                    float z = Useful.readFloatLE(istream);
                 }
-            }
-            
-            for (int i = 0; i < node.numFaces; i++)
-            {
-                int f = Useful.readIntLE(istream);
-                int g = Useful.readIntLE(istream);
-                int h = Useful.readIntLE(istream);
 
-                checkLt(f, node.numVertices);
-                checkLt(g, node.numVertices);
-                checkLt(h, node.numVertices);
+                if (hasVertexColour)
+                {
+                    for (int i = 0; i < node.numVertices; i++)
+                    {
+                        byte r = (byte) istream.read();
+                        byte g = (byte) istream.read();
+                        byte b = (byte) istream.read();
+                        byte a = (byte) istream.read();
+
+                        check(r, g);
+                        check(g, b);
+                        check(a, (byte) 255);
+                    }
+                }
+
+                for (int i = 0; i < node.numFaces; i++)
+                {
+                    int f = Useful.readIntLE(istream);
+                    int g = Useful.readIntLE(istream);
+                    int h = Useful.readIntLE(istream);
+
+                    checkLt(f, node.numVertices);
+                    checkLt(g, node.numVertices);
+                    checkLt(h, node.numVertices);
+                }
+                currentPosition += node.blockLength;
             }
+
+            check(istream.available(), 0);
+
+            check(streamLength, currentPosition + 4 + jsonHeader.length());
+
+            System.out.println("All checks passed successfully");
+
         }
-
-        check(istream.available(), 0);
-
-        System.out.println("All checks passed successfully");
-
-        istream.close();
     }
 
     private static boolean check(byte a, byte b)
