@@ -50,18 +50,21 @@ public class OutputValidator
                 float z = Useful.readFloatLE(istream);
             }
 
-            for (int i = 0; i < node.numVertices; i++)
+            if (hasVertexColour)
             {
-                byte r = (byte) istream.read();
-                byte g = (byte) istream.read();
-                byte b = (byte) istream.read();
-                byte a = (byte) istream.read();
+                for (int i = 0; i < node.numVertices; i++)
+                {
+                    byte r = (byte) istream.read();
+                    byte g = (byte) istream.read();
+                    byte b = (byte) istream.read();
+                    byte a = (byte) istream.read();
 
-                check(r, g);
-                check(g, b);
-                check(a, (byte) 255);
+                    check(r, g);
+                    check(g, b);
+                    check(a, (byte) 255);
+                }
             }
-
+            
             for (int i = 0; i < node.numFaces; i++)
             {
                 int f = Useful.readIntLE(istream);
@@ -77,7 +80,7 @@ public class OutputValidator
         check(istream.available(), 0);
 
         System.out.println("All checks passed successfully");
-        
+
         istream.close();
     }
 
