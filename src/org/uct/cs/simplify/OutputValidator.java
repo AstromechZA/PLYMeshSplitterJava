@@ -57,9 +57,9 @@ public class OutputValidator
                 byte b = (byte) istream.read();
                 byte a = (byte) istream.read();
 
-                assert r == g;
-                assert g == b;
-                assert a == (byte) 255;
+                check(r, g);
+                check(g, b);
+                check(a, (byte) 255);
             }
 
             for (int i = 0; i < node.numFaces; i++)
@@ -68,16 +68,37 @@ public class OutputValidator
                 int g = Useful.readIntLE(istream);
                 int h = Useful.readIntLE(istream);
 
-                assert f < node.numVertices;
-                assert g < node.numVertices;
-                assert h < node.numVertices;
+                checkLt(f, node.numVertices);
+                checkLt(g, node.numVertices);
+                checkLt(h, node.numVertices);
             }
         }
 
-        System.out.println(istream.available());
+        check(istream.available(), 0);
 
+        System.out.println("All checks passed successfully");
+        
         istream.close();
     }
+
+    private static boolean check(byte a, byte b)
+    {
+        if (a != b) throw new RuntimeException(String.format("%s != %s", a, b));
+        return true;
+    }
+
+    private static boolean check(long a, long b)
+    {
+        if (a != b) throw new RuntimeException(String.format("%s != %s", a, b));
+        return true;
+    }
+
+    private static boolean checkLt(long a, long b)
+    {
+        if (a >= b) throw new RuntimeException(String.format("%s >= %s", a, b));
+        return true;
+    }
+
 
     private static CommandLine getCommandLine(String[] args)
     {
