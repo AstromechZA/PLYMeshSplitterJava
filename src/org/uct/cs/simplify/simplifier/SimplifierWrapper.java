@@ -18,12 +18,17 @@ public class SimplifierWrapper
         String flags = " -P";
         if (preserveBoundary) flags += " -By";
 
+        String inputS = input.getAbsolutePath();
+        String outputS = tt.getAbsolutePath();
+        if (inputS.contains(" ")) inputS = "\"" + inputS + "\"";
+        if (outputS.contains(" ")) outputS = "\"" + outputS + "\"";
+
         Process proc = r.exec(
             String.format(
                 "%s 0 %s %s %d" + flags,
                 PATH_TO_EXECUTABLE,
-                input.getAbsolutePath(),
-                tt.getAbsolutePath(),
+                inputS,
+                outputS,
                 numFaces
             )
         );
