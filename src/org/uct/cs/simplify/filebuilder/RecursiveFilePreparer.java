@@ -19,11 +19,11 @@ public class RecursiveFilePreparer
     public static PHFNode prepare(PHFNode inputNode, int maxdepth)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth);
+        return prepare(inputNode, 0, maxdepth, 0, 100);
     }
 
-    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth)
-        throws IOException, InterruptedException
+    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth, float start_progress, float end_progress)
+    throws IOException, InterruptedException
     {
         // stopping condition
         if (depth == maxdepth)
@@ -31,6 +31,7 @@ public class RecursiveFilePreparer
             // simply copy the node and return
             PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
             outputNode.setDepth(depth);
+            Outputter.info3f("Progress: %.2f%%%n", end_progress);
             return outputNode;
         }
         else
@@ -42,7 +43,15 @@ public class RecursiveFilePreparer
 
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
-            for (PHFNode childNode : childNodes) processedNodes.add(prepare(childNode, depth + 1, maxdepth));
+            float fromEnd = 100 / (float) Math.pow(2, maxdepth + 1);
+            float diffProgress = (end_progress - fromEnd - start_progress) / (childNodes.size());
+            float childProgress = start_progress;
+            for (PHFNode childNode : childNodes)
+            {
+                processedNodes
+                    .add(prepare(childNode, depth + 1, maxdepth, childProgress, childProgress + diffProgress));
+                childProgress += diffProgress;
+            }
 
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
             for (PHFNode n : processedNodes) processedFiles.add(n.getLinkedFile());
@@ -64,6 +73,7 @@ public class RecursiveFilePreparer
             outputNode.setDepth(depth);
 
             Outputter.info1f("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
+            Outputter.info3f("Progress: %.2f%%.%n", end_progress);
             return outputNode;
         }
     }
