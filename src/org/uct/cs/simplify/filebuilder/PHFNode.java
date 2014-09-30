@@ -11,10 +11,11 @@ import java.util.*;
 public class PHFNode
 {
     private final ArrayList<PHFNode> children = new ArrayList<>(8);
-    private long numVertices;
-    private long numFaces;
-    private XBoundingBox boundingBox;
-    private File linkedFile;
+    private final long numVertices;
+    private final long numFaces;
+    private final XBoundingBox boundingBox;
+    private final File linkedFile;
+
     private PHFNode parent;
     private long blockOffset;
     private long blockLength;
@@ -95,11 +96,6 @@ public class PHFNode
         return this.boundingBox;
     }
 
-    public void setBoundingBox(XBoundingBox boundingBox)
-    {
-        this.boundingBox = boundingBox;
-    }
-
     public File getLinkedFile()
     {
         return this.linkedFile;
@@ -133,16 +129,6 @@ public class PHFNode
             String.format("\"max_y\":%f,", this.boundingBox.getMaxY()) +
             String.format("\"max_z\":%f", this.boundingBox.getMaxZ()) +
             '}';
-    }
-
-    public int countSelfPlusDescendants()
-    {
-        int c = 1;
-        for (PHFNode child : this.children)
-        {
-            c += child.countSelfPlusDescendants();
-        }
-        return c;
     }
 
     public int getDepth()
