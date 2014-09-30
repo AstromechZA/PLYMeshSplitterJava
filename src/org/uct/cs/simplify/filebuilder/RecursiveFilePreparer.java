@@ -6,6 +6,7 @@ import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import java.io.File;
@@ -62,7 +63,7 @@ public class RecursiveFilePreparer
             outputNode.addChildren(processedNodes);
             outputNode.setDepth(depth);
 
-            System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
+            Outputter.info1f("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
             return outputNode;
         }
     }

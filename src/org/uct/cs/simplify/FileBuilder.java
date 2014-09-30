@@ -4,10 +4,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PHFBuilder;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
-import org.uct.cs.simplify.util.StatRecorder;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Timer;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -84,7 +81,9 @@ public class FileBuilder
         treedepth.setType(Number.class);
         options.addOption(treedepth);
 
-        Option keepTempFiles = new Option("k", "keeptemp", false, "keep any temporary files generated during phf compilation");
+        Option keepTempFiles = new Option(
+            "k", "keeptemp", false, "keep any temporary files generated during phf compilation"
+        );
         options.addOption(keepTempFiles);
 
         Option swapYZ = new Option("s", "swapyz", false, "Rotate model 90 around X. (convert coordinate frame)");
@@ -104,7 +103,7 @@ public class FileBuilder
         }
         catch (ParseException e)
         {
-            System.out.printf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
+            Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("filebuilder --input <path> --output <path>", options);
             System.exit(1);

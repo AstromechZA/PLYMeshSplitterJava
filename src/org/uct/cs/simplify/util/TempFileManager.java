@@ -106,10 +106,10 @@ public class TempFileManager
 
         if (!filesToDelete.isEmpty())
         {
-            System.out.printf("Failed to clean up %d files. Please delete these manually:%n", filesToDelete.size());
+            Outputter.errorf("Failed to clean up %d files. Please delete these manually:%n", filesToDelete.size());
             for (Path path : filesToDelete)
             {
-                System.out.print(path);
+                Outputter.errorln(path);
             }
         }
     }

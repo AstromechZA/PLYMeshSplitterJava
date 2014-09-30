@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.simplifier;
 
 import org.uct.cs.simplify.util.OSDetect;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import java.io.*;
@@ -12,7 +13,7 @@ public class SimplifierWrapper
     public static File simplify(File input, long numFaces, boolean preserveBoundary) throws IOException, InterruptedException
     {
         File tt = TempFileManager.provide("simp", ".ply");
-        System.out.printf("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
+        Outputter.info2f("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
 
         String flags = " -P";

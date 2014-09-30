@@ -10,6 +10,7 @@ import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
 import org.uct.cs.simplify.util.CompactBitArray;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
@@ -28,7 +29,7 @@ public class NodeSplitter
         IMembershipBuilder membershipBuilder
     ) throws IOException
     {
-        System.out.printf(
+        Outputter.info1f(
             "Splitting %s into %d subnodes%n", parent.getLinkedFile().getPath(), membershipBuilder.getSplitRatio()
         );
         // output object for subnodes
@@ -36,16 +37,16 @@ public class NodeSplitter
         // build reader object
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
-        System.out.println("Calculating subnode memberships..");
+        Outputter.info1ln("Calculating subnode memberships..");
 
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
 
-        System.out.println("Subnode memberships created.");
+        Outputter.debugln("Subnode memberships created.");
 
         ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
-            System.out.printf("Creating subnode %d%n", nodeID);
+            Outputter.debugf("Creating subnode %d%n", nodeID);
             File tempFaceFile = TempFileManager.provide("faces");
             GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
             if (result.numFaces > 0)

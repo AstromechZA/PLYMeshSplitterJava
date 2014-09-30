@@ -6,6 +6,7 @@ import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
@@ -42,7 +43,7 @@ public class NaiveMeshStitcher
         int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
         int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
 
-        System.out.printf("Stitched %d vertices.%n", stitchResult.getStitchedCount());
+        Outputter.debugf("Stitched %d vertices.%n", stitchResult.getStitchedCount());
 
         PLYHeader h = writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces, outVam);
 
@@ -178,7 +179,7 @@ public class NaiveMeshStitcher
         {
             File temp = TempFileManager.provide("phf", ".ply");
             File current = files.get(i);
-            System.out.printf("Stitching %s and %s into %s%n", last, current, temp);
+            Outputter.info2f("Stitching %s and %s into %s%n", last, current, temp);
             NaiveMeshStitcher.stitch(last, current, temp);
 
             // if 'last' is a tempfile, and not the final one.. delete it

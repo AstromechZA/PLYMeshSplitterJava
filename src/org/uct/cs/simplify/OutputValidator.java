@@ -3,6 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.Useful;
 
@@ -30,15 +31,15 @@ public class OutputValidator
             int streamLength = istream.available();
             int headerLength = Useful.readIntLE(istream);
             String jsonHeader = Useful.readString(istream, headerLength);
-            System.out.printf("header length: %s%n", headerLength);
+            Outputter.info2f("header length: %s%n", headerLength);
 
             JSONObject o = new JSONObject(jsonHeader);
 
             boolean hasVertexColour = o.getBoolean("vertex_colour");
-            System.out.printf("vertex_colour: %b%n", hasVertexColour);
+            Outputter.info2f("vertex_colour: %b%n", hasVertexColour);
 
             JSONArray nodesJ = o.getJSONArray("nodes");
-            System.out.printf("number of nodes: %d%n", nodesJ.length());
+            Outputter.info2f("number of nodes: %d%n", nodesJ.length());
 
             List<SomeNode> nodes = new ArrayList<>();
             for (int i = 0; i < nodesJ.length(); i++)
@@ -103,7 +104,7 @@ public class OutputValidator
 
             check(streamLength, currentPosition + 4 + jsonHeader.length());
 
-            System.out.println("All checks passed successfully");
+            Outputter.info3ln("All checks passed successfully");
         }
     }
 
@@ -145,7 +146,7 @@ public class OutputValidator
         }
         catch (ParseException e)
         {
-            System.out.printf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
+            Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("outputvalidator --input <path>", options);
             System.exit(1);

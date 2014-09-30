@@ -6,6 +6,7 @@ import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.SplittingAxis;
 import org.uct.cs.simplify.util.CompactBitArray;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
@@ -92,7 +93,7 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
             ratio = countValuesLessThan(vr, axis, approximate) / nv;
             iterations++;
         }
-        System.out.printf("Found median of %d values after %d iterations.%n", vr.getCount(), iterations);
+        Outputter.debugf("Found median of %d values after %d iterations.%n", vr.getCount(), iterations);
         return approximate;
     }
 

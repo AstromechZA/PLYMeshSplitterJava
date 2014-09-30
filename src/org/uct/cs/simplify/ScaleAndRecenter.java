@@ -8,10 +8,7 @@ import org.uct.cs.simplify.model.VertexAttrMap;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.ProgressBar;
-import org.uct.cs.simplify.util.StatRecorder;
-import org.uct.cs.simplify.util.Useful;
-import org.uct.cs.simplify.util.XBoundingBox;
+import org.uct.cs.simplify.util.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -54,10 +51,10 @@ public class ScaleAndRecenter
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
         // debug
-        System.out.println("Rescaling and Centering...");
-        System.out.printf("%s -> %s%n", reader.getFile(), outputFile);
-        System.out.printf("Scale ratio: %f%n", scale);
-        System.out.printf("Swapping YZ axis: %s%n", swapYZ);
+        Outputter.info3ln("Rescaling and Centering...");
+        Outputter.info2f("%s -> %s%n", reader.getFile(), outputFile);
+        Outputter.debugf("Scale ratio: %f%n", scale);
+        Outputter.info1f("Swapping YZ axis: %s%n", swapYZ);
 
         try (FileChannel fcIN = new FileInputStream(reader.getFile()).getChannel())
         {
@@ -101,10 +98,9 @@ public class ScaleAndRecenter
 
             try (FileChannel fcOUT = new FileOutputStream(outputFile, true).getChannel())
             {
-                System.out.print("Transferring face elements...");
+                Outputter.debugln("Transferring face elements...");
                 long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
                 fcIN.transferTo(fcIN.position(), fileRemainder, fcOUT);
-                System.out.println("done.");
             }
         }
 
