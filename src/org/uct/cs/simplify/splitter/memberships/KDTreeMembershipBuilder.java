@@ -6,7 +6,6 @@ import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.SplittingAxis;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
@@ -20,10 +19,7 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
         Point3D center = boundingBox.getCenter();
         TIntObjectMap<XBoundingBox> subNodes = SplittingAxis.splitBBIntoSubnodes(boundingBox, longest, center);
 
-        try (
-            MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
-            ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
-        )
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(1, c);
@@ -32,21 +28,18 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
                 case X:
                     for (int i = 0; i < c; i++)
                     {
-                        pb.tick();
                         if (vr.get(i).x > center.getX()) memberships.set(i, 1);
                     }
                     break;
                 case Y:
                     for (int i = 0; i < c; i++)
                     {
-                        pb.tick();
                         if (vr.get(i).y > center.getY()) memberships.set(i, 1);
                     }
                     break;
                 case Z:
                     for (int i = 0; i < c; i++)
                     {
-                        pb.tick();
                         if (vr.get(i).z > center.getZ()) memberships.set(i, 1);
                     }
                     break;

@@ -10,7 +10,6 @@ import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
@@ -37,6 +36,8 @@ public class NodeSplitter
         // build reader object
         PLYReader reader = new PLYReader(parent.getLinkedFile());
 
+        System.out.println("Calculating subnode memberships..");
+
         MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
 
         System.out.println("Subnode memberships created.");
@@ -44,6 +45,7 @@ public class NodeSplitter
         ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
+            System.out.printf("Creating subnode %d%n", nodeID);
             File tempFaceFile = TempFileManager.provide("faces");
             GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
             if (result.numFaces > 0)
@@ -72,18 +74,9 @@ public class NodeSplitter
                 PLYHeader newHeader = PLYHeader.constructHeader(result.numVertices, result.numFaces, vam);
                 fostream.write((newHeader + "\n").getBytes());
 
-                try (
-                    ProgressBar pb = new ProgressBar(
-                        String.format("%s: Writing Vertices", Useful.getFilenameWithoutExt(subNodeFile.getName())),
-                        result.numVertices
-                    )
-                )
+                for (int i : result.vertexIndexMap.keySet())
                 {
-                    for (int i : result.vertexIndexMap.keySet())
-                    {
-                        pb.tick();
-                        vr.get(i).writeToStream(fostream, vam);
-                    }
+                    vr.get(i).writeToStream(fostream, vam);
                 }
             }
         }
@@ -109,8 +102,7 @@ public class NodeSplitter
         try (
             MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
-            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE);
-            ProgressBar pb = new ProgressBar("Gathering Vertices & Writing Faces", faceReader.getCount())
+            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
             Face face;
@@ -158,8 +150,6 @@ public class NodeSplitter
                     fostream.write(bostream.toByteArray());
                     bostream.reset();
                 }
-
-                pb.tick();
             }
             if (bostream.size() > 0) fostream.write(bostream.toByteArray());
             return new GatheringResult(numFacesInSubnode, vertexIndexMap);

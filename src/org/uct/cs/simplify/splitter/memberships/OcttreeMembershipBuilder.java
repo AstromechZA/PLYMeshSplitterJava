@@ -7,7 +7,6 @@ import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
@@ -107,10 +106,7 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
             )
         );
 
-        try (
-            MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader);
-            ProgressBar pb = new ProgressBar("Calculating Memberships", vr.getCount())
-        )
+        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
 
             long c = vr.getCount();
@@ -119,7 +115,6 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
             Vertex v;
             for (int i = 0; i < c; i++)
             {
-                pb.tick();
                 v = vr.get(i);
                 memberships.set(i, ofinder.getNode(v.x, v.y, v.z));
             }
