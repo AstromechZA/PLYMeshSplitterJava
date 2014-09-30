@@ -14,6 +14,7 @@ public class ProgressWindow extends JFrame
     public static final int WINDOW_HEIGHT = 400;
     private JTextArea consoleArea;
     private JProgressBar progressBar;
+    private JScrollPane consoleScroll;
 
     public ProgressWindow()
     {
@@ -34,13 +35,21 @@ public class ProgressWindow extends JFrame
         this.consoleArea.setEditable(false);
         this.consoleArea.setBackground(Color.black);
         this.consoleArea.setForeground(Color.gray);
-        this.add(this.consoleArea, BorderLayout.CENTER);
+
+        this.consoleScroll = new JScrollPane(
+            this.consoleArea,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+        this.add(this.consoleScroll, BorderLayout.CENTER);
 
         this.setVisible(true);
 
         File input = this.getInputFile();
         String baseFileName = Useful.getFilenameWithoutExt(input.getAbsolutePath()) + ".phf";
         File outputFile = this.getOutputFile(new File(baseFileName));
+
+        new Thread(new ProcessingThread(this, this.progressBar)).start();
     }
 
     private File getInputFile()
@@ -96,4 +105,12 @@ public class ProgressWindow extends JFrame
             e.printStackTrace();
         }
     }
+
+    public void println(Object o)
+    {
+        this.consoleArea.append(o.toString() + "\n");
+        JScrollBar bar = this.consoleScroll.getVerticalScrollBar();
+        bar.setValue(bar.getMaximum());
+    }
+
 }

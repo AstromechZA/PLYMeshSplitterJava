@@ -4,7 +4,10 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PHFBuilder;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
-import org.uct.cs.simplify.util.*;
+import org.uct.cs.simplify.util.Outputter;
+import org.uct.cs.simplify.util.StatRecorder;
+import org.uct.cs.simplify.util.TempFileManager;
+import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,6 +17,11 @@ public class FileBuilder
 {
     private static final int RESCALE_SIZE = 1024;
     public static final int MAX_DEPTH = 20;
+
+    public static void run()
+    {
+
+    }
 
     public static void main(String[] args) throws IOException
     {
@@ -32,9 +40,7 @@ public class FileBuilder
 
             File scaledFile = TempFileManager.provide("rescaled", ".ply");
 
-            Timer scaleTimer = new Timer("Rescaling");
             ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, cmd.hasOption("swapyz"));
-            scaleTimer.close();
 
             PHFNode seed = new PHFNode(scaledFile);
 
