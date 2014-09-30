@@ -44,7 +44,7 @@ public class NodeSplitter
         ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
         for (int nodeID : mr.subNodes.keys())
         {
-            File tempFaceFile = TempFileManager.provide();
+            File tempFaceFile = TempFileManager.provide("faces");
             GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
             if (result.numFaces > 0)
             {
@@ -56,6 +56,7 @@ public class NodeSplitter
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
             }
+            TempFileManager.release(tempFaceFile);
         }
 
         return output;

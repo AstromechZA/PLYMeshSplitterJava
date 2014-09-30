@@ -44,7 +44,12 @@ public class NaiveMeshStitcher
 
         System.out.printf("Stitched %d vertices.%n", stitchResult.getStitchedCount());
 
-        return writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces, outVam);
+        PLYHeader h = writeFinalPLYModel(outputFile, vertexFile, faceFile, numVertices, numFaces, outVam);
+
+        TempFileManager.release(vertexFile);
+        TempFileManager.release(faceFile);
+
+        return h;
     }
 
     private static VertexStitchResult getStitchTransform(
@@ -168,12 +173,17 @@ public class NaiveMeshStitcher
     public static File stitch(List<File> files) throws IOException
     {
         File last = files.get(0);
-        for (int i = 1; i < files.size(); i++)
+        int num = files.size();
+        for (int i = 1; i < num; i++)
         {
             File temp = TempFileManager.provide("phf", ".ply");
             File current = files.get(i);
             System.out.printf("Stitching %s and %s into %s%n", last, current, temp);
             NaiveMeshStitcher.stitch(last, current, temp);
+
+            // if 'last' is a tempfile, and not the final one.. delete it
+            if (i > 1 && i < (num - 1)) TempFileManager.release(last);
+
             last = temp;
         }
 

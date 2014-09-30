@@ -5,6 +5,7 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.util.List;
 
 public class PHFBuilder
 {
@@ -18,7 +19,9 @@ public class PHFBuilder
             try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
             {
                 long position = 0;
-                for (PHFNode node : tree.collectAllNodes())
+                List<PHFNode> nodes = tree.collectAllNodes();
+                System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
+                for (PHFNode node : nodes)
                 {
                     System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
                     try (FileChannel fcIN = new FileInputStream(node.getLinkedFile()).getChannel())
@@ -37,7 +40,9 @@ public class PHFBuilder
             try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
             {
                 long position = 0;
-                for (PHFNode node : tree.collectAllNodes())
+                List<PHFNode> nodes = tree.collectAllNodes();
+                System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
+                for (PHFNode node : nodes)
                 {
                     System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
 
@@ -79,6 +84,8 @@ public class PHFBuilder
                 fcOUT.transferFrom(fcIN, fcOUT.position(), fcIN.size());
             }
         }
+
+        TempFileManager.release(tempBlockFile);
 
         return jsonheader;
     }

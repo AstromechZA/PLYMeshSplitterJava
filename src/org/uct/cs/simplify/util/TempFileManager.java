@@ -70,6 +70,15 @@ public class TempFileManager
         return f.toFile();
     }
 
+    public static void release(File f)
+    {
+        try
+        {
+            Files.deleteIfExists(f.toPath());
+        }
+        catch (IOException e) { }
+    }
+
     public static void clear() throws InterruptedException
     {
         System.gc();

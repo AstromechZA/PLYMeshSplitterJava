@@ -6,6 +6,7 @@ import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
+import org.uct.cs.simplify.util.TempFileManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,8 @@ public class RecursiveFilePreparer
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
             for (PHFNode n : processedNodes) processedFiles.add(n.getLinkedFile());
 
+            TempFileManager.release(inputNode.getLinkedFile());
+
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
@@ -50,6 +53,8 @@ public class RecursiveFilePreparer
             long targetFaces = totalFaces / splitType.getSplitRatio();
 
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
+
+            TempFileManager.release(stitchedModel);
 
             PHFNode outputNode = new PHFNode(simplifiedFile);
             outputNode.addChildren(processedNodes);

@@ -43,6 +43,8 @@ public class FileBuilder
             int treedepthv = Integer.parseInt(cmd.getOptionValue("treedepth"));
             PHFNode tree = RecursiveFilePreparer.prepare(seed, treedepthv);
 
+            TempFileManager.release(scaledFile);
+
             String jsonHeader = PHFBuilder.compile(tree, outputFile, PHFBuilder.CompilationMode.COMPRESSED_ARRAY);
 
             if (cmd.hasOption("dumpjson"))
