@@ -14,7 +14,7 @@ public class TempFileManager
     public static final int DELETE_WAIT_DELAY = 500;
     private static Path workingDirectory;
     private static boolean deleteOnExit = true;
-    private static ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
+    private static final ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
 
     public static Path getWorkingDirectory() throws IOException
     {

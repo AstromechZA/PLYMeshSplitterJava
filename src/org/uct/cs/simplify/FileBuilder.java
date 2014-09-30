@@ -16,6 +16,7 @@ import java.io.IOException;
 public class FileBuilder
 {
     private static final int RESCALE_SIZE = 1024;
+    public static final int MAX_DEPTH = 20;
 
     public static void main(String[] args) throws IOException
     {
@@ -98,7 +99,7 @@ public class FileBuilder
         {
             cmd = clp.parse(options, args);
             long treedepthv = (Long) cmd.getParsedOptionValue("treedepth");
-            if (treedepthv < 2 || treedepthv > 20) throw new ParseException("treedepth must be > 1 and < 21");
+            if (treedepthv < 2 || treedepthv > MAX_DEPTH) throw new ParseException("treedepth must be > 1 and < 21");
             return cmd;
         }
         catch (ParseException e)

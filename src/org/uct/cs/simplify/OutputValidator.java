@@ -19,6 +19,7 @@ public class OutputValidator
 
     public static final int BYTES_PER_VERTEX = 12;
     public static final int BYTES_PER_FACE = 12;
+    public static final int DEFAULT_ALPHA = 255;
 
     public static void main(String[] args) throws IOException
     {
@@ -80,7 +81,7 @@ public class OutputValidator
 
                             check(r, g);
                             check(g, b);
-                            check(a, (byte) 255);
+                            check(a, (byte) DEFAULT_ALPHA);
                         }
                     }
 
@@ -106,28 +107,24 @@ public class OutputValidator
         }
     }
 
-    private static boolean check(byte a, byte b)
+    private static void check(byte a, byte b)
     {
         if (a != b) throw new RuntimeException(String.format("%s != %s", a, b));
-        return true;
     }
 
-    private static boolean check(long a, long b)
+    private static void check(long a, long b)
     {
         if (a != b) throw new RuntimeException(String.format("%s != %s", a, b));
-        return true;
     }
 
-    private static boolean checkLt(long a, long b)
+    private static void checkLt(long a, long b)
     {
         if (a >= b) throw new RuntimeException(String.format("%s >= %s", a, b));
-        return true;
     }
 
-    private static boolean checkInRange(double a, double v, double b)
+    private static void checkInRange(double a, double v, double b)
     {
         if (v > b || v < a) throw new RuntimeException(String.format("%s is out of range %s..%s", v, a, b));
-        return true;
     }
 
     private static CommandLine getCommandLine(String[] args)
