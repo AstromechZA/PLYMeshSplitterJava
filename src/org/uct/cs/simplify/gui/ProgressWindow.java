@@ -1,8 +1,11 @@
 package org.uct.cs.simplify.gui;
 
+import org.uct.cs.simplify.util.Useful;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
 
 public class ProgressWindow extends JFrame
 {
@@ -35,17 +38,44 @@ public class ProgressWindow extends JFrame
 
         this.setVisible(true);
 
+        File input = this.getInputFile();
+        String baseFileName = Useful.getFilenameWithoutExt(input.getAbsolutePath()) + ".phf";
+        File outputFile = this.getOutputFile(new File(baseFileName));
+    }
+
+    private File getInputFile()
+    {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new FileNameExtensionFilter("PLY Models", ".ply"));
+        chooser.setFileFilter(new FileNameExtensionFilter("PLY Models", "ply"));
         chooser.setDialogTitle("Pick a PLY model to process");
+        chooser.setMultiSelectionEnabled(false);
         int result = chooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION)
         {
-            //
+            return chooser.getSelectedFile();
         } else
         {
             System.exit(0);
         }
+        return null;
+    }
+
+    private File getOutputFile(File baseFile)
+    {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setDialogTitle("Pick output file");
+        chooser.setFileFilter(new FileNameExtensionFilter("PHF Data file", "phf"));
+        chooser.setSelectedFile(baseFile);
+        int result = chooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION)
+        {
+            return chooser.getSelectedFile();
+        } else
+        {
+            System.exit(0);
+        }
+        return null;
     }
 
     private static void setFancyLookAndFeel()
