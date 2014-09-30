@@ -9,63 +9,36 @@ import java.util.List;
 
 public class PHFBuilder
 {
-    public static String compile(PHFNode tree, File outputFile, CompilationMode mode) throws IOException
+    public static String compile(PHFNode tree, File outputFile) throws IOException
     {
-        System.out.printf("Compressing Hierarchical tree into %s using mode: %s%n", outputFile, mode);
+        System.out.printf("Compressing Hierarchical tree into %s%n", outputFile);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
 
         List<PHFNode> nodes = tree.collectAllNodes();
         System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
 
         int max_depth = 0;
-        if (mode == CompilationMode.PLY_MODEL)
+        try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
         {
-            try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
+            long position = 0;
+            for (PHFNode node : nodes)
             {
-                long position = 0;
-                for (PHFNode node : nodes)
-                {
-                    System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
-                    try (FileChannel fcIN = new FileInputStream(node.getLinkedFile()).getChannel())
-                    {
-                        long length = fcIN.size();
-                        fcOUT.transferFrom(fcIN, position, length);
-                        node.setBlockOffset(position);
-                        node.setBlockLength(length);
-                        position += length;
-                    }
-                    max_depth = Math.max(max_depth, node.getDepth());
-                }
-            }
-        }
-        else if (mode == CompilationMode.COMPRESSED_ARRAY)
-        {
-            try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
-            {
-                long position = 0;
-                for (PHFNode node : nodes)
-                {
-                    System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
+                System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
 
-                    PLYDataCompressor.CompressionResult r = PLYDataCompressor.compress(node.getLinkedFile(), ostream);
+                PLYDataCompressor.CompressionResult r = PLYDataCompressor.compress(node.getLinkedFile(), ostream);
 
-                    long length = r.getLengthOfFaces() + r.getLengthOfVertices();
-                    node.setBlockOffset(position);
-                    node.setBlockLength(length);
-                    position += length;
-                    max_depth = Math.max(max_depth, node.getDepth());
-                }
+                long length = r.getLengthOfFaces() + r.getLengthOfVertices();
+                node.setBlockOffset(position);
+                node.setBlockLength(length);
+                position += length;
+                max_depth = Math.max(max_depth, node.getDepth());
             }
-        }
-        else
-        {
-            throw new RuntimeException("No compression mode provided!");
         }
 
         String jsonheader = "{" +
             String.format("\"vertex_colour\":%b,", true) +
             String.format("\"nodes\":%s,", PHFNode.buildJSONHierarchy(tree)) +
-            String.format("\"max_depth\";%d", max_depth) +
+            String.format("\"max_depth\":%d", max_depth) +
             "}";
 
         System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());
@@ -91,10 +64,5 @@ public class PHFBuilder
         TempFileManager.release(tempBlockFile);
 
         return jsonheader;
-    }
-
-    public enum CompilationMode
-    {
-        PLY_MODEL, COMPRESSED_ARRAY
     }
 }

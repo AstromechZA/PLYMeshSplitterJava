@@ -77,18 +77,21 @@ public class Vertex
     public boolean equals(Object o)
     {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || this.getClass() != o.getClass()) return false;
 
         Vertex vertex = (Vertex) o;
-        return Float.compare(vertex.x, x) == 0 && Float.compare(vertex.y, y) == 0 && Float.compare(vertex.z, z) == 0;
+        return Float.compare(vertex.x, this.x) == 0 && Float.compare(vertex.y, this.y) == 0 && Float.compare(
+            vertex.z,
+            this.z
+        ) == 0;
     }
 
     @Override
     public int hashCode()
     {
-        int result = (x != +0.0f ? Float.floatToIntBits(x) : 0);
-        result = 31 * result + (y != +0.0f ? Float.floatToIntBits(y) : 0);
-        return 31 * result + (z != +0.0f ? Float.floatToIntBits(z) : 0);
+        int result = (this.x != +0.0f ? Float.floatToIntBits(this.x) : 0);
+        result = 31 * result + (this.y != +0.0f ? Float.floatToIntBits(this.y) : 0);
+        return 31 * result + (this.z != +0.0f ? Float.floatToIntBits(this.z) : 0);
     }
 
     public void writeToStream(OutputStream stream, VertexAttrMap vam) throws IOException

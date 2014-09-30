@@ -16,6 +16,10 @@ import java.util.List;
 
 public class OutputValidator
 {
+
+    public static final int BYTES_PER_VERTEX = 12;
+    public static final int BYTES_PER_FACE = 12;
+
     public static void main(String[] args) throws IOException
     {
         CommandLine cmd = getCommandLine(args);
@@ -50,7 +54,8 @@ public class OutputValidator
                 {
                     check(currentPosition, node.blockOffset);
 
-                    long l = node.numVertices * 12 + ((hasVertexColour) ? node.numVertices * 4 : 0) + node.numFaces * 12;
+                    long l = node.numVertices * BYTES_PER_VERTEX + ((hasVertexColour) ? node.numVertices * 4 : 0) +
+                        node.numFaces * BYTES_PER_FACE;
                     check(node.blockLength, l);
 
                     for (int i = 0; i < node.numVertices; i++)

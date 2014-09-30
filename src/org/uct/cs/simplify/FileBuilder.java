@@ -45,7 +45,7 @@ public class FileBuilder
 
             TempFileManager.release(scaledFile);
 
-            String jsonHeader = PHFBuilder.compile(tree, outputFile, PHFBuilder.CompilationMode.COMPRESSED_ARRAY);
+            String jsonHeader = PHFBuilder.compile(tree, outputFile);
 
             if (cmd.hasOption("dumpjson"))
             {

@@ -11,7 +11,8 @@ import java.util.ArrayDeque;
  */
 public class TempFileManager
 {
-    private static Path workingDirectory = null;
+    public static final int DELETE_WAIT_DELAY = 500;
+    private static Path workingDirectory;
     private static boolean deleteOnExit = true;
     private static ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
 
@@ -76,7 +77,10 @@ public class TempFileManager
         {
             Files.deleteIfExists(f.toPath());
         }
-        catch (IOException e) { }
+        catch (IOException e)
+        {
+            // nothing
+        }
     }
 
     public static void clear() throws InterruptedException
@@ -96,7 +100,7 @@ public class TempFileManager
                 filesToDelete.addLast(p);
 
                 if (errorlimit-- == 0) break;
-                Thread.sleep(500);
+                Thread.sleep(DELETE_WAIT_DELAY);
             }
         }
 
