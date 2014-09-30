@@ -14,13 +14,15 @@ public class PHFBuilder
         System.out.printf("Compressing Hierarchical tree into %s using mode: %s%n", outputFile, mode);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
 
+        List<PHFNode> nodes = tree.collectAllNodes();
+        System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
+
+        int max_depth = 0;
         if (mode == CompilationMode.PLY_MODEL)
         {
             try (FileChannel fcOUT = new FileOutputStream(tempBlockFile).getChannel())
             {
                 long position = 0;
-                List<PHFNode> nodes = tree.collectAllNodes();
-                System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
                 for (PHFNode node : nodes)
                 {
                     System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
@@ -32,6 +34,7 @@ public class PHFBuilder
                         node.setBlockLength(length);
                         position += length;
                     }
+                    max_depth = Math.max(max_depth, node.getDepth());
                 }
             }
         }
@@ -40,8 +43,6 @@ public class PHFBuilder
             try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
             {
                 long position = 0;
-                List<PHFNode> nodes = tree.collectAllNodes();
-                System.out.printf("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
                 for (PHFNode node : nodes)
                 {
                     System.out.printf("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
@@ -52,6 +53,7 @@ public class PHFBuilder
                     node.setBlockOffset(position);
                     node.setBlockLength(length);
                     position += length;
+                    max_depth = Math.max(max_depth, node.getDepth());
                 }
             }
         }
@@ -61,8 +63,9 @@ public class PHFBuilder
         }
 
         String jsonheader = "{" +
-            String.format("\"vertex_colour\":%b, ", true) +
-            String.format("\"nodes\":%s, ", PHFNode.buildJSONHierarchy(tree)) +
+            String.format("\"vertex_colour\":%b,", true) +
+            String.format("\"nodes\":%s,", PHFNode.buildJSONHierarchy(tree)) +
+            String.format("\"max_depth\";%d", max_depth) +
             "}";
 
         System.out.printf("%nWriting '%s' ..%n", outputFile.getPath());

@@ -28,7 +28,9 @@ public class RecursiveFilePreparer
         if (depth == maxdepth)
         {
             // simply copy the node and return
-            return new PHFNode(inputNode.getLinkedFile());
+            PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
+            outputNode.setDepth(depth);
+            return outputNode;
         }
         else
         {
@@ -58,6 +60,7 @@ public class RecursiveFilePreparer
 
             PHFNode outputNode = new PHFNode(simplifiedFile);
             outputNode.addChildren(processedNodes);
+            outputNode.setDepth(depth);
 
             System.out.printf("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
             return outputNode;

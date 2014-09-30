@@ -10,14 +10,15 @@ import java.util.*;
 
 public class PHFNode
 {
-    private final ArrayList<PHFNode> children;
+    private final ArrayList<PHFNode> children = new ArrayList<>(8);
     private long numVertices;
     private long numFaces;
     private XBoundingBox boundingBox;
     private File linkedFile;
     private PHFNode parent;
-    private long blockOffset, blockLength;
-    private int depth;
+    private long blockOffset;
+    private long blockLength;
+    private int depth = -1;
 
     public PHFNode(XBoundingBox bb, long numV, long numF, File f)
     {
@@ -25,11 +26,6 @@ public class PHFNode
         this.numVertices = numV;
         this.boundingBox = bb;
         this.linkedFile = f;
-        this.parent = null;
-        this.children = new ArrayList<>(8);
-        this.blockOffset = 0;
-        this.blockLength = 0;
-        this.depth = 0;
     }
 
     public PHFNode(File f) throws IOException
@@ -39,11 +35,6 @@ public class PHFNode
         this.numVertices = r.getHeader().getElement("vertex").getCount();
         this.boundingBox = BoundsFinder.getBoundingBox(r);
         this.linkedFile = f;
-        this.parent = null;
-        this.children = new ArrayList<>(8);
-        this.blockOffset = 0;
-        this.blockLength = 0;
-        this.depth = 0;
     }
 
     public PHFNode(File f, XBoundingBox bb) throws IOException
@@ -53,11 +44,6 @@ public class PHFNode
         this.numVertices = r.getHeader().getElement("vertex").getCount();
         this.boundingBox = bb;
         this.linkedFile = f;
-        this.parent = null;
-        this.children = new ArrayList<>(8);
-        this.blockOffset = 0;
-        this.blockLength = 0;
-        this.depth = 0;
     }
 
     @SuppressWarnings("CollectionWithoutInitialCapacity")
@@ -139,6 +125,7 @@ public class PHFNode
             String.format("\"file\":\"%s\",", this.linkedFile.getAbsolutePath().replace("\\", "\\\\")) +
             String.format("\"block_offset\":%d,", this.blockOffset) +
             String.format("\"block_length\":%d,", this.blockLength) +
+            String.format("\"depth\":%d,", this.depth) +
             String.format("\"min_x\":%f,", this.boundingBox.getMinX()) +
             String.format("\"min_y\":%f,", this.boundingBox.getMinY()) +
             String.format("\"min_z\":%f,", this.boundingBox.getMinZ()) +
