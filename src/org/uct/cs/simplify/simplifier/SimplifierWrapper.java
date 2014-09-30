@@ -20,7 +20,7 @@ public class SimplifierWrapper
 
         Process proc = r.exec(
             String.format(
-                "%s 0 %s %s %d" + flags,
+                "\"%s\" 0 \"%s\" \"%s\" %d" + flags,
                 PATH_TO_EXECUTABLE,
                 input.getAbsolutePath(),
                 tt.getAbsolutePath(),
