@@ -15,6 +15,8 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     public static final int PROGRESSBAR_HEIGHT = 30;
     public static final int WINDOW_WIDTH = 800;
     public static final int WINDOW_HEIGHT = 800;
+    public static final String NO_INPUT_FILE_SELECTED = "No input file selected!";
+    public static final String NO_OUTPUT_FILE_SET = "No output file set!";
     private JTextArea consoleArea;
     private JProgressBar progressBar;
     private JCheckBox swapYZCheckBox;
@@ -37,10 +39,6 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         this.linkActions();
 
         this.setVisible(true);
-
-        //File input = this.getInputFile();
-        //String baseFileName = Useful.getFilenameWithoutExt(input.getAbsolutePath()) + ".phf";
-        //File outputFile = this.getOutputFile(new File(baseFileName));
 
         PrintStream ps = new PrintStream(new TextAreaOutputStream(this.consoleArea));
         System.setOut(ps);
@@ -71,7 +69,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         c.gridy = 1;
         c.gridx = 0;
-        pickedInputFileDisplay = new JTextField("No input file selected!");
+        pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
         pickedInputFileDisplay.setEditable(false);
         topPanel.add(pickedInputFileDisplay, c);
 
@@ -82,7 +80,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         c.gridy = 2;
         c.gridx = 0;
-        pickedOutputFileDisplay = new JTextField("No output file set!");
+        pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
         pickedOutputFileDisplay.setEditable(false);
         pickedOutputFileDisplay.setEnabled(false);
         topPanel.add(pickedOutputFileDisplay, c);
@@ -176,7 +174,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                 selectedInputFile = getInputFile();
                 if (selectedInputFile == null)
                 {
-                    ProgressWindow.this.pickedInputFileDisplay.setText("No input file selected!");
+                    ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
                 }
                 else
                 {
@@ -200,7 +198,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                 selectedOutputFile = getOutputFile(new File(baseFile));
                 if (selectedOutputFile == null)
                 {
-                    ProgressWindow.this.pickedOutputFileDisplay.setText("No output file set!");
+                    ProgressWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
                 }
                 else
                 {
@@ -222,9 +220,9 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                 swapYZCheckBox.setEnabled(true);
                 swapYZCheckBox.setSelected(true);
                 pickedInputFileDisplay.setEnabled(true);
-                pickedInputFileDisplay.setText("No input file selected!");
+                pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
                 pickedOutputFileDisplay.setEnabled(false);
-                pickedOutputFileDisplay.setText("No output file set!");
+                pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
 
                 consoleArea.setText("");
             }
