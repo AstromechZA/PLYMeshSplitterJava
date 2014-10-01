@@ -2,5 +2,5 @@ package org.uct.cs.simplify.gui;
 
 public interface ICompletionListener
 {
-    void callback();
+    void callback(boolean success);
 }

@@ -26,11 +26,13 @@ public class ProcessingRunnable implements Runnable
     @Override
     public void run()
     {
+        boolean success = false;
         try
         {
             FileBuilder.run(inputFile, outputFile, false, swapYZ, 7, new ProgressBarProgressReporter(progressBar));
+            success = true;
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | InterruptedException | RuntimeException e)
         {
             e.printStackTrace();
         }
@@ -43,8 +45,6 @@ public class ProcessingRunnable implements Runnable
         {
             e.printStackTrace();
         }
-        if (listener != null) listener.callback();
-
-
+        if (listener != null) listener.callback(success);
     }
 }

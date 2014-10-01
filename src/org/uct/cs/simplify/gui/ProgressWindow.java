@@ -152,7 +152,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                     progressBar,
                     ProgressWindow.this
                 ));
-                
+
                 processingThread.start();
             }
         });
@@ -249,8 +249,11 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     }
 
     @Override
-    public void callback()
+    public void callback(boolean success)
     {
-        JOptionPane.showMessageDialog(this, "File saved to " + selectedOutputFile.toPath());
+        if (success)
+            JOptionPane.showMessageDialog(this, "File saved to " + selectedOutputFile.toPath());
+        else
+            JOptionPane.showMessageDialog(this, "Something went wrong! Check the log for more details.", "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
