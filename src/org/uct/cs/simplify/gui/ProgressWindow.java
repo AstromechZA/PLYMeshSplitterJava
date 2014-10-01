@@ -13,8 +13,8 @@ import java.io.PrintStream;
 public class ProgressWindow extends JFrame implements ICompletionListener
 {
     public static final int PROGRESSBAR_HEIGHT = 30;
-    public static final int WINDOW_WIDTH = 600;
-    public static final int WINDOW_HEIGHT = 400;
+    public static final int WINDOW_WIDTH = 800;
+    public static final int WINDOW_HEIGHT = 800;
     private JTextArea consoleArea;
     private JProgressBar progressBar;
     private JCheckBox swapYZCheckBox;
@@ -26,6 +26,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     private JTextField pickedInputFileDisplay;
     private File selectedInputFile;
     private File selectedOutputFile;
+    private JButton resetInputsBtn;
 
     private Thread processingThread;
 
@@ -100,11 +101,21 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         swapYZCheckBox.setToolTipText("The PHF Viewer uses a Y-up coordinate system. Use this option to convert a model from Z-up to Y-up.");
         topPanel.add(swapYZCheckBox, c);
 
+        c.gridy = 3;
+        c.gridx = 1;
+        c.weightx = 0.125;
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.EAST;
+        resetInputsBtn = new JButton("Reset");
+        resetInputsBtn.setHorizontalAlignment(SwingConstants.RIGHT);
+        topPanel.add(resetInputsBtn, c);
+
         c.gridy = 4;
         c.gridx = 0;
         c.gridwidth = 3;
         c.weightx = 0;
         c.ipady = 20;
+        c.fill = GridBagConstraints.HORIZONTAL;
         goButton = new JButton("Go");
         goButton.setEnabled(false);
         topPanel.add(goButton, c);
@@ -143,6 +154,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                 pickInputFileBtn.setEnabled(false);
                 pickOutputFileBtn.setEnabled(false);
                 swapYZCheckBox.setEnabled(false);
+                resetInputsBtn.setEnabled(false);
 
                 processingThread = new Thread(new ProcessingRunnable(
                     selectedInputFile,
@@ -197,6 +209,26 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                 goButton.setEnabled((selectedInputFile != null) && (selectedOutputFile != null));
             }
         });
+
+        resetInputsBtn.addMouseListener(new ClickButtonListener()
+        {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                selectedInputFile = null;
+                selectedOutputFile = null;
+                pickInputFileBtn.setEnabled(true);
+                pickOutputFileBtn.setEnabled(false);
+                swapYZCheckBox.setEnabled(true);
+                swapYZCheckBox.setSelected(true);
+                pickedInputFileDisplay.setEnabled(true);
+                pickedInputFileDisplay.setText("No input file selected!");
+                pickedOutputFileDisplay.setEnabled(false);
+                pickedOutputFileDisplay.setText("No output file set!");
+
+                consoleArea.setText("");
+            }
+        });
     }
 
     private File getInputFile()
@@ -232,6 +264,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     {
         try
         {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
             {
                 if ("Nimbus".equals(info.getName()))
@@ -240,6 +273,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                     break;
                 }
             }
+            UIManager.getLookAndFeelDefaults().put("nimbusOrange", (new Color(0, 200, 0)));
         }
         catch (Exception e)
         {
@@ -254,5 +288,6 @@ public class ProgressWindow extends JFrame implements ICompletionListener
             JOptionPane.showMessageDialog(this, "File saved to " + selectedOutputFile.toPath());
         else
             JOptionPane.showMessageDialog(this, "Something went wrong! Check the log for more details.", "Error", JOptionPane.ERROR_MESSAGE);
+        resetInputsBtn.setEnabled(true);
     }
 }
