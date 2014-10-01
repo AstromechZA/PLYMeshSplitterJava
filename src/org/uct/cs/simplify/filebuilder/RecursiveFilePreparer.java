@@ -6,6 +6,7 @@ import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
+import org.uct.cs.simplify.util.IProgressReporter;
 import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
 
@@ -16,13 +17,20 @@ import java.util.List;
 
 public class RecursiveFilePreparer
 {
-    public static PHFNode prepare(PHFNode inputNode, int maxdepth)
+    public static PHFNode prepare(PHFNode inputNode, int maxdepth, IProgressReporter progressReporter)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, 0, 100);
+        return prepare(inputNode, 0, maxdepth, 0, 100, progressReporter);
     }
 
-    public static PHFNode prepare(PHFNode inputNode, int depth, int maxdepth, float start_progress, float end_progress)
+    public static PHFNode prepare(
+        PHFNode inputNode,
+        int depth,
+        int maxdepth,
+        float start_progress,
+        float end_progress,
+        IProgressReporter progressReporter
+    )
     throws IOException, InterruptedException
     {
         // stopping condition
@@ -31,7 +39,7 @@ public class RecursiveFilePreparer
             // simply copy the node and return
             PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
             outputNode.setDepth(depth);
-            Outputter.info3f("Progress: %.2f%%%n", end_progress);
+            progressReporter.report(end_progress);
             return outputNode;
         }
         else
@@ -48,8 +56,14 @@ public class RecursiveFilePreparer
             float childProgress = start_progress;
             for (PHFNode childNode : childNodes)
             {
-                processedNodes
-                    .add(prepare(childNode, depth + 1, maxdepth, childProgress, childProgress + diffProgress));
+                processedNodes.add(prepare(
+                    childNode,
+                    depth + 1,
+                    maxdepth,
+                    childProgress,
+                    childProgress + diffProgress,
+                    progressReporter
+                ));
                 childProgress += diffProgress;
             }
 
@@ -73,7 +87,7 @@ public class RecursiveFilePreparer
             outputNode.setDepth(depth);
 
             Outputter.info1f("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
-            Outputter.info3f("Progress: %.2f%%.%n", end_progress);
+            progressReporter.report(end_progress);
             return outputNode;
         }
     }

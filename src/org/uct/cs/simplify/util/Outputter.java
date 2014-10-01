@@ -4,10 +4,9 @@ public class Outputter
 {
     public static final int DEBUG = 0;
     public static final int INFO_1 = 1;
+    private static int currentLevel = INFO_1;
     public static final int INFO_2 = 2;
     public static final int INFO_3 = 3;
-
-    private static int currentLevel = INFO_3;
 
     public static void println(int logLevel, Object o)
     {

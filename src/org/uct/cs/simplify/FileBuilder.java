@@ -4,10 +4,7 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PHFBuilder;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.StatRecorder;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,12 +12,34 @@ import java.io.IOException;
 
 public class FileBuilder
 {
-    private static final int RESCALE_SIZE = 1024;
     public static final int MAX_DEPTH = 20;
+    private static final int RESCALE_SIZE = 1024;
 
-    public static void run()
+    public static String run(File inputFile, File outputFile, boolean keepNodes, boolean swapYZ, int treedepth, IProgressReporter progressReporter)
+        throws IOException, InterruptedException
     {
+        try (StatRecorder sr = new StatRecorder())
+        {
+            // use the directory of the outputfile as the default output directory
+            File outputDir = outputFile.getParentFile();
 
+            // generate tempfiles in the outputdir
+            TempFileManager.setWorkingDirectory(outputDir.toPath());
+            // delete all tempfiles afterwards
+            TempFileManager.setDeleteOnExit(!keepNodes);
+
+            // create scaled and recentered version of input
+            File scaledFile = TempFileManager.provide("rescaled", ".ply");
+            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
+
+            // build tree
+            PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, progressReporter);
+
+            // compile into output file
+            String jsonHeader = PHFBuilder.compile(tree, outputFile);
+            Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
+            return jsonHeader;
+        }
     }
 
     public static void main(String[] args) throws IOException
@@ -29,27 +48,17 @@ public class FileBuilder
         try (StatRecorder ignored = new StatRecorder())
         {
             File inputFile = new File(cmd.getOptionValue("input"));
-            File outputDir = new File(cmd.getOptionValue("output"));
-            File outputFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".phf");
+            File outputFile = new File(cmd.getOptionValue("output"));
+            File outputDir = outputFile.getParentFile();
 
-            TempFileManager.setWorkingDirectory(outputDir.toPath());
-            if (cmd.hasOption("keeptemp"))
-            {
-                TempFileManager.setDeleteOnExit(false);
-            }
-
-            File scaledFile = TempFileManager.provide("rescaled", ".ply");
-
-            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, cmd.hasOption("swapyz"));
-
-            PHFNode seed = new PHFNode(scaledFile);
-
-            int treedepthv = Integer.parseInt(cmd.getOptionValue("treedepth"));
-            PHFNode tree = RecursiveFilePreparer.prepare(seed, treedepthv);
-
-            TempFileManager.release(scaledFile);
-
-            String jsonHeader = PHFBuilder.compile(tree, outputFile);
+            String jsonHeader = run(
+                inputFile,
+                outputFile,
+                cmd.hasOption("keeptemp"),
+                cmd.hasOption("swapyz"),
+                Integer.parseInt(cmd.getOptionValue("treedepth")),
+                new StdOutProgressReporter()
+            );
 
             if (cmd.hasOption("dumpjson"))
             {
