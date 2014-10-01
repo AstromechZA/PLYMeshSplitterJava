@@ -17,7 +17,6 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     public static final int WINDOW_HEIGHT = 400;
     private JTextArea consoleArea;
     private JProgressBar progressBar;
-    private JScrollPane consoleScroll;
     private JCheckBox swapYZCheckBox;
     private JSpinner treeDepthSpinner;
     private JButton goButton;
@@ -118,12 +117,12 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         this.consoleArea.setForeground(Color.lightGray);
         this.consoleArea.setFont(new Font("monospaced", Font.PLAIN, 12));
 
-        this.consoleScroll = new JScrollPane(
+        JScrollPane consoleScroll = new JScrollPane(
             this.consoleArea,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
             ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
-        this.add(this.consoleScroll, BorderLayout.CENTER);
+        this.add(consoleScroll, BorderLayout.CENTER);
 
         this.progressBar = new JProgressBar();
         this.progressBar.setValue(0);
