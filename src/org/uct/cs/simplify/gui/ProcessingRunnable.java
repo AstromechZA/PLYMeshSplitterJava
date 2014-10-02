@@ -29,7 +29,10 @@ public class ProcessingRunnable implements Runnable
         boolean success = false;
         try
         {
-            FileBuilder.run(inputFile, outputFile, false, swapYZ, 7, new ProgressBarProgressReporter(progressBar));
+            FileBuilder.run(
+                this.inputFile, this.outputFile, false,
+                this.swapYZ, 7, new ProgressBarProgressReporter(this.progressBar)
+            );
             success = true;
         }
         catch (IOException | InterruptedException | RuntimeException e)
@@ -45,6 +48,6 @@ public class ProcessingRunnable implements Runnable
         {
             e.printStackTrace();
         }
-        if (listener != null) listener.callback(success);
+        if (this.listener != null) this.listener.callback(success);
     }
 }

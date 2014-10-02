@@ -17,10 +17,11 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     public static final int WINDOW_HEIGHT = 800;
     public static final String NO_INPUT_FILE_SELECTED = "No input file selected!";
     public static final String NO_OUTPUT_FILE_SET = "No output file set!";
+    public static final Color PROGRESSBAR_COLOR = new Color(0, 200, 0);
+
     private JTextArea consoleArea;
     private JProgressBar progressBar;
     private JCheckBox swapYZCheckBox;
-    private JSpinner treeDepthSpinner;
     private JButton goButton;
     private JButton pickOutputFileBtn;
     private JTextField pickedOutputFileDisplay;
@@ -69,44 +70,45 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         c.gridy = 1;
         c.gridx = 0;
-        pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
-        pickedInputFileDisplay.setEditable(false);
-        topPanel.add(pickedInputFileDisplay, c);
+        this.pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
+        this.pickedInputFileDisplay.setEditable(false);
+        topPanel.add(this.pickedInputFileDisplay, c);
 
         c.gridy = 1;
         c.gridx = 1;
-        pickInputFileBtn = new JButton("Pick input file");
-        topPanel.add(pickInputFileBtn, c);
+        this.pickInputFileBtn = new JButton("Pick input file");
+        topPanel.add(this.pickInputFileBtn, c);
 
         c.gridy = 2;
         c.gridx = 0;
-        pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
-        pickedOutputFileDisplay.setEditable(false);
-        pickedOutputFileDisplay.setEnabled(false);
-        topPanel.add(pickedOutputFileDisplay, c);
+        this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
+        this.pickedOutputFileDisplay.setEditable(false);
+        this.pickedOutputFileDisplay.setEnabled(false);
+        topPanel.add(this.pickedOutputFileDisplay, c);
 
         c.gridy = 2;
         c.gridx = 1;
-        pickOutputFileBtn = new JButton("Pick output file");
-        pickOutputFileBtn.setEnabled(false);
-        topPanel.add(pickOutputFileBtn, c);
+        this.pickOutputFileBtn = new JButton("Pick output file");
+        this.pickOutputFileBtn.setEnabled(false);
+        topPanel.add(this.pickOutputFileBtn, c);
 
         c.gridy = 3;
         c.gridx = 0;
         c.weightx = 0.5;
-        swapYZCheckBox = new JCheckBox("Swap YZ axis");
-        swapYZCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
-        swapYZCheckBox.setToolTipText("The PHF Viewer uses a Y-up coordinate system. Use this option to convert a model from Z-up to Y-up.");
-        topPanel.add(swapYZCheckBox, c);
+        this.swapYZCheckBox = new JCheckBox("Swap YZ axis");
+        this.swapYZCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
+        this.swapYZCheckBox.setToolTipText(
+            "The PHF Viewer uses a Y-up coordinate system. Use this option to convert a model from Z-up to Y-up."
+        );
+        topPanel.add(this.swapYZCheckBox, c);
 
         c.gridy = 3;
         c.gridx = 1;
-        c.weightx = 0.125;
         c.fill = GridBagConstraints.NONE;
         c.anchor = GridBagConstraints.EAST;
-        resetInputsBtn = new JButton("Reset");
-        resetInputsBtn.setHorizontalAlignment(SwingConstants.RIGHT);
-        topPanel.add(resetInputsBtn, c);
+        this.resetInputsBtn = new JButton("Reset");
+        this.resetInputsBtn.setHorizontalAlignment(SwingConstants.RIGHT);
+        topPanel.add(this.resetInputsBtn, c);
 
         c.gridy = 4;
         c.gridx = 0;
@@ -114,9 +116,9 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         c.weightx = 0;
         c.ipady = 20;
         c.fill = GridBagConstraints.HORIZONTAL;
-        goButton = new JButton("Go");
-        goButton.setEnabled(false);
-        topPanel.add(goButton, c);
+        this.goButton = new JButton("Go");
+        this.goButton.setEnabled(false);
+        topPanel.add(this.goButton, c);
 
         this.add(topPanel, BorderLayout.NORTH);
 
@@ -144,89 +146,108 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     private void linkActions()
     {
         // link Go button
-        goButton.addMouseListener(new ClickButtonListener()
-        {
-            public void mouseClicked(MouseEvent e)
+        this.goButton.addMouseListener(
+            new ClickButtonListener()
             {
-                goButton.setEnabled(false);
-                pickInputFileBtn.setEnabled(false);
-                pickOutputFileBtn.setEnabled(false);
-                swapYZCheckBox.setEnabled(false);
-                resetInputsBtn.setEnabled(false);
+                public void mouseClicked(MouseEvent e)
+                {
+                    ProgressWindow.this.goButton.setEnabled(false);
+                    ProgressWindow.this.pickInputFileBtn.setEnabled(false);
+                    ProgressWindow.this.pickOutputFileBtn.setEnabled(false);
+                    ProgressWindow.this.swapYZCheckBox.setEnabled(false);
+                    ProgressWindow.this.resetInputsBtn.setEnabled(false);
 
-                processingThread = new Thread(new ProcessingRunnable(
-                    selectedInputFile,
-                    selectedOutputFile,
-                    swapYZCheckBox.isSelected(),
-                    progressBar,
-                    ProgressWindow.this
-                ));
+                    ProgressWindow.this.processingThread = new Thread(
+                        new ProcessingRunnable(
+                            ProgressWindow.this.selectedInputFile,
+                            ProgressWindow.this.selectedOutputFile,
+                            ProgressWindow.this.swapYZCheckBox.isSelected(),
+                            ProgressWindow.this.progressBar,
+                            ProgressWindow.this
+                        )
+                    );
 
-                processingThread.start();
+                    ProgressWindow.this.processingThread.start();
+                }
             }
-        });
+        );
 
         // link pickInputFile button
-        pickInputFileBtn.addMouseListener(new ClickButtonListener()
-        {
-            public void mouseClicked(MouseEvent e)
+        this.pickInputFileBtn.addMouseListener(
+            new ClickButtonListener()
             {
-                selectedInputFile = getInputFile();
-                if (selectedInputFile == null)
+                public void mouseClicked(MouseEvent e)
                 {
-                    ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                    ProgressWindow.this.selectedInputFile = ProgressWindow.this.getInputFile();
+                    if (ProgressWindow.this.selectedInputFile == null)
+                    {
+                        ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                    } else
+                    {
+                        ProgressWindow.this.pickOutputFileBtn.setEnabled(true);
+                        ProgressWindow.this.pickedOutputFileDisplay.setEnabled(true);
+                        ProgressWindow.this.pickedInputFileDisplay
+                            .setText(ProgressWindow.this.selectedInputFile.getPath());
+                    }
+                    ProgressWindow.this.goButton.setEnabled(
+                        (ProgressWindow.this.selectedInputFile != null) && (ProgressWindow.this.selectedOutputFile !=
+                            null)
+                    );
                 }
-                else
-                {
-                    pickOutputFileBtn.setEnabled(true);
-                    pickedOutputFileDisplay.setEnabled(true);
-                    ProgressWindow.this.pickedInputFileDisplay.setText(selectedInputFile.getPath());
-                }
-                goButton.setEnabled((selectedInputFile != null) && (selectedOutputFile != null));
             }
-        });
+        );
 
         // link pickOutputFileBtn button
-        pickOutputFileBtn.addMouseListener(new ClickButtonListener()
-        {
-            public void mouseClicked(MouseEvent e)
+        this.pickOutputFileBtn.addMouseListener(
+            new ClickButtonListener()
             {
-                String baseFile = (selectedInputFile == null)
-                    ? "output.phf"
-                    : Useful.getFilenameWithoutExt(selectedInputFile.getAbsolutePath()) + ".phf";
-
-                selectedOutputFile = getOutputFile(new File(baseFile));
-                if (selectedOutputFile == null)
+                public void mouseClicked(MouseEvent e)
                 {
+                    String baseFile = (ProgressWindow.this.selectedInputFile == null)
+                        ? "output.phf"
+                        : Useful
+                        .getFilenameWithoutExt(ProgressWindow.this.selectedInputFile.getAbsolutePath()) + ".phf";
+
+                    ProgressWindow.this.selectedOutputFile = ProgressWindow.this.getOutputFile(new File(baseFile));
+                    if (ProgressWindow.this.selectedOutputFile == null)
+                    {
+                        ProgressWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
+                    } else
+                    {
+                        ProgressWindow.this.pickedOutputFileDisplay.setText(
+                            ProgressWindow.this.selectedOutputFile.getPath()
+                        );
+                    }
+                    ProgressWindow.this.goButton.setEnabled(
+                        (ProgressWindow.this.selectedInputFile != null) && (ProgressWindow.this.selectedOutputFile !=
+                            null)
+                    );
+                }
+            }
+        );
+
+        this.resetInputsBtn.addMouseListener(
+            new ClickButtonListener()
+            {
+                @Override
+                public void mouseClicked(MouseEvent e)
+                {
+                    ProgressWindow.this.selectedInputFile = null;
+                    ProgressWindow.this.selectedOutputFile = null;
+                    ProgressWindow.this.pickInputFileBtn.setEnabled(true);
+                    ProgressWindow.this.pickOutputFileBtn.setEnabled(false);
+                    ProgressWindow.this.swapYZCheckBox.setEnabled(true);
+                    ProgressWindow.this.swapYZCheckBox.setSelected(true);
+                    ProgressWindow.this.pickedInputFileDisplay.setEnabled(true);
+                    ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                    ProgressWindow.this.pickedOutputFileDisplay.setEnabled(false);
                     ProgressWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
-                }
-                else
-                {
-                    ProgressWindow.this.pickedOutputFileDisplay.setText(selectedOutputFile.getPath());
-                }
-                goButton.setEnabled((selectedInputFile != null) && (selectedOutputFile != null));
-            }
-        });
+                    ProgressWindow.this.progressBar.setValue(0);
 
-        resetInputsBtn.addMouseListener(new ClickButtonListener()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                selectedInputFile = null;
-                selectedOutputFile = null;
-                pickInputFileBtn.setEnabled(true);
-                pickOutputFileBtn.setEnabled(false);
-                swapYZCheckBox.setEnabled(true);
-                swapYZCheckBox.setSelected(true);
-                pickedInputFileDisplay.setEnabled(true);
-                pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
-                pickedOutputFileDisplay.setEnabled(false);
-                pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
-
-                consoleArea.setText("");
+                    ProgressWindow.this.consoleArea.setText("");
+                }
             }
-        });
+        );
     }
 
     private File getInputFile()
@@ -271,7 +292,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                     break;
                 }
             }
-            UIManager.getLookAndFeelDefaults().put("nimbusOrange", (new Color(0, 200, 0)));
+            UIManager.getLookAndFeelDefaults().put("nimbusOrange", PROGRESSBAR_COLOR);
         }
         catch (Exception e)
         {
@@ -283,9 +304,9 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     public void callback(boolean success)
     {
         if (success)
-            JOptionPane.showMessageDialog(this, "File saved to " + selectedOutputFile.toPath());
+            JOptionPane.showMessageDialog(this, "File saved to " + this.selectedOutputFile.toPath());
         else
             JOptionPane.showMessageDialog(this, "Something went wrong! Check the log for more details.", "Error", JOptionPane.ERROR_MESSAGE);
-        resetInputsBtn.setEnabled(true);
+        this.resetInputsBtn.setEnabled(true);
     }
 }

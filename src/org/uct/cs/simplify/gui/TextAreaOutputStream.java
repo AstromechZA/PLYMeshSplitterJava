@@ -16,7 +16,7 @@ public class TextAreaOutputStream extends OutputStream
     @Override
     public void write(int b) throws IOException
     {
-        textArea.append(String.valueOf((char) b));
-        textArea.setCaretPosition(textArea.getDocument().getLength());
+        this.textArea.append(String.valueOf((char) b));
+        this.textArea.setCaretPosition(this.textArea.getDocument().getLength());
     }
 }
