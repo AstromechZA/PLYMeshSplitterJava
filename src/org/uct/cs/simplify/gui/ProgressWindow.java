@@ -14,7 +14,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 {
     public static final int PROGRESSBAR_HEIGHT = 30;
     public static final int WINDOW_WIDTH = 800;
-    public static final int WINDOW_HEIGHT = 800;
+    public static final int WINDOW_HEIGHT = 600;
     public static final String NO_INPUT_FILE_SELECTED = "No input file selected!";
     public static final String NO_OUTPUT_FILE_SET = "No output file set!";
     public static final Color PROGRESSBAR_COLOR = new Color(0, 200, 0);

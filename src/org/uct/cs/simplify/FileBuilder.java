@@ -18,29 +18,28 @@ public class FileBuilder
     public static String run(File inputFile, File outputFile, boolean keepNodes, boolean swapYZ, int treedepth, IProgressReporter progressReporter)
         throws IOException, InterruptedException
     {
-        try (StatRecorder sr = new StatRecorder())
-        {
-            // use the directory of the outputfile as the default output directory
-            File outputDir = outputFile.getParentFile();
+        StatRecorder sr = new StatRecorder();
+        // use the directory of the outputfile as the default output directory
+        File outputDir = outputFile.getParentFile();
 
-            // generate tempfiles in the outputdir
-            TempFileManager.setWorkingDirectory(outputDir.toPath());
-            // delete all tempfiles afterwards
-            TempFileManager.setDeleteOnExit(!keepNodes);
+        // generate tempfiles in the outputdir
+        TempFileManager.setWorkingDirectory(outputDir.toPath());
+        // delete all tempfiles afterwards
+        TempFileManager.setDeleteOnExit(!keepNodes);
 
-            // create scaled and recentered version of input
-            File scaledFile = TempFileManager.provide("rescaled", ".ply");
-            ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
+        // create scaled and recentered version of input
+        File scaledFile = TempFileManager.provide("rescaled", ".ply");
+        ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
-            // build tree
-            PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, progressReporter);
+        // build tree
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, progressReporter);
 
-            // compile into output file
-            String jsonHeader = PHFBuilder.compile(tree, outputFile);
-            Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
-            sr.dump(new File(outputDir, "memdump"));
-            return jsonHeader;
-        }
+        // compile into output file
+        String jsonHeader = PHFBuilder.compile(tree, outputFile);
+        Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
+        sr.close();
+        sr.dump(new File(outputDir, "memdump"));
+        return jsonHeader;
     }
 
     public static void main(String[] args) throws IOException

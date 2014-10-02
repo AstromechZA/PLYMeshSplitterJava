@@ -1,6 +1,8 @@
 package org.uct.cs.simplify.gui;
 
 import org.uct.cs.simplify.FileBuilder;
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import javax.swing.*;
@@ -9,6 +11,7 @@ import java.io.IOException;
 
 public class ProcessingRunnable implements Runnable
 {
+    public static final int FACES_PER_NODE = 50000;
     private final JProgressBar progressBar;
     private final File inputFile, outputFile;
     private final boolean swapYZ;
@@ -29,9 +32,16 @@ public class ProcessingRunnable implements Runnable
         boolean success = false;
         try
         {
+            PLYHeader header = new PLYHeader(this.inputFile);
+            long numFaces = header.getElement("face").getCount();
+
+            int treedepth = (int) Math.round((Math.log(numFaces / FACES_PER_NODE) / Math.log(2)) + 1);
+
+            Outputter.info3f("Treedepth: %d%n", treedepth);
+
             FileBuilder.run(
                 this.inputFile, this.outputFile, false,
-                this.swapYZ, 7, new ProgressBarProgressReporter(this.progressBar)
+                this.swapYZ, treedepth, new ProgressBarProgressReporter(this.progressBar)
             );
             success = true;
         }

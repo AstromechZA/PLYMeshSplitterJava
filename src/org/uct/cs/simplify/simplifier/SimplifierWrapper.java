@@ -3,6 +3,7 @@ package org.uct.cs.simplify.simplifier;
 import org.uct.cs.simplify.util.OSDetect;
 import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.TempFileManager;
+import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.*;
 
@@ -10,14 +11,33 @@ public class SimplifierWrapper
 {
     private static final String PATH_TO_EXECUTABLE = "./simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
 
-    public static File simplify(File input, long numFaces, boolean preserveBoundary) throws IOException, InterruptedException
+    public static File simplify(File input, long numFaces)
+    throws IOException, InterruptedException
+    {
+        return simplify(input, numFaces, false, null);
+    }
+
+    public static File simplify(File input, long numFaces, XBoundingBox bb)
+    throws IOException, InterruptedException
+    {
+        return simplify(input, numFaces, true, bb);
+    }
+
+    public static File simplify(File input, long numFaces, boolean preserveBoundary, XBoundingBox bb)
+    throws IOException, InterruptedException
     {
         File tt = TempFileManager.provide("simp", ".ply");
         Outputter.info2f("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
 
         String flags = " -P";
-        if (preserveBoundary) flags += " -By";
+        if (preserveBoundary)
+        {
+            flags += String.format(
+                " -By %f %f %f %f %f %f", bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY(), bb.getMinZ(),
+                bb.getMaxZ()
+            );
+        }
 
         String inputS = input.getAbsolutePath();
         String outputS = tt.getAbsolutePath();

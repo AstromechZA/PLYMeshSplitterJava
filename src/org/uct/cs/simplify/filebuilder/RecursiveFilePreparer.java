@@ -78,7 +78,7 @@ public class RecursiveFilePreparer
             long totalFaces = stitchedHeader.getElement("face").getCount();
             long targetFaces = totalFaces / splitType.getSplitRatio();
 
-            File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, false);
+            File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());
 
             TempFileManager.release(stitchedModel);
 
