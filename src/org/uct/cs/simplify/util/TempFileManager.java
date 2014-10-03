@@ -12,9 +12,9 @@ import java.util.ArrayDeque;
 public class TempFileManager
 {
     public static final int DELETE_WAIT_DELAY = 500;
+    private static final ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
     private static Path workingDirectory;
     private static boolean deleteOnExit = true;
-    private static final ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
 
     public static Path getWorkingDirectory() throws IOException
     {
@@ -85,6 +85,7 @@ public class TempFileManager
 
     public static void clear() throws InterruptedException
     {
+        Outputter.info3ln("Removing Temporary Files");
         System.gc();
 
         int errorlimit = 10;

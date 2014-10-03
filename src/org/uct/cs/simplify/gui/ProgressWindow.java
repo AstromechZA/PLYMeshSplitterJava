@@ -6,7 +6,6 @@ import org.uct.cs.simplify.util.Useful;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.PrintStream;
 
@@ -30,6 +29,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     private File selectedInputFile;
     private File selectedOutputFile;
     private JButton resetInputsBtn;
+    private JButton abortBtn;
 
     private Thread processingThread;
 
@@ -111,6 +111,15 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         topPanel.add(this.resetInputsBtn, c);
 
         c.gridy = 4;
+        c.gridx = 1;
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.EAST;
+        this.abortBtn = new JButton("Abort");
+        this.abortBtn.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.abortBtn.setEnabled(false);
+        topPanel.add(this.abortBtn, c);
+
+        c.gridy = 5;
         c.gridx = 0;
         c.gridwidth = 3;
         c.weightx = 0;
@@ -146,10 +155,10 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     private void linkActions()
     {
         // link Go button
-        this.goButton.addMouseListener(
+        this.goButton.addActionListener(
             new ClickButtonListener()
             {
-                public void mouseClicked(MouseEvent e)
+                public void mouseClicked()
                 {
                     ProgressWindow.this.goButton.setEnabled(false);
                     ProgressWindow.this.pickInputFileBtn.setEnabled(false);
@@ -167,22 +176,24 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                         )
                     );
 
+                    ProgressWindow.this.abortBtn.setEnabled(true);
                     ProgressWindow.this.processingThread.start();
                 }
             }
         );
 
         // link pickInputFile button
-        this.pickInputFileBtn.addMouseListener(
+        this.pickInputFileBtn.addActionListener(
             new ClickButtonListener()
             {
-                public void mouseClicked(MouseEvent e)
+                public void mouseClicked()
                 {
                     ProgressWindow.this.selectedInputFile = ProgressWindow.this.getInputFile();
                     if (ProgressWindow.this.selectedInputFile == null)
                     {
                         ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
-                    } else
+                    }
+                    else
                     {
                         ProgressWindow.this.pickOutputFileBtn.setEnabled(true);
                         ProgressWindow.this.pickedOutputFileDisplay.setEnabled(true);
@@ -198,10 +209,10 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         );
 
         // link pickOutputFileBtn button
-        this.pickOutputFileBtn.addMouseListener(
+        this.pickOutputFileBtn.addActionListener(
             new ClickButtonListener()
             {
-                public void mouseClicked(MouseEvent e)
+                public void mouseClicked()
                 {
                     String baseFile = (ProgressWindow.this.selectedInputFile == null)
                         ? "output.phf"
@@ -212,7 +223,8 @@ public class ProgressWindow extends JFrame implements ICompletionListener
                     if (ProgressWindow.this.selectedOutputFile == null)
                     {
                         ProgressWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
-                    } else
+                    }
+                    else
                     {
                         ProgressWindow.this.pickedOutputFileDisplay.setText(
                             ProgressWindow.this.selectedOutputFile.getPath()
@@ -226,25 +238,37 @@ public class ProgressWindow extends JFrame implements ICompletionListener
             }
         );
 
-        this.resetInputsBtn.addMouseListener(
+        this.resetInputsBtn.addActionListener(
             new ClickButtonListener()
             {
                 @Override
-                public void mouseClicked(MouseEvent e)
+                public void mouseClicked()
                 {
                     ProgressWindow.this.selectedInputFile = null;
                     ProgressWindow.this.selectedOutputFile = null;
                     ProgressWindow.this.pickInputFileBtn.setEnabled(true);
                     ProgressWindow.this.pickOutputFileBtn.setEnabled(false);
                     ProgressWindow.this.swapYZCheckBox.setEnabled(true);
-                    ProgressWindow.this.swapYZCheckBox.setSelected(true);
+                    ProgressWindow.this.swapYZCheckBox.setSelected(false);
                     ProgressWindow.this.pickedInputFileDisplay.setEnabled(true);
                     ProgressWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
                     ProgressWindow.this.pickedOutputFileDisplay.setEnabled(false);
                     ProgressWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
                     ProgressWindow.this.progressBar.setValue(0);
+                    ProgressWindow.this.progressBar.setString("");
 
                     ProgressWindow.this.consoleArea.setText("");
+                }
+            }
+        );
+
+        this.abortBtn.addActionListener(
+            new ClickButtonListener()
+            {
+                @Override
+                public void mouseClicked()
+                {
+                    ProgressWindow.this.processingThread.interrupt();
                 }
             }
         );
@@ -308,5 +332,6 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         else
             JOptionPane.showMessageDialog(this, "Something went wrong! Check the log for more details.", "Error", JOptionPane.ERROR_MESSAGE);
         this.resetInputsBtn.setEnabled(true);
+        this.abortBtn.setEnabled(false);
     }
 }

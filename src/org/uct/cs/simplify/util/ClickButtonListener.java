@@ -1,17 +1,15 @@
 package org.uct.cs.simplify.util;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public abstract class ClickButtonListener implements MouseListener
+public abstract class ClickButtonListener implements ActionListener
 {
-    public abstract void mouseClicked(MouseEvent e);
+    public abstract void mouseClicked();
 
-    public void mousePressed(MouseEvent e) { }
-
-    public void mouseReleased(MouseEvent e) { }
-
-    public void mouseEntered(MouseEvent e) { }
-
-    public void mouseExited(MouseEvent e) { }
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+        this.mouseClicked();
+    }
 }
