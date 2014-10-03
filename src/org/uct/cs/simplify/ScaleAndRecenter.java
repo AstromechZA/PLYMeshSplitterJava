@@ -5,14 +5,14 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.model.BoundsFinder;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.model.VertexAttrMap;
-import org.uct.cs.simplify.ply.header.PLYElement;
-import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.ply.header.*;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class ScaleAndRecenter
@@ -27,7 +27,7 @@ public class ScaleAndRecenter
         return run(reader, outputFile, size, swapYZ);
     }
 
-    public static XBoundingBox run(PLYReader reader, File outputFile, int size, boolean swapYZ) throws IOException
+    public static XBoundingBox run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
@@ -37,8 +37,9 @@ public class ScaleAndRecenter
             (bb.getMinZ() + bb.getMaxZ()) / 2
         );
 
-        // mesh size is the maximum axis
-        double meshHalfSize = Math.abs(
+        // calculate transform
+        // - mesh size is the length of the longest axis
+        double scale = targetSize / (2 * Math.abs(
             Math.max(
                 Math.max(
                     bb.getMaxX() - center.getX(),
@@ -46,8 +47,8 @@ public class ScaleAndRecenter
                 ),
                 bb.getMaxZ() - center.getZ()
             )
-        );
-        double scale = size / (2 * meshHalfSize);
+        ));
+        // - translate to center
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
         // debug
@@ -64,21 +65,23 @@ public class ScaleAndRecenter
             int numFaces = faceE.getCount();
             long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
             long vertexElementLength = reader.getElementDimension("vertex").getLength();
+            long faceElementBegin = reader.getElementDimension("face").getOffset();
+            long faceElementLength = reader.getElementDimension("face").getLength();
 
-            try (BufferedOutputStream bufostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
+            try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
             {
                 VertexAttrMap vam = new VertexAttrMap(vertexE);
                 // construct new header
                 PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
 
-                bufostream.write((header + "\n").getBytes());
+                ostream.write((header + "\n").getBytes());
 
+                fcIN.position(vertexElementBegin);
                 ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(vertexE.getItemSize());
                 blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
 
                 try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
-                    fcIN.position(vertexElementBegin);
                     Vertex v;
                     for (int n = 0; n < numVertices; n++)
                     {
@@ -88,19 +91,48 @@ public class ScaleAndRecenter
                         v = new Vertex(blockBufferIN, vam);
                         v.transform(translate, (float)scale);
                         if (swapYZ) v.swapYZ();
-                        v.writeToStream(bufostream, vam);
+                        v.writeToStream(ostream, vam);
 
                         blockBufferIN.clear();
                         progress.tick();
                     }
                 }
-            }
 
-            try (FileChannel fcOUT = new FileOutputStream(outputFile, true).getChannel())
-            {
-                Outputter.debugln("Transferring face elements...");
-                long fileRemainder = reader.getFile().length() - vertexElementBegin - vertexElementLength;
-                fcIN.transferTo(fcIN.position(), fileRemainder, fcOUT);
+                fcIN.position(reader.getElementDimension("face").getOffset());
+                MappedByteBuffer buffer = fcIN.map(FileChannel.MapMode.READ_ONLY, faceElementBegin, faceElementLength);
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+                try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
+                {
+                    for (int i = 0; i < numFaces; i++)
+                    {
+                        for (PLYPropertyBase base : faceE.getProperties())
+                        {
+                            if (base.getName().equals("vertex_indices"))
+                            {
+                                buffer.get();
+                                ostream.write(3);
+                                Useful.writeIntLE(ostream, buffer.getInt());
+                                Useful.writeIntLE(ostream, buffer.getInt());
+                                Useful.writeIntLE(ostream, buffer.getInt());
+                            }
+                            else if (base instanceof PLYListProperty)
+                            {
+                                PLYListProperty listProperty = (PLYListProperty) base;
+                                int l = (int) listProperty.getLengthTypeReader().read(buffer);
+                                for (int j = 0; j < l; j++)
+                                {
+                                    listProperty.getTypeReader().read(buffer);
+                                }
+                            }
+                            else if (base instanceof PLYProperty)
+                            {
+                                ((PLYProperty) base).getTypeReader().read(buffer);
+                            }
+                        }
+                        progress.tick();
+                    }
+                }
             }
         }
 

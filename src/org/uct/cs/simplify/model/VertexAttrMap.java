@@ -13,6 +13,7 @@ import org.uct.cs.simplify.ply.header.PLYPropertyBase;
 public class VertexAttrMap
 {
     public final boolean hasColour, hasAlpha;
+    public final int byteLength;
     public int xOffset = -1;
     public int yOffset = -1;
     public int zOffset = -1;
@@ -29,6 +30,7 @@ public class VertexAttrMap
     public VertexAttrMap(PLYElement vertexElement) throws IllegalArgumentException
     {
         int position = 0;
+        this.byteLength = vertexElement.getItemSize();
         for (PLYPropertyBase base : vertexElement.getProperties())
         {
             // only scan the PLYProperty types

@@ -51,8 +51,8 @@ public class RecursiveFilePreparer
 
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
-            float fromEnd = 100 / (float) Math.pow(2, maxdepth + 1);
-            float diffProgress = (end_progress - fromEnd - start_progress) / (childNodes.size());
+            float fromEnd = 100 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
+            float diffProgress = (end_progress - fromEnd - start_progress) / childNodes.size();
             float childProgress = start_progress;
             for (PHFNode childNode : childNodes)
             {

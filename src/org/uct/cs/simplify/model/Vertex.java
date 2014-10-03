@@ -4,6 +4,7 @@ import javafx.geometry.Point3D;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
@@ -56,6 +57,27 @@ public class Vertex
         if (vam.hasAlpha)
         {
             this.a = input.get(vam.alphaOffset);
+        }
+    }
+
+    public Vertex(InputStream istream, VertexAttrMap vam) throws IOException
+    {
+        byte[] buffer = new byte[ vam.byteLength ];
+        istream.read(buffer);
+        this.x = Useful.readFloatLE(buffer, vam.xOffset);
+        this.y = Useful.readFloatLE(buffer, vam.yOffset);
+        this.z = Useful.readFloatLE(buffer, vam.zOffset);
+
+        if (vam.hasColour)
+        {
+            this.r = buffer[ vam.redOffset ];
+            this.g = buffer[ vam.greenOffset ];
+            this.b = buffer[ vam.blueOffset ];
+        }
+
+        if (vam.hasAlpha)
+        {
+            this.a = buffer[ vam.alphaOffset ];
         }
     }
 

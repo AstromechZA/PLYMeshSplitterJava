@@ -15,6 +15,11 @@ public class PLYListProperty extends PLYProperty
         this.lengthTypeReader = IDataTypeReader.getReaderForType(this.lengthType);
     }
 
+    public DataType getLengthType()
+    {
+        return this.lengthType;
+    }
+
     public IDataTypeReader getLengthTypeReader()
     {
         return this.lengthTypeReader;

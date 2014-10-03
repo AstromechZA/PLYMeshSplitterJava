@@ -117,7 +117,8 @@ public class PLYReader
                     int listSize = (int) pp.getLengthTypeReader().read(buffer);
                     int s = listSize * pp.getLengthTypeReader().bytesAtATime();
                     buffer.position(buffer.position() + s);
-                } else if (p instanceof PLYProperty)
+                }
+                else if (p instanceof PLYProperty)
                 {
                     PLYProperty pp = (PLYProperty) p;
                     buffer.position(buffer.position() + pp.getTypeReader().bytesAtATime());
