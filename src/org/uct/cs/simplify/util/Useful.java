@@ -8,13 +8,13 @@ import java.nio.ByteBuffer;
 public class Useful
 {
 
-    private static final long NANOSECONDS_PER_MINUTE = 60_000_000_000L;
-    private static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
-    private static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
-    private static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
-    private static final long KILOBYTE = 1024;
-    private static final long MEGABYTE = 1048576;
-    private static final int BYTE_MASK = 255;
+    public static final long NANOSECONDS_PER_MINUTE = 60_000_000_000L;
+    public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
+    public static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
+    public static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
+    public static final long KILOBYTE = 1024;
+    public static final long MEGABYTE = 1048576;
+    public static final int BYTE_MASK = 255;
 
     public static String getFilenameWithoutExt(String fn)
     {
@@ -30,6 +30,17 @@ public class Useful
             return String.format("%.2f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);
         if (ns > NANOSECONDS_PER_MICROSECOND)
             return String.format("%.2f microseconds", ns / (double) NANOSECONDS_PER_MICROSECOND);
+        return String.format("%d nanoseconds", ns);
+    }
+
+    public static String formatTimeNoDecimal(long ns)
+    {
+        if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.0f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
+        if (ns > NANOSECONDS_PER_SECOND) return String.format("%.0f seconds", ns / (double) NANOSECONDS_PER_SECOND);
+        if (ns > NANOSECONDS_PER_MILLISECONDS)
+            return String.format("%.0f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);
+        if (ns > NANOSECONDS_PER_MICROSECOND)
+            return String.format("%.0f microseconds", ns / (double) NANOSECONDS_PER_MICROSECOND);
         return String.format("%d nanoseconds", ns);
     }
 

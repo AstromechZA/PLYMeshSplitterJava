@@ -20,7 +20,7 @@ public class RecursiveFilePreparer
     public static PHFNode prepare(PHFNode inputNode, int maxdepth, IProgressReporter progressReporter)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, 0, 100, progressReporter);
+        return prepare(inputNode, 0, maxdepth, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
@@ -51,7 +51,7 @@ public class RecursiveFilePreparer
 
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
-            float fromEnd = 100 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
+            float fromEnd = 1 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
             float diffProgress = (end_progress - fromEnd - start_progress) / childNodes.size();
             float childProgress = start_progress;
             for (PHFNode childNode : childNodes)
