@@ -9,6 +9,8 @@ import org.uct.cs.simplify.util.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileBuilder
 {
@@ -29,13 +31,17 @@ public class FileBuilder
 
         // create scaled and recentered version of input
         File scaledFile = TempFileManager.provide("rescaled", ".ply");
-        ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
+        double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
         // build tree
         PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, progressReporter);
 
+        // additional json keys
+        Map<String, String> additionalJSON = new HashMap<>();
+        additionalJSON.put("scale_ratio", "" + scaleRatio);
+
         // compile into output file
-        String jsonHeader = PHFBuilder.compile(tree, outputFile);
+        String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
         sr.close();
         //sr.dump(new File(outputDir, "memdump"));

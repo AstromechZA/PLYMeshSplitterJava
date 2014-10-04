@@ -19,7 +19,7 @@ public class ScaleAndRecenter
 {
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
-    public static XBoundingBox run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
+    public static double run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
         // this scans the target file and works out start and end ranges
         PLYReader reader = new PLYReader(inputFile);
@@ -27,7 +27,7 @@ public class ScaleAndRecenter
         return run(reader, outputFile, size, swapYZ);
     }
 
-    public static XBoundingBox run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
+    public static double run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
         XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
@@ -136,25 +136,7 @@ public class ScaleAndRecenter
             }
         }
 
-        double minX = (bb.getMinX() - center.getX()) * scale;
-        double minY = (bb.getMinY() - center.getY()) * scale;
-        double minZ = (bb.getMinZ() - center.getZ()) * scale;
-        double lenX = (bb.getMaxX() - center.getX()) * scale - minX;
-        double lenY = (bb.getMaxY() - center.getY()) * scale - minY;
-        double lenZ = (bb.getMaxZ() - center.getZ()) * scale - minZ;
-
-        if (swapYZ)
-        {
-            double t = lenY;
-            lenY = lenZ;
-            lenZ = t;
-
-            t = minY;
-            minY = minZ;
-            minZ = t;
-        }
-
-        return new XBoundingBox(minX, minY, minZ, lenX, lenY, lenZ);
+        return scale;
     }
 
     public static void main(String[] args)

@@ -7,10 +7,11 @@ import org.uct.cs.simplify.util.Useful;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.List;
+import java.util.Map;
 
 public class PHFBuilder
 {
-    public static String compile(PHFNode tree, File outputFile) throws IOException
+    public static String compile(PHFNode tree, File outputFile, Map<String, String> additionJSONKeys) throws IOException
     {
         Outputter.info3f("Compressing Hierarchical tree into %s%n", outputFile);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
@@ -36,11 +37,18 @@ public class PHFBuilder
             }
         }
 
-        String jsonheader = "{" +
-            String.format("\"vertex_colour\":%b,", true) +
-            String.format("\"nodes\":%s,", PHFNode.buildJSONHierarchy(tree)) +
-            String.format("\"max_depth\":%d", max_depth) +
-            "}";
+        additionJSONKeys.put("vertex_colour", "true");
+        additionJSONKeys.put("nodes", PHFNode.buildJSONHierarchy(tree));
+        additionJSONKeys.put("max_depth", "" + max_depth);
+
+        StringBuilder sb = new StringBuilder(1000);
+        sb.append('{');
+        for (Map.Entry<String, String> entry : additionJSONKeys.entrySet())
+        {
+            sb.append(String.format("\"%s\":%s,", entry.getKey(), entry.getValue()));
+        }
+        sb.append('}');
+        String jsonheader = sb.toString();
 
         Outputter.info1f("%nWriting '%s' ..%n", outputFile.getPath());
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
