@@ -38,7 +38,7 @@ public class FileBuilder
         String jsonHeader = PHFBuilder.compile(tree, outputFile);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
         sr.close();
-        sr.dump(new File(outputDir, "memdump"));
+        //sr.dump(new File(outputDir, "memdump"));
         return jsonHeader;
     }
 
