@@ -91,7 +91,7 @@ public class NaiveMeshStitcher
     private static void writeMesh2FacesStitched(File faceFile, PLYReader reader, int[] indexTransform) throws IOException
     {
         try (
-            MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader);
+            StreamingFaceReader fr = new FastBufferedFaceReader(reader);
             BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(faceFile, true))
         )
         {

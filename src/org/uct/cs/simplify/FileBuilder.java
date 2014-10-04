@@ -48,38 +48,29 @@ public class FileBuilder
         return jsonHeader;
     }
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, InterruptedException
     {
         CommandLine cmd = getCommandLine(args);
-        try (StatRecorder ignored = new StatRecorder())
+        File inputFile = new File(cmd.getOptionValue("input"));
+        File outputFile = new File(cmd.getOptionValue("output"));
+        File outputDir = outputFile.getParentFile();
+
+        String jsonHeader = run(
+            inputFile,
+            outputFile,
+            cmd.hasOption("keeptemp"),
+            cmd.hasOption("swapyz"),
+            Integer.parseInt(cmd.getOptionValue("treedepth")),
+            new StdOutProgressReporter()
+        );
+
+        if (cmd.hasOption("dumpjson"))
         {
-            File inputFile = new File(cmd.getOptionValue("input"));
-            File outputFile = new File(cmd.getOptionValue("output"));
-            File outputDir = outputFile.getParentFile();
-
-            String jsonHeader = run(
-                inputFile,
-                outputFile,
-                cmd.hasOption("keeptemp"),
-                cmd.hasOption("swapyz"),
-                Integer.parseInt(cmd.getOptionValue("treedepth")),
-                new StdOutProgressReporter()
-            );
-
-            if (cmd.hasOption("dumpjson"))
+            File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
+            try (FileWriter fw = new FileWriter(headerFile))
             {
-                File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
-                try (FileWriter fw = new FileWriter(headerFile))
-                {
-                    fw.write(jsonHeader);
-                }
+                fw.write(jsonHeader);
             }
-
-            TempFileManager.clear();
-        }
-        catch (InterruptedException | IllegalArgumentException e)
-        {
-            e.printStackTrace();
         }
     }
 

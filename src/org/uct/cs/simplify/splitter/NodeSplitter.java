@@ -1,10 +1,7 @@
 package org.uct.cs.simplify.splitter;
 
 import org.uct.cs.simplify.filebuilder.PHFNode;
-import org.uct.cs.simplify.model.Face;
-import org.uct.cs.simplify.model.MemoryMappedFaceReader;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
-import org.uct.cs.simplify.model.VertexAttrMap;
+import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
@@ -101,7 +98,7 @@ public class NodeSplitter
         int currentVertexIndex = 0;
         LinkedHashMap<Integer, Integer> vertexIndexMap = new LinkedHashMap<>((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
-            MemoryMappedFaceReader faceReader = new MemoryMappedFaceReader(reader);
+            StreamingFaceReader faceReader = new FastBufferedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
             ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )

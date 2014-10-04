@@ -1,9 +1,6 @@
 package org.uct.cs.simplify.filebuilder;
 
-import org.uct.cs.simplify.model.Face;
-import org.uct.cs.simplify.model.MemoryMappedFaceReader;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
-import org.uct.cs.simplify.model.Vertex;
+import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Pair;
@@ -78,7 +75,7 @@ public class PLYDataCompressor
                 ostream.write(v.a);
             }
 
-            try (MemoryMappedFaceReader fr = new MemoryMappedFaceReader(reader))
+            try (StreamingFaceReader fr = new FastBufferedFaceReader(reader))
             {
                 Face f;
                 while (fr.hasNext())
@@ -88,6 +85,10 @@ public class PLYDataCompressor
                     Useful.writeIntLE(ostream, f.j);
                     Useful.writeIntLE(ostream, f.k);
                 }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
             }
         }
         return new CompressionResult(vbuffersize, fbuffersize);

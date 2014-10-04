@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.model;
 
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,28 +9,25 @@ import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Iterator;
 
-public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
+public class MemoryMappedFaceReader extends StreamingFaceReader implements AutoCloseable
 {
-    private static final int BYTE_MASK = 0xFF;
-
-    private int index;
-    private int count;
+    private long index;
+    private long count;
     private RandomAccessFile raf;
     private FileChannel fc;
     private MappedByteBuffer buffer;
 
     public MemoryMappedFaceReader(PLYReader reader) throws IOException
     {
-        int c = reader.getHeader().getElement("face").getCount();
+        long c = reader.getHeader().getElement("face").getCount();
         long p = reader.getElementDimension("face").getOffset();
         long l = reader.getElementDimension("face").getLength();
 
         this.construct(reader.getFile(), p, c, l);
     }
 
-    private void construct(File file, long position, int count, long length) throws IOException
+    private void construct(File file, long position, long count, long length) throws IOException
     {
         this.count = count;
         this.raf = new RandomAccessFile(file, "r");
@@ -43,9 +41,9 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
         return this.index <= (this.count - 1);
     }
 
-    public Face next()
+    public Face next() throws IOException
     {
-        int vertexCount = this.buffer.get() & BYTE_MASK;
+        int vertexCount = this.buffer.get() & Useful.BYTE_MASK;
 
         int i = this.buffer.getInt();
         int j = this.buffer.getInt();
@@ -69,7 +67,7 @@ public class MemoryMappedFaceReader implements AutoCloseable, Iterator<Face>
         this.raf.close();
     }
 
-    public int getCount()
+    public long getCount()
     {
         return this.count;
     }
