@@ -1,123 +1,105 @@
 package org.uct.cs.simplify.splitter.memberships;
 
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import javafx.geometry.Point3D;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
-import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.splitter.SplittingAxis;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.Outputter;
+import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.XBoundingBox;
+import org.uct.cs.simplify.util.axis.Axis;
+import org.uct.cs.simplify.util.axis.IAxisReader;
 
 import java.io.IOException;
 
 public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
 {
-    private static final double APPROXIMATION_THRESHOLD = 0.01;
-    private static final double MEDIAN_TARGET = 0.5;
+    private static final float MEDIAN_TARGET = 0.5f;
 
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException
     {
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            SplittingAxis longest = SplittingAxis.getLongestAxis(boundingBox);
-            double splitPoint = calculateMedianInRegion(vr, boundingBox, longest, APPROXIMATION_THRESHOLD);
-            TIntObjectMap<XBoundingBox> subNodes = SplittingAxis.splitBBIntoSubnodes(boundingBox, longest, splitPoint);
+            Axis longest = Axis.getLongestAxis(boundingBox);
+            IAxisReader axisReader = longest.getReader();
+            Pair<Double, Double> bounds = longest.getAxisBounds(boundingBox);
+
+            double p50 = new PercentileFinder(reader, axisReader).findPercentile(MEDIAN_TARGET, bounds.getFirst(), bounds.getSecond());
+
+            TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest, p50);
 
             long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(1, c);
-            switch (longest)
+            for (int i = 0; i < c; i++)
             {
-                case X:
-                    for (int i = 0; i < c; i++)
-                    {
-                        if (vr.get(i).x > splitPoint) memberships.set(i, 1);
-                    }
-                    break;
-                case Y:
-                    for (int i = 0; i < c; i++)
-                    {
-                        if (vr.get(i).y > splitPoint) memberships.set(i, 1);
-                    }
-                    break;
-                case Z:
-                    for (int i = 0; i < c; i++)
-                    {
-                        if (vr.get(i).z > splitPoint) memberships.set(i, 1);
-                    }
-                    break;
+                if (axisReader.read(vr.get(i)) > p50) memberships.set(i, 1);
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }
-    }
-
-    private static double calculateMedianInRegion(MemoryMappedVertexReader vr, XBoundingBox bb, SplittingAxis axis, double approxThreshold)
-    {
-        double min, max, approximate, ratio;
-        switch (axis)
-        {
-            case X:
-                min = bb.getMinX();
-                max = bb.getMaxX();
-                break;
-            case Y:
-                min = bb.getMinY();
-                max = bb.getMaxY();
-                break;
-            default:
-                min = bb.getMinZ();
-                max = bb.getMaxZ();
-        }
-
-        float nv = vr.getCount();
-
-        approximate = (min + max) / 2;
-        ratio = countValuesLessThan(vr, axis, approximate) / nv;
-
-        double minR = MEDIAN_TARGET - approxThreshold;
-        double maxR = MEDIAN_TARGET + approxThreshold;
-        int iterations = 0;
-        while (iterations < 10 && (ratio < minR || ratio > maxR))
-        {
-            if (ratio > MEDIAN_TARGET)
-            {
-                max = approximate;
-            }
-            else
-            {
-                min = approximate;
-            }
-
-            approximate = (min + max) / 2;
-            ratio = countValuesLessThan(vr, axis, approximate) / nv;
-            iterations++;
-        }
-        Outputter.debugf("Found median of %d values after %d iterations.%n", vr.getCount(), iterations);
-        return approximate;
-    }
-
-    private static long countValuesLessThan(MemoryMappedVertexReader vr, SplittingAxis axis, double value)
-    {
-        long c = vr.getCount();
-        long count = 0;
-        for (long i = 0; i < c; i++)
-        {
-            if (getValueFromVertex(vr.get(i), axis) < value) count++;
-        }
-        return count;
-    }
-
-    private static double getValueFromVertex(Vertex v, SplittingAxis a)
-    {
-        if (a == SplittingAxis.X) return v.x;
-        if (a == SplittingAxis.Y) return v.y;
-        return v.z;
     }
 
     @Override
     public int getSplitRatio()
     {
         return 2;
+    }
+
+    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, double onPoint)
+    {
+        return splitBBIntoSubnodes(boundingBox, axis, new Point3D(onPoint, onPoint, onPoint));
+    }
+
+    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, Point3D center)
+    {
+        TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(2);
+        switch (axis)
+        {
+            case X:
+                subNodes.put(
+                    0, XBoundingBox.fromTo(
+                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
+                        center.getX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
+                    )
+                );
+                subNodes.put(
+                    1, XBoundingBox.fromTo(
+                        center.getX(), boundingBox.getMinY(), boundingBox.getMinZ(),
+                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
+                    )
+                );
+                break;
+            case Y:
+                subNodes.put(
+                    0, XBoundingBox.fromTo(
+                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
+                        boundingBox.getMaxX(), center.getY(), boundingBox.getMaxZ()
+                    )
+                );
+                subNodes.put(
+                    1, XBoundingBox.fromTo(
+                        boundingBox.getMinX(), center.getY(), boundingBox.getMinZ(),
+                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
+                    )
+                );
+                break;
+            case Z:
+                subNodes.put(
+                    0, XBoundingBox.fromTo(
+                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
+                        boundingBox.getMaxX(), boundingBox.getMaxY(), center.getZ()
+                    )
+                );
+                subNodes.put(
+                    1, XBoundingBox.fromTo(
+                        boundingBox.getMinX(), boundingBox.getMinY(), center.getZ(),
+                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
+                    )
+                );
+                break;
+        }
+
+        return subNodes;
     }
 }
