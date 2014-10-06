@@ -17,6 +17,19 @@ public class XBoundingBox extends BoundingBox
         super(minX, minY, minZ, width, height, depth);
     }
 
+    public XBoundingBox(Point3D minPoint, Point3D maxPoint)
+    {
+        super(
+            minPoint.getX(),
+            minPoint.getY(),
+            minPoint.getZ(),
+
+            maxPoint.getX() - minPoint.getX(),
+            maxPoint.getY() - minPoint.getY(),
+            maxPoint.getZ() - minPoint.getZ()
+        );
+    }
+
     public static XBoundingBox fromTo(
         double minX,
         double minY,
@@ -30,6 +43,7 @@ public class XBoundingBox extends BoundingBox
         return new XBoundingBox(minX, minY, minZ, maxX - minX, maxY - minY, maxZ - minZ);
     }
 
+
     public Point3D getCenter()
     {
         return new Point3D(
@@ -37,5 +51,15 @@ public class XBoundingBox extends BoundingBox
             (this.getMinY() + this.getMaxY()) / 2,
             (this.getMinZ() + this.getMaxZ()) / 2
         );
+    }
+
+    public Point3D getMin()
+    {
+        return new Point3D(this.getMinX(), this.getMinY(), this.getMinZ());
+    }
+
+    public Point3D getMax()
+    {
+        return new Point3D(this.getMaxX(), this.getMaxY(), this.getMaxZ());
     }
 }

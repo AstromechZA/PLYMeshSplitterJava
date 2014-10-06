@@ -6,7 +6,6 @@ import javafx.geometry.Point3D;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.Pair;
 import org.uct.cs.simplify.util.XBoundingBox;
 import org.uct.cs.simplify.util.axis.Axis;
 import org.uct.cs.simplify.util.axis.IAxisReader;
@@ -20,16 +19,17 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException
     {
+        Axis longest = Axis.getLongestAxis(boundingBox);
+        IAxisReader axisReader = longest.getReader();
+        double min = longest.getBBMin(boundingBox);
+        double max = longest.getBBax(boundingBox);
+
+        double p50 = new PercentileFinder(reader, axisReader).findPercentile(MEDIAN_TARGET, min, max);
+
+        TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest, p50);
+
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            Axis longest = Axis.getLongestAxis(boundingBox);
-            IAxisReader axisReader = longest.getReader();
-            Pair<Double, Double> bounds = longest.getAxisBounds(boundingBox);
-
-            double p50 = new PercentileFinder(reader, axisReader).findPercentile(MEDIAN_TARGET, bounds.getFirst(), bounds.getSecond());
-
-            TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest, p50);
-
             long c = vr.getCount();
             CompactBitArray memberships = new CompactBitArray(1, c);
             for (int i = 0; i < c; i++)

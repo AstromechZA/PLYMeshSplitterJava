@@ -4,7 +4,6 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
-import org.uct.cs.simplify.splitter.memberships.VariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.IProgressReporter;
 import org.uct.cs.simplify.util.Outputter;
@@ -17,16 +16,17 @@ import java.util.List;
 
 public class RecursiveFilePreparer
 {
-    public static PHFNode prepare(PHFNode inputNode, int maxdepth, IProgressReporter progressReporter)
+    public static PHFNode prepare(PHFNode inputNode, int maxdepth, IMembershipBuilder splitType, IProgressReporter progressReporter)
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, 0, 1, progressReporter);
+        return prepare(inputNode, 0, maxdepth, splitType, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
         PHFNode inputNode,
         int depth,
         int maxdepth,
+        IMembershipBuilder splitType,
         float start_progress,
         float end_progress,
         IProgressReporter progressReporter
@@ -44,8 +44,6 @@ public class RecursiveFilePreparer
         }
         else
         {
-            IMembershipBuilder splitType = new VariableKDTreeMembershipBuilder();
-
             // split current node into a list of subnodes
             ArrayList<PHFNode> childNodes = NodeSplitter.split(inputNode, splitType);
 
@@ -60,6 +58,7 @@ public class RecursiveFilePreparer
                     childNode,
                     depth + 1,
                     maxdepth,
+                    splitType,
                     childProgress,
                     childProgress + diffProgress,
                     progressReporter

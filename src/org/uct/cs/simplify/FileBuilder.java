@@ -4,6 +4,9 @@ import org.apache.commons.cli.*;
 import org.uct.cs.simplify.filebuilder.PHFBuilder;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
+import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.util.*;
 
 import java.io.File;
@@ -15,9 +18,35 @@ import java.util.Map;
 public class FileBuilder
 {
     public static final int MAX_DEPTH = 20;
+    public static final int FACES_PER_NODE = 100_000;
     private static final int RESCALE_SIZE = 1024;
 
-    public static String run(File inputFile, File outputFile, boolean keepNodes, boolean swapYZ, int treedepth, IProgressReporter progressReporter)
+    public static String run(
+        File inputFile,
+        File outputFile,
+        boolean keepNodes,
+        boolean swapYZ,
+        IMembershipBuilder membershipBuilder,
+        IProgressReporter reporter)
+        throws IOException, InterruptedException
+    {
+
+        PLYHeader header = new PLYHeader(inputFile);
+        long numFaces = header.getElement("face").getCount();
+        int treedepth = (int) Math.round((Math.log(numFaces / FACES_PER_NODE) / Math.log(membershipBuilder.getSplitRatio())) + 1);
+        Outputter.info3f("Treedepth: %d%n", treedepth);
+
+        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, treedepth, reporter);
+    }
+
+    public static String run(
+        File inputFile,
+        File outputFile,
+        boolean keepNodes,
+        boolean swapYZ,
+        IMembershipBuilder membershipBuilder,
+        int treedepth,
+        IProgressReporter progressReporter)
         throws IOException, InterruptedException
     {
         StatRecorder sr = new StatRecorder();
@@ -26,15 +55,13 @@ public class FileBuilder
 
         // generate tempfiles in the outputdir
         TempFileManager.setWorkingDirectory(outputDir.toPath());
-        // delete all tempfiles afterwards
-        TempFileManager.setDeleteOnExit(!keepNodes);
 
         // create scaled and recentered version of input
         File scaledFile = TempFileManager.provide("rescaled", ".ply");
         double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
         // build tree
-        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, progressReporter);
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, membershipBuilder, progressReporter);
 
         // additional json keys
         Map<String, String> additionalJSON = new HashMap<>();
@@ -43,6 +70,19 @@ public class FileBuilder
         // compile into output file
         String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
+
+        if (!keepNodes)
+        {
+            try
+            {
+                TempFileManager.clear();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
         sr.close();
         //sr.dump(new File(outputDir, "memdump"));
         return jsonHeader;
@@ -60,7 +100,7 @@ public class FileBuilder
             outputFile,
             cmd.hasOption("keeptemp"),
             cmd.hasOption("swapyz"),
-            Integer.parseInt(cmd.getOptionValue("treedepth")),
+            new MultiwayVariableKDTreeMembershipBuilder(4),
             new StdOutProgressReporter()
         );
 
@@ -88,11 +128,6 @@ public class FileBuilder
         outputFile.setRequired(true);
         options.addOption(outputFile);
 
-        Option treedepth = new Option("d", "treedepth", true, "Dump the JSON header into separate file");
-        treedepth.setRequired(true);
-        treedepth.setType(Number.class);
-        options.addOption(treedepth);
-
         Option keepTempFiles = new Option(
             "k", "keeptemp", false, "keep any temporary files generated during phf compilation"
         );
@@ -109,8 +144,6 @@ public class FileBuilder
         try
         {
             cmd = clp.parse(options, args);
-            long treedepthv = (Long) cmd.getParsedOptionValue("treedepth");
-            if (treedepthv < 2 || treedepthv > MAX_DEPTH) throw new ParseException("treedepth must be > 1 and < 21");
             return cmd;
         }
         catch (ParseException e)
@@ -122,4 +155,6 @@ public class FileBuilder
             return null;
         }
     }
+
+
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class PHFBuilder
 {
-    public static String compile(PHFNode tree, File outputFile, Map<String, String> additionJSONKeys) throws IOException
+    public static String compile(PHFNode tree, File outputFile, Map<String, String> jsonPairs) throws IOException
     {
         Outputter.info3f("Compressing Hierarchical tree into %s%n", outputFile);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));
@@ -37,15 +37,18 @@ public class PHFBuilder
             }
         }
 
-        additionJSONKeys.put("vertex_colour", "true");
-        additionJSONKeys.put("nodes", PHFNode.buildJSONHierarchy(tree));
-        additionJSONKeys.put("max_depth", "" + max_depth);
+        jsonPairs.put("vertex_colour", "true");
+        jsonPairs.put("nodes", PHFNode.buildJSONHierarchy(tree));
+        jsonPairs.put("max_depth", "" + max_depth);
 
         StringBuilder sb = new StringBuilder(1000);
         sb.append('{');
-        for (Map.Entry<String, String> entry : additionJSONKeys.entrySet())
+        boolean needsComma = false;
+        for (Map.Entry<String, String> entry : jsonPairs.entrySet())
         {
-            sb.append(String.format("\"%s\":%s,", entry.getKey(), entry.getValue()));
+            if (needsComma) sb.append(',');
+            sb.append(String.format("\"%s\":%s", entry.getKey(), entry.getValue()));
+            needsComma = true;
         }
         sb.append('}');
         String jsonheader = sb.toString();
