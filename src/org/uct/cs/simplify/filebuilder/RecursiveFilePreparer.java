@@ -47,6 +47,8 @@ public class RecursiveFilePreparer
             // split current node into a list of subnodes
             ArrayList<PHFNode> childNodes = NodeSplitter.split(inputNode, splitType);
 
+            TempFileManager.release(inputNode.getLinkedFile());
+
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
             float fromEnd = 1 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
@@ -68,8 +70,6 @@ public class RecursiveFilePreparer
 
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
             for (PHFNode n : processedNodes) processedFiles.add(n.getLinkedFile());
-
-            TempFileManager.release(inputNode.getLinkedFile());
 
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
