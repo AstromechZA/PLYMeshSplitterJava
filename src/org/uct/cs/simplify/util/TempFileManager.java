@@ -89,7 +89,7 @@ public class TempFileManager
         System.gc();
 
         int errorlimit = 10;
-        while (!filesToDelete.isEmpty())
+        while (!filesToDelete.isEmpty() && errorlimit > 0)
         {
             Path p = filesToDelete.removeFirst();
             try
@@ -99,8 +99,7 @@ public class TempFileManager
             catch (IOException e)
             {
                 filesToDelete.addLast(p);
-
-                if (errorlimit-- == 0) break;
+                errorlimit--;
                 Thread.sleep(DELETE_WAIT_DELAY);
             }
         }
