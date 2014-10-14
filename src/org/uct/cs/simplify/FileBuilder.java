@@ -17,8 +17,7 @@ import java.util.Map;
 
 public class FileBuilder
 {
-    public static final int MAX_DEPTH = 20;
-    public static final int FACES_PER_NODE = 100_000;
+    public static final int FACES_PER_LEAF = 50_000;
     private static final int RESCALE_SIZE = 1024;
 
     public static String run(
@@ -27,16 +26,21 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         IMembershipBuilder membershipBuilder,
-        IProgressReporter reporter)
+        IProgressReporter reporter
+    )
         throws IOException, InterruptedException
     {
+        float facesPerSimplification = FACES_PER_LEAF * membershipBuilder.getSplitRatio();
 
-        PLYHeader header = new PLYHeader(inputFile);
-        long numFaces = header.getElement("face").getCount();
-        int treedepth = (int) Math.round((Math.log(numFaces / FACES_PER_NODE) / Math.log(membershipBuilder.getSplitRatio())) + 1);
-        Outputter.info3f("Treedepth: %d%n", treedepth);
+        long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
+        float numLeaves = (numFaces / facesPerSimplification) * membershipBuilder.getSplitRatio();
+        int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
+        float ratio = (float) Math.pow(facesPerSimplification / numFaces, 1.0f / (numLevels - 1));
 
-        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, treedepth, reporter);
+        Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
+        Outputter.info1f("Calculated preffered simplification ratio: %f%n", ratio);
+
+        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, ratio, numLevels, reporter);
     }
 
     public static String run(
@@ -45,8 +49,10 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         IMembershipBuilder membershipBuilder,
+        float simplificationRatio,
         int treedepth,
-        IProgressReporter progressReporter)
+        IProgressReporter progressReporter
+    )
         throws IOException, InterruptedException
     {
         StatRecorder sr = new StatRecorder();
@@ -61,7 +67,7 @@ public class FileBuilder
         double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
         // build tree
-        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, membershipBuilder, progressReporter);
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, membershipBuilder, simplificationRatio, progressReporter);
 
         // additional json keys
         Map<String, String> additionalJSON = new HashMap<>();

@@ -16,10 +16,16 @@ import java.util.List;
 
 public class RecursiveFilePreparer
 {
-    public static PHFNode prepare(PHFNode inputNode, int maxdepth, IMembershipBuilder splitType, IProgressReporter progressReporter)
+    public static PHFNode prepare(
+        PHFNode inputNode,
+        int maxdepth,
+        IMembershipBuilder splitType,
+        float simplificationRatio,
+        IProgressReporter progressReporter
+    )
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, splitType, 0, 1, progressReporter);
+        return prepare(inputNode, 0, maxdepth, splitType, simplificationRatio, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
@@ -27,8 +33,9 @@ public class RecursiveFilePreparer
         int depth,
         int maxdepth,
         IMembershipBuilder splitType,
-        float start_progress,
-        float end_progress,
+        float simplificationRatio,
+        float startProgress,
+        float endProgress,
         IProgressReporter progressReporter
     )
     throws IOException, InterruptedException
@@ -39,7 +46,7 @@ public class RecursiveFilePreparer
             // simply copy the node and return
             PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
             outputNode.setDepth(depth);
-            progressReporter.report(end_progress);
+            progressReporter.report(endProgress);
             return outputNode;
         }
         else
@@ -52,8 +59,8 @@ public class RecursiveFilePreparer
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
             float fromEnd = 1 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
-            float diffProgress = (end_progress - fromEnd - start_progress) / childNodes.size();
-            float childProgress = start_progress;
+            float diffProgress = (endProgress - fromEnd - startProgress) * simplificationRatio;
+            float childProgress = startProgress;
             for (PHFNode childNode : childNodes)
             {
                 processedNodes.add(prepare(
@@ -61,6 +68,7 @@ public class RecursiveFilePreparer
                     depth + 1,
                     maxdepth,
                     splitType,
+                    simplificationRatio,
                     childProgress,
                     childProgress + diffProgress,
                     progressReporter
@@ -86,7 +94,7 @@ public class RecursiveFilePreparer
             outputNode.setDepth(depth);
 
             Outputter.info1f("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
-            progressReporter.report(end_progress);
+            progressReporter.report(endProgress);
             return outputNode;
         }
     }
