@@ -25,7 +25,7 @@ import java.io.*;
  */
 public class PLYDataCompressor
 {
-    private static final int BYTES_PER_VERTEX = 4 * 3 + 4;
+    private static final int BYTES_PER_VERTEX = 4 * 3 + 3;
     private static final int BYTES_PER_FACE = 4 * 3;
 
     public static CompressionResult compress(File inputFile, File outputFile) throws IOException
