@@ -49,7 +49,6 @@ public class FileBuilder
             simplificationRatio = (float) Math.pow(facesPerSimplification / numFaces, 1.0f / (numLevels - 1));
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
-            Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
 
             stopCondition = new DepthStoppingCondition(numLevels);
         }
@@ -58,10 +57,12 @@ public class FileBuilder
             simplificationRatio = (float) 1 / membershipBuilder.getSplitRatio();
 
             Outputter.info1ln("Calculated Tree Depth: N/A (face limit controlled)");
-            Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
 
             stopCondition = new LowerFaceBoundStoppingCondition(FACES_PER_LEAF);
         }
+
+        simplificationRatio = (float) Math.pow(simplificationRatio, 1 - (1.0f / membershipBuilder.getSplitRatio()));
+        Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
 
         return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplificationRatio, stopCondition, reporter);
     }

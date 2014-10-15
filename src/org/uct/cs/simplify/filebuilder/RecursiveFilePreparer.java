@@ -83,7 +83,7 @@ public class RecursiveFilePreparer
 
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
             long totalFaces = stitchedHeader.getElement("face").getCount();
-            long targetFaces = totalFaces / splitType.getSplitRatio();
+            long targetFaces = (long) (totalFaces * simplificationRatio);
 
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());
 
@@ -93,7 +93,7 @@ public class RecursiveFilePreparer
             outputNode.addChildren(processedNodes);
             outputNode.setDepth(depth);
 
-            Outputter.info1f("Simplified from %d to %d faces.%n", totalFaces, outputNode.getNumFaces());
+            Outputter.info1f("Simplified from %d to %d faces. (depth: %d) (ratio: %f)%n", totalFaces, outputNode.getNumFaces(), depth, outputNode.getNumFaces() / totalFaces);
             progressReporter.report(endProgress);
             return outputNode;
         }
