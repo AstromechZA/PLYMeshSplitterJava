@@ -1,20 +1,17 @@
 package org.uct.cs.simplify.splitter;
 
+import gnu.trove.iterator.TIntIterator;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
-import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 public class NodeSplitter
 {
@@ -73,8 +70,10 @@ public class NodeSplitter
                 PLYHeader newHeader = PLYHeader.constructHeader(result.numVertices, result.numFaces, vam);
                 fostream.write((newHeader + "\n").getBytes());
 
-                for (int i : result.vertexIndexMap.keySet())
+                TIntIterator iter = result.vertexIndexMap.getKeyList().iterator();
+                while (iter.hasNext())
                 {
+                    int i = iter.next();
                     vr.get(i, v);
                     v.writeToStream(fostream, vam);
                 }
@@ -98,7 +97,7 @@ public class NodeSplitter
     ) throws IOException
     {
         int currentVertexIndex = 0;
-        LinkedHashMap<Integer, Integer> vertexIndexMap = new LinkedHashMap<>((int) (memberships.size() / Math.pow(2, memberships.getBits())));
+        IntIntHashMapWithKeyList vertexIndexMap = new IntIntHashMapWithKeyList((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
             StreamingFaceReader faceReader = new FastBufferedFaceReader(reader);
             FileOutputStream fostream = new FileOutputStream(tempfile);
@@ -161,9 +160,9 @@ public class NodeSplitter
     {
         public final int numFaces;
         public final int numVertices;
-        public final LinkedHashMap<Integer, Integer> vertexIndexMap;
+        public final IntIntHashMapWithKeyList vertexIndexMap;
 
-        public GatheringResult(int numFacesInSubnode, LinkedHashMap<Integer, Integer> vertexIndexMap)
+        public GatheringResult(int numFacesInSubnode, IntIntHashMapWithKeyList vertexIndexMap)
         {
             this.numFaces = numFacesInSubnode;
             this.numVertices = vertexIndexMap.size();
