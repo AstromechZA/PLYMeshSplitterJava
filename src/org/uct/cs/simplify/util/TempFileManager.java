@@ -85,7 +85,7 @@ public class TempFileManager
 
     public static void clear() throws InterruptedException
     {
-        Outputter.info3ln("Removing Temporary Files");
+        Outputter.info3f("Removing %d Temporary Files%n", filesToDelete.size());
         System.gc();
 
         int errorlimit = 10;

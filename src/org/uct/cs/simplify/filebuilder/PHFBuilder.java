@@ -23,9 +23,12 @@ public class PHFBuilder
         try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
         {
             long position = 0;
+            int nodeIndex = 0;
             for (PHFNode node : nodes)
             {
-                Outputter.info1f("Writing %s to %s%n", node.getLinkedFile().getPath(), tempBlockFile.getPath());
+                nodeIndex++;
+
+                Outputter.info1f("%d/%d Writing %s to %s%n", nodeIndex, nodes.size(), node.getLinkedFile().getPath(), tempBlockFile.getPath());
 
                 PLYDataCompressor.CompressionResult r = PLYDataCompressor.compress(node.getLinkedFile(), ostream);
 
@@ -34,6 +37,7 @@ public class PHFBuilder
                 node.setBlockLength(length);
                 position += length;
                 max_depth = Math.max(max_depth, node.getDepth());
+
             }
         }
 
