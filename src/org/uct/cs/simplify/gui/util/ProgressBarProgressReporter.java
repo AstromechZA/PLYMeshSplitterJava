@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.gui;
+package org.uct.cs.simplify.gui.util;
 
 import org.uct.cs.simplify.util.IProgressReporter;
 import org.uct.cs.simplify.util.Useful;

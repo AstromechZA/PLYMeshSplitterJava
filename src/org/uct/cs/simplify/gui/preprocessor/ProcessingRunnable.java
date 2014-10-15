@@ -1,7 +1,9 @@
-package org.uct.cs.simplify.gui;
+package org.uct.cs.simplify.gui.preprocessor;
 
 import org.uct.cs.simplify.FileBuilder;
+import org.uct.cs.simplify.gui.util.ProgressBarProgressReporter;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
+import org.uct.cs.simplify.util.ICompletionListener;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import javax.swing.*;

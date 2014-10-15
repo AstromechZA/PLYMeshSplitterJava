@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.gui;
+package org.uct.cs.simplify.gui.util;
 
 import javax.swing.*;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.uct.cs.simplify.gui;
+package org.uct.cs.simplify.util;
 
 public interface ICompletionListener
 {

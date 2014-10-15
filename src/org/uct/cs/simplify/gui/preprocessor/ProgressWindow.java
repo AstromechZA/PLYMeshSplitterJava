@@ -1,6 +1,8 @@
-package org.uct.cs.simplify.gui;
+package org.uct.cs.simplify.gui.preprocessor;
 
+import org.uct.cs.simplify.gui.util.TextAreaOutputStream;
 import org.uct.cs.simplify.util.ClickButtonListener;
+import org.uct.cs.simplify.util.ICompletionListener;
 import org.uct.cs.simplify.util.Useful;
 
 import javax.swing.*;

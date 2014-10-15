@@ -1,8 +1,8 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.gui.ProgressWindow;
+import org.uct.cs.simplify.gui.preprocessor.ProgressWindow;
 
-public class GuiDriver
+public class PreProcessorGuiDriver
 {
     public static void main(String[] args)
     {
