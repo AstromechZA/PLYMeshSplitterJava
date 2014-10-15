@@ -7,6 +7,9 @@ import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
+import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
+import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
+import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
 import org.uct.cs.simplify.util.*;
 
 import java.io.File;
@@ -30,17 +33,37 @@ public class FileBuilder
     )
         throws IOException, InterruptedException
     {
-        float facesPerSimplification = FACES_PER_LEAF * membershipBuilder.getSplitRatio();
+        IStoppingCondition stopCondition;
+        float simplificationRatio;
 
-        long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-        float numLeaves = (numFaces / facesPerSimplification) * membershipBuilder.getSplitRatio();
-        int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
-        float ratio = (float) Math.pow(facesPerSimplification / numFaces, 1.0f / (numLevels - 1));
+        Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
-        Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
-        Outputter.info1f("Calculated preffered simplification ratio: %f%n", ratio);
+        if (membershipBuilder.isBalanced())
+        {
+            float facesPerSimplification = FACES_PER_LEAF * membershipBuilder.getSplitRatio();
 
-        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, ratio, numLevels, reporter);
+            long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
+            float numLeaves = (numFaces / facesPerSimplification) * membershipBuilder.getSplitRatio();
+            int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
+
+            simplificationRatio = (float) Math.pow(facesPerSimplification / numFaces, 1.0f / (numLevels - 1));
+
+            Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
+            Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
+
+            stopCondition = new DepthStoppingCondition(numLevels);
+        }
+        else
+        {
+            simplificationRatio = (float) 1 / membershipBuilder.getSplitRatio();
+
+            Outputter.info1ln("Calculated Tree Depth: N/A (face limit controlled)");
+            Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
+
+            stopCondition = new LowerFaceBoundStoppingCondition(FACES_PER_LEAF);
+        }
+
+        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplificationRatio, stopCondition, reporter);
     }
 
     public static String run(
@@ -50,7 +73,7 @@ public class FileBuilder
         boolean swapYZ,
         IMembershipBuilder membershipBuilder,
         float simplificationRatio,
-        int treedepth,
+        IStoppingCondition stopCondition,
         IProgressReporter progressReporter
     )
         throws IOException, InterruptedException
@@ -67,7 +90,7 @@ public class FileBuilder
         double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
         // build tree
-        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), treedepth, membershipBuilder, simplificationRatio, progressReporter);
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationRatio, progressReporter);
 
         // additional json keys
         Map<String, String> additionalJSON = new HashMap<>();

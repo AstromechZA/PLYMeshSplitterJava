@@ -91,4 +91,10 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
     {
         return this.order;
     }
+
+    @Override
+    public boolean isBalanced()
+    {
+        return true;
+    }
 }

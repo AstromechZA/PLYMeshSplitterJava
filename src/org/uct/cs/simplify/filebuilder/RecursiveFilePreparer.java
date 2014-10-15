@@ -4,6 +4,7 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.IProgressReporter;
 import org.uct.cs.simplify.util.Outputter;
@@ -18,20 +19,20 @@ public class RecursiveFilePreparer
 {
     public static PHFNode prepare(
         PHFNode inputNode,
-        int maxdepth,
+        IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
         float simplificationRatio,
         IProgressReporter progressReporter
     )
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, maxdepth, splitType, simplificationRatio, 0, 1, progressReporter);
+        return prepare(inputNode, 0, stopCondition, splitType, simplificationRatio, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
         PHFNode inputNode,
         int depth,
-        int maxdepth,
+        IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
         float simplificationRatio,
         float startProgress,
@@ -41,7 +42,7 @@ public class RecursiveFilePreparer
     throws IOException, InterruptedException
     {
         // stopping condition
-        if (depth == maxdepth)
+        if (stopCondition.met(depth, inputNode.getNumFaces()))
         {
             // simply copy the node and return
             PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
@@ -58,15 +59,14 @@ public class RecursiveFilePreparer
 
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
-            float fromEnd = 1 / (float) (Math.pow(splitType.getSplitRatio(), maxdepth + 1) - 1);
-            float diffProgress = (endProgress - fromEnd - startProgress) * simplificationRatio;
+            float diffProgress = (endProgress - startProgress) / childNodes.size();
             float childProgress = startProgress;
             for (PHFNode childNode : childNodes)
             {
                 processedNodes.add(prepare(
                     childNode,
                     depth + 1,
-                    maxdepth,
+                    stopCondition,
                     splitType,
                     simplificationRatio,
                     childProgress,

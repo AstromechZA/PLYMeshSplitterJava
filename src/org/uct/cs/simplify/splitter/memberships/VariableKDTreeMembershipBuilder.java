@@ -46,59 +46,28 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         return 2;
     }
 
-    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, double onPoint)
+    @Override
+    public boolean isBalanced()
     {
-        return splitBBIntoSubnodes(boundingBox, axis, new Point3D(onPoint, onPoint, onPoint));
+        return false;
     }
 
-    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, Point3D center)
+    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, double onPoint)
     {
         TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(2);
-        switch (axis)
-        {
-            case X:
-                subNodes.put(
-                    0, XBoundingBox.fromTo(
-                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
-                        center.getX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
-                    )
-                );
-                subNodes.put(
-                    1, XBoundingBox.fromTo(
-                        center.getX(), boundingBox.getMinY(), boundingBox.getMinZ(),
-                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
-                    )
-                );
-                break;
-            case Y:
-                subNodes.put(
-                    0, XBoundingBox.fromTo(
-                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
-                        boundingBox.getMaxX(), center.getY(), boundingBox.getMaxZ()
-                    )
-                );
-                subNodes.put(
-                    1, XBoundingBox.fromTo(
-                        boundingBox.getMinX(), center.getY(), boundingBox.getMinZ(),
-                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
-                    )
-                );
-                break;
-            case Z:
-                subNodes.put(
-                    0, XBoundingBox.fromTo(
-                        boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getMinZ(),
-                        boundingBox.getMaxX(), boundingBox.getMaxY(), center.getZ()
-                    )
-                );
-                subNodes.put(
-                    1, XBoundingBox.fromTo(
-                        boundingBox.getMinX(), boundingBox.getMinY(), center.getZ(),
-                        boundingBox.getMaxX(), boundingBox.getMaxY(), boundingBox.getMaxZ()
-                    )
-                );
-                break;
-        }
+
+        // first calculate longest axis
+        Axis longest = Axis.getLongestAxis(boundingBox);
+        IAxisReader axisReader = longest.getReader();
+
+        Point3D minPoint = boundingBox.getMin();
+        Point3D maxPoint = boundingBox.getMax();
+
+        Point3D mid1 = longest.modifyPointValue(maxPoint, onPoint);
+        Point3D mid2 = longest.modifyPointValue(minPoint, onPoint);
+
+        subNodes.put(0, new XBoundingBox(minPoint, mid1));
+        subNodes.put(1, new XBoundingBox(mid2, maxPoint));
 
         return subNodes;
     }

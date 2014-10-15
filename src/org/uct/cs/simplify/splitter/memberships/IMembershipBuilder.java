@@ -10,4 +10,6 @@ public interface IMembershipBuilder
     MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException;
 
     int getSplitRatio();
+
+    boolean isBalanced();
 }

@@ -122,6 +122,18 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
         }
     }
 
+    @Override
+    public int getSplitRatio()
+    {
+        return 8;
+    }
+
+    @Override
+    public boolean isBalanced()
+    {
+        return false;
+    }
+
     private static class OctantFinder
     {
         private final double x, y, z;
@@ -142,11 +154,5 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
             if (z > this.z) v += 1;
             return v;
         }
-    }
-
-    @Override
-    public int getSplitRatio()
-    {
-        return 8;
     }
 }
