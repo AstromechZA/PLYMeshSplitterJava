@@ -14,23 +14,23 @@ public class Blueprintify
 {
     private static final int DEFAULT_RESOLUTION = 1024;
     private static final float DEFAULT_ALPHA_MOD = 0.1f;
+    private static final int DEFAULT_SKIP_SIZE = 1;
     private static final String OUTPUT_FORMAT = "png";
 
-    public static void run(File inputFile, File outputDir, int resolution, float alphamod) throws IOException
+    public static void run(File inputFile, File outputDir, int resolution, float alphamod, int skipsize) throws IOException
     {
         PLYReader reader = new PLYReader(inputFile);
-
-        run(reader, outputDir, resolution, alphamod);
+        run(reader, outputDir, resolution, alphamod, skipsize);
     }
 
-    public static void run(PLYReader reader, File outputDir, int resolution, float alphamod) throws IOException
+    public static void run(PLYReader reader, File outputDir, int resolution, float alphamod, int skipsize) throws IOException
     {
 
         File outputFile;
         for (BluePrintGenerator.CoordinateSpace coordinateSpace : BluePrintGenerator.CoordinateSpace.values())
         {
             outputFile = new File(outputDir, reader.getFile().getName() + '.' + coordinateSpace.name() + '.' + OUTPUT_FORMAT);
-            BufferedImage bi = BluePrintGenerator.createImage(reader, resolution, alphamod, coordinateSpace);
+            BufferedImage bi = BluePrintGenerator.createImage(reader, resolution, alphamod, coordinateSpace, skipsize);
             ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);
@@ -44,8 +44,9 @@ public class Blueprintify
 
         try (StatRecorder ignored = new StatRecorder())
         {
-            int resolution = cmd.hasOption("resolution") ? (int) cmd.getParsedOptionValue("resolution") : DEFAULT_RESOLUTION;
-            float alphamod = cmd.hasOption("alphamod") ? (float) cmd.getParsedOptionValue("alphamod") : DEFAULT_ALPHA_MOD;
+            int resolution = cmd.hasOption("resolution") ? Integer.parseInt(cmd.getOptionValue("resolution")) : DEFAULT_RESOLUTION;
+            float alphamod = cmd.hasOption("alphamod") ? Float.parseFloat(cmd.getOptionValue("alphamod")) : DEFAULT_ALPHA_MOD;
+            int skipsize = cmd.hasOption("skipsize") ? Integer.parseInt(cmd.getOptionValue("skipsize")) : DEFAULT_SKIP_SIZE;
             String filename = cmd.getOptionValue("filename");
             String outputDirectory = cmd.getOptionValue("output");
 
@@ -56,9 +57,9 @@ public class Blueprintify
 
             File inputFile = new File(filename);
 
-            run(inputFile, outputDir, resolution, alphamod);
+            run(inputFile, outputDir, resolution, alphamod, skipsize);
         }
-        catch (ParseException | IOException | InterruptedException e)
+        catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -82,15 +83,15 @@ public class Blueprintify
             "r", "resolution", true,
             String.format("Resolution of image to output (default %s)", DEFAULT_RESOLUTION)
         );
-        o3.setType(Short.class);
         options.addOption(o3);
 
         Option o4 = new Option(
             "a", "alphamod", true,
             String.format("Translucency of applied pixels (default %.2f)", DEFAULT_ALPHA_MOD)
         );
-        o4.setType(Float.class);
         options.addOption(o4);
+
+        options.addOption(new Option("s", "skipsize", true, "Only draw every nth vertex"));
 
         try
         {

@@ -18,18 +18,18 @@ public class BluePrintGenerator
     private static final Color DEFAULT_FOREGROUND = Color.white;
     private static final int BYTE_MASK = 0xFF;
 
-    public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type)
+    public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type, int skipSize)
         throws IOException
     {
-        return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type);
+        return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type, skipSize);
     }
 
     public static BufferedImage createImage(
-        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, CoordinateSpace type
+        PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, CoordinateSpace type, int skipSize
     )
         throws IOException
     {
-        return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type);
+        return makeBufferedImage(reader, resolution, background, foreground, alphaAdjustment, type, skipSize);
     }
 
     /**
@@ -46,10 +46,13 @@ public class BluePrintGenerator
      */
     private static BufferedImage makeBufferedImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
-        CoordinateSpace coordinateSpace
+        CoordinateSpace coordinateSpace,
+        int skipSize
     )
         throws IOException
     {
+        if (skipSize < 1) throw new RuntimeException("Skipsize must be atleast 1");
+
         IAxisValueGetter avg = parseAVG(coordinateSpace);
 
         BufferedImage bi = new BufferedImage(resolution, resolution, BufferedImage.TYPE_INT_RGB);
@@ -73,14 +76,12 @@ public class BluePrintGenerator
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             int c = vr.getCount();
-            Vertex v;
-            for (int i = 0; i < c; i++)
+            Vertex v = new Vertex(0, 0, 0);
+            for (int i = 0; i < c; i += skipSize)
             {
-                v = vr.get(i);
-
+                vr.get(i, v);
                 int tx = (int) (center + ((avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio));
                 int ty = (int) (center - ((avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio));
-
                 int index = ty * w + tx;
                 pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
