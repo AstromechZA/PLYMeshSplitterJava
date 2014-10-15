@@ -169,4 +169,15 @@ public class PHFNode
 
         return o;
     }
+
+    public int getDepthOfDeepestChild()
+    {
+        int md = this.depth;
+        for (PHFNode child : children)
+        {
+            md = Math.max(md, child.getDepthOfDeepestChild());
+        }
+        return md;
+    }
+
 }

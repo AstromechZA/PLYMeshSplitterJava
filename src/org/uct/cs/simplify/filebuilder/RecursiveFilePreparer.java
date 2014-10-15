@@ -21,12 +21,12 @@ public class RecursiveFilePreparer
         PHFNode inputNode,
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
-        float simplificationRatio,
+        float finalRatio,
         IProgressReporter progressReporter
     )
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, stopCondition, splitType, simplificationRatio, 0, 1, progressReporter);
+        return prepare(inputNode, 0, stopCondition, splitType, finalRatio, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
@@ -34,7 +34,7 @@ public class RecursiveFilePreparer
         int depth,
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
-        float simplificationRatio,
+        float finalRatio,
         float startProgress,
         float endProgress,
         IProgressReporter progressReporter
@@ -68,7 +68,7 @@ public class RecursiveFilePreparer
                     depth + 1,
                     stopCondition,
                     splitType,
-                    simplificationRatio,
+                    finalRatio,
                     childProgress,
                     childProgress + diffProgress,
                     progressReporter
@@ -76,24 +76,38 @@ public class RecursiveFilePreparer
                 childProgress += diffProgress;
             }
 
+            // collect list of files for stitching
             List<File> processedFiles = new ArrayList<>(processedNodes.size());
-            for (PHFNode n : processedNodes) processedFiles.add(n.getLinkedFile());
-
+            int maxDepth = -1;
+            for (PHFNode n : processedNodes)
+            {
+                maxDepth = Math.max(n.getDepthOfDeepestChild(), maxDepth);
+                processedFiles.add(n.getLinkedFile());
+            }
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
+            // load details of stitched model
             PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
-            long totalFaces = stitchedHeader.getElement("face").getCount();
-            long targetFaces = (long) (totalFaces * simplificationRatio);
 
+            // calculate target number of faces based on target simplification ratio
+            long totalFaces = stitchedHeader.getElement("face").getCount();
+            // nth root of finalRatio (equal spread of simplification throughout tree)
+            float localSimplificationRatio = (float) Math.pow(finalRatio, 1.0f / maxDepth);
+            long targetFaces = (long) (totalFaces * localSimplificationRatio);
+
+            // simplify file
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());
 
+            // delete stitched model
             TempFileManager.release(stitchedModel);
 
+            // build output file
             PHFNode outputNode = new PHFNode(simplifiedFile);
             outputNode.addChildren(processedNodes);
             outputNode.setDepth(depth);
 
-            Outputter.info1f("Simplified from %d to %d faces. (depth: %d) (ratio: %f)%n", totalFaces, outputNode.getNumFaces(), depth, outputNode.getNumFaces() / totalFaces);
+            // print & report & return
+            Outputter.info1f("Simplified from %d to %d faces. (depth: %d) (ratio: %f)%n", totalFaces, outputNode.getNumFaces(), depth, outputNode.getNumFaces() / (float) totalFaces);
             progressReporter.report(endProgress);
             return outputNode;
         }

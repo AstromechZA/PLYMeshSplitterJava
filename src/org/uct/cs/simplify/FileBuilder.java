@@ -20,7 +20,8 @@ import java.util.Map;
 
 public class FileBuilder
 {
-    public static final int FACES_PER_LEAF = 50_000;
+    public static final int FACES_PER_LEAF = 100_000;
+    public static final int FACES_PER_ROOT = 400_000;
     private static final int RESCALE_SIZE = 1024;
 
     public static String run(
@@ -38,15 +39,13 @@ public class FileBuilder
 
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
+        long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
+        simplificationRatio = FACES_PER_ROOT / (float) numFaces;
+
         if (membershipBuilder.isBalanced())
         {
-            float facesPerSimplification = FACES_PER_LEAF * membershipBuilder.getSplitRatio();
-
-            long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-            float numLeaves = (numFaces / facesPerSimplification) * membershipBuilder.getSplitRatio();
+            float numLeaves = (numFaces / FACES_PER_LEAF);
             int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
-
-            simplificationRatio = (float) Math.pow(facesPerSimplification / numFaces, 1.0f / (numLevels - 1));
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
 
@@ -54,14 +53,12 @@ public class FileBuilder
         }
         else
         {
-            simplificationRatio = (float) 1 / membershipBuilder.getSplitRatio();
-
             Outputter.info1ln("Calculated Tree Depth: N/A (face limit controlled)");
 
             stopCondition = new LowerFaceBoundStoppingCondition(FACES_PER_LEAF);
         }
 
-        simplificationRatio = (float) Math.pow(simplificationRatio, 1 - (1.0f / membershipBuilder.getSplitRatio()));
+        //simplificationRatio = (float) Math.pow(simplificationRatio, 1 - (1.0f / membershipBuilder.getSplitRatio()));
         Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
 
         return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplificationRatio, stopCondition, reporter);
