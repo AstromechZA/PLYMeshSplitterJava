@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.filebuilder;
 
 import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.simplifier.SimplificationFactory;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
@@ -21,12 +22,12 @@ public class RecursiveFilePreparer
         PHFNode inputNode,
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
-        float finalRatio,
+        SimplificationFactory simplificationFactory,
         IProgressReporter progressReporter
     )
     throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, stopCondition, splitType, finalRatio, 0, 1, progressReporter);
+        return prepare(inputNode, 0, stopCondition, splitType, simplificationFactory, 0, 1, progressReporter);
     }
 
     public static PHFNode prepare(
@@ -34,7 +35,7 @@ public class RecursiveFilePreparer
         int depth,
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
-        float finalRatio,
+        SimplificationFactory simplificationFactory,
         float startProgress,
         float endProgress,
         IProgressReporter progressReporter
@@ -68,7 +69,7 @@ public class RecursiveFilePreparer
                     depth + 1,
                     stopCondition,
                     splitType,
-                    finalRatio,
+                    simplificationFactory,
                     childProgress,
                     childProgress + diffProgress,
                     progressReporter
@@ -91,9 +92,9 @@ public class RecursiveFilePreparer
 
             // calculate target number of faces based on target simplification ratio
             long totalFaces = stitchedHeader.getElement("face").getCount();
-            // nth root of finalRatio (equal spread of simplification throughout tree)
-            float localSimplificationRatio = (float) Math.pow(finalRatio, 1.0f / maxDepth);
-            long targetFaces = (long) (totalFaces * localSimplificationRatio);
+            float ratio = simplificationFactory.getSimplificationRioForDepth(depth, maxDepth);
+            Outputter.info2f("Approximate ratio: %f%n", ratio);
+            long targetFaces = (long) (totalFaces * ratio);
 
             // simplify file
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());

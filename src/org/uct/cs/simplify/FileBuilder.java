@@ -5,6 +5,7 @@ import org.uct.cs.simplify.filebuilder.PHFBuilder;
 import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
+import org.uct.cs.simplify.simplifier.SimplificationFactory;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
@@ -21,7 +22,6 @@ import java.util.Map;
 public class FileBuilder
 {
     public static final int FACES_PER_LEAF = 100_000;
-    public static final int FACES_PER_ROOT = 400_000;
     private static final int RESCALE_SIZE = 1024;
 
     public static String run(
@@ -35,12 +35,11 @@ public class FileBuilder
         throws IOException, InterruptedException
     {
         IStoppingCondition stopCondition;
-        float simplificationRatio;
 
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
         long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-        simplificationRatio = FACES_PER_ROOT / (float) numFaces;
+        SimplificationFactory simplifier = new SimplificationFactory(numFaces);
 
         if (membershipBuilder.isBalanced())
         {
@@ -49,19 +48,21 @@ public class FileBuilder
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
 
+            for (int i = 0; i < numLevels; i++)
+            {
+                Outputter.info2f("Ratio for lvl %d: %f%n", i, simplifier.getSimplificationRioForDepth(i, numLevels));
+            }
             stopCondition = new DepthStoppingCondition(numLevels);
         }
         else
         {
-            Outputter.info1ln("Calculated Tree Depth: N/A (face limit controlled)");
+            Outputter.info1ln("Calculated Tree Depth: N/A (unbalanced tree)");
 
             stopCondition = new LowerFaceBoundStoppingCondition(FACES_PER_LEAF);
         }
 
-        //simplificationRatio = (float) Math.pow(simplificationRatio, 1 - (1.0f / membershipBuilder.getSplitRatio()));
-        Outputter.info1f("Calculated preffered simplification ratio: %f%n", simplificationRatio);
 
-        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplificationRatio, stopCondition, reporter);
+        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplifier, stopCondition, reporter);
     }
 
     public static String run(
@@ -70,7 +71,7 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         IMembershipBuilder membershipBuilder,
-        float simplificationRatio,
+        SimplificationFactory simplificationFactory,
         IStoppingCondition stopCondition,
         IProgressReporter progressReporter
     )
@@ -88,7 +89,7 @@ public class FileBuilder
         double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
 
         // build tree
-        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationRatio, progressReporter);
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
 
         // additional json keys
         Map<String, String> additionalJSON = new HashMap<>();
