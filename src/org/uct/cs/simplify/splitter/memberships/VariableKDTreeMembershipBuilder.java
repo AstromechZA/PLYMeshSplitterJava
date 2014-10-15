@@ -49,7 +49,7 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
     @Override
     public boolean isBalanced()
     {
-        return false;
+        return true;
     }
 
     public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, double onPoint)
