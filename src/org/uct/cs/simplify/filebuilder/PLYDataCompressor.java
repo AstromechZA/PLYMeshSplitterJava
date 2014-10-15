@@ -58,17 +58,17 @@ public class PLYDataCompressor
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            Vertex v;
+            Vertex v = new Vertex(0, 0, 0);
             for (int i = 0; i < vertexE.getCount(); i++)
             {
-                v = vr.get(i);
+                vr.get(i, v);
                 Useful.writeFloatLE(ostream, v.x);
                 Useful.writeFloatLE(ostream, v.y);
                 Useful.writeFloatLE(ostream, v.z);
             }
             for (int i = 0; i < vertexE.getCount(); i++)
             {
-                v = vr.get(i);
+                vr.get(i, v);
                 ostream.write(v.r);
                 ostream.write(v.g);
                 ostream.write(v.b);
@@ -76,10 +76,10 @@ public class PLYDataCompressor
 
             try (StreamingFaceReader fr = new FastBufferedFaceReader(reader))
             {
-                Face f;
+                Face f = new Face(0, 0, 0);
                 while (fr.hasNext())
                 {
-                    f = fr.next();
+                    fr.next(f);
                     Useful.writeIntLE(ostream, f.i);
                     Useful.writeIntLE(ostream, f.j);
                     Useful.writeIntLE(ostream, f.k);

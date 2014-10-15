@@ -41,6 +41,26 @@ public class MemoryMappedFaceReader extends StreamingFaceReader implements AutoC
         return this.index <= (this.count - 1);
     }
 
+    public void next(Face f) throws IOException
+    {
+        int vertexCount = this.buffer.get() & Useful.BYTE_MASK;
+
+        int i = this.buffer.getInt();
+        int j = this.buffer.getInt();
+        int k = this.buffer.getInt();
+
+        while (vertexCount > 3)
+        {
+            this.buffer.getInt();
+            vertexCount--;
+        }
+
+        this.index += 1;
+        f.i = i;
+        f.j = j;
+        f.k = k;
+    }
+
     public Face next() throws IOException
     {
         int vertexCount = this.buffer.get() & Useful.BYTE_MASK;

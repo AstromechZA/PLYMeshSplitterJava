@@ -69,10 +69,10 @@ public class NaiveMeshStitcher
             MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader2)
         )
         {
-            Vertex v;
+            Vertex v = new Vertex(0, 0, 0);
             for (int i = 0; i < mesh2NumVertices; i++)
             {
-                v = vr.get(i);
+                vr.get(i, v);
                 if (mesh1VertexMap.containsKey(v))
                 {
                     mesh2VertexIndices[ i ] = mesh1VertexMap.get(v);
@@ -95,10 +95,10 @@ public class NaiveMeshStitcher
             BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(faceFile, true))
         )
         {
-            Face face;
+            Face face = new Face(0, 0, 0);
             while (fr.hasNext())
             {
-                face = fr.next();
+                fr.next(face);
                 fostream.write((byte) 3);
                 Useful.writeIntLE(fostream, indexTransform[face.i]);
                 Useful.writeIntLE(fostream, indexTransform[face.j]);
@@ -132,9 +132,11 @@ public class NaiveMeshStitcher
         TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap(mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
+            Vertex v = new Vertex(0, 0, 0);
             for (int i = 0; i < mesh1NumVertices; i++)
             {
-                mesh1Vertices.put(vr.get(i), i);
+                vr.get(i, v);
+                mesh1Vertices.put(v, i);
             }
         }
         return mesh1Vertices;

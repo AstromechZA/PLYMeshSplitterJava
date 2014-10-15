@@ -68,13 +68,15 @@ public class NodeSplitter
         {
             try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
             {
+                Vertex v = new Vertex(0, 0, 0);
                 VertexAttrMap vam = vr.getVam();
                 PLYHeader newHeader = PLYHeader.constructHeader(result.numVertices, result.numFaces, vam);
                 fostream.write((newHeader + "\n").getBytes());
 
                 for (int i : result.vertexIndexMap.keySet())
                 {
-                    vr.get(i).writeToStream(fostream, vam);
+                    vr.get(i, v);
+                    v.writeToStream(fostream, vam);
                 }
             }
         }
@@ -103,12 +105,12 @@ public class NodeSplitter
             ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
         )
         {
-            Face face;
+            Face face = new Face(0, 0, 0);
             int numVerticesOfFaceInSubnode;
             int numFacesInSubnode = 0;
             while (faceReader.hasNext())
             {
-                face = faceReader.next();
+                faceReader.next(face);
                 numVerticesOfFaceInSubnode = 0;
 
                 if (memberships.get(face.i) == subnode) numVerticesOfFaceInSubnode += 1;

@@ -27,11 +27,11 @@ public class BoundsFinder
                 minz = Float.MAX_VALUE,
                 maxz = -Float.MAX_VALUE;
 
-            Vertex v;
+            Vertex v = new Vertex(0, 0, 0);
             int c = vr.getCount();
             for (int i = 0; i < c; i += nth)
             {
-                v = vr.get(i);
+                vr.get(i, v);
 
                 minx = Math.min(minx, v.x);
                 maxx = Math.max(maxx, v.x);

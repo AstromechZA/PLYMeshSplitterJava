@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.splitter.memberships;
 
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.axis.IAxisReader;
 
@@ -59,9 +60,11 @@ public class PercentileFinder
         long numVertices = vr.getCount();
 
         long count = 0;
+        Vertex v = new Vertex(0, 0, 0);
         for (long i = 0; i < numVertices; i++)
         {
-            if (this.axisReader.read(vr.get(i)) < approximate)
+            vr.get(i, v);
+            if (this.axisReader.read(v) < approximate)
             {
                 count++;
                 if (count > maxThreshold) return -1;

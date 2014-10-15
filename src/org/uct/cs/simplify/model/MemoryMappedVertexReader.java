@@ -44,6 +44,14 @@ public class MemoryMappedVertexReader implements AutoCloseable
         return this.count;
     }
 
+    public void get(long i, Vertex v)
+    {
+        long index = i * this.blockSize;
+        this.buffer.position((int) index);
+        this.buffer.get(this.blockBuffer, 0, this.blockSize);
+        v.read(this.blockBuffer, this.vam);
+    }
+
     public Vertex get(long i)
     {
         long index = i * this.blockSize;

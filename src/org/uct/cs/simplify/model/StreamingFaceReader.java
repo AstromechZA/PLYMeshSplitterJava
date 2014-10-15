@@ -9,6 +9,8 @@ public abstract class StreamingFaceReader implements AutoCloseable
 
     public abstract Face next() throws IOException;
 
+    public abstract void next(Face f) throws IOException;
+
     public abstract long getCount();
 
     public abstract void close() throws IOException;

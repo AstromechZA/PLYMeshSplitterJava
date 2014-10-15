@@ -36,6 +36,15 @@ public class FastBufferedFaceReader extends StreamingFaceReader implements AutoC
         return this.index <= (this.count - 1);
     }
 
+    public void next(Face f) throws IOException
+    {
+        istream.read();
+        this.index += 1;
+        f.i = Useful.readIntLE(istream);
+        f.j = Useful.readIntLE(istream);
+        f.k = Useful.readIntLE(istream);
+    }
+
     public Face next() throws IOException
     {
         istream.read();

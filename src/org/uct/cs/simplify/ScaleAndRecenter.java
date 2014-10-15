@@ -82,14 +82,14 @@ public class ScaleAndRecenter
 
                 try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
-                    Vertex v;
+                    Vertex v = new Vertex(0, 0, 0);
                     for (int n = 0; n < numVertices; n++)
                     {
                         fcIN.read(blockBufferIN);
                         blockBufferIN.flip();
 
-                        v = new Vertex(blockBufferIN, vam);
-                        v.transform(translate, (float)scale);
+                        v.read(blockBufferIN, vam);
+                        v.transform(translate, (float) scale);
                         if (swapYZ) v.swapYZ();
                         v.writeToStream(ostream, vam);
 

@@ -4,6 +4,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
 import org.uct.cs.simplify.util.XBoundingBox;
@@ -31,10 +32,12 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
             long c = vr.getCount();
+            Vertex v = new Vertex(0, 0, 0);
             CompactBitArray memberships = new CompactBitArray(1, c);
             for (int i = 0; i < c; i++)
             {
-                if (axisReader.read(vr.get(i)) > p50) memberships.set(i, 1);
+                vr.get(i, v);
+                if (axisReader.read(v) > p50) memberships.set(i, 1);
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }

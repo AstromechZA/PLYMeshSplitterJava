@@ -4,7 +4,6 @@ import javafx.geometry.Point3D;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
@@ -22,7 +21,24 @@ public class Vertex
     public float y;
     public float z;
 
+    public Vertex(float x, float y, float z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
     public Vertex(byte[] input, VertexAttrMap vam)
+    {
+        read(input, vam);
+    }
+
+    public Vertex(ByteBuffer input, VertexAttrMap vam)
+    {
+        read(input, vam);
+    }
+
+    public void read(byte[] input, VertexAttrMap vam)
     {
         this.x = Useful.readFloatLE(input, vam.xOffset);
         this.y = Useful.readFloatLE(input, vam.yOffset);
@@ -30,18 +46,18 @@ public class Vertex
 
         if (vam.hasColour)
         {
-            this.r = input[vam.redOffset];
-            this.g = input[vam.greenOffset];
-            this.b = input[vam.blueOffset];
+            this.r = input[ vam.redOffset ];
+            this.g = input[ vam.greenOffset ];
+            this.b = input[ vam.blueOffset ];
         }
 
         if (vam.hasAlpha)
         {
-            this.a = input[vam.alphaOffset];
+            this.a = input[ vam.alphaOffset ];
         }
     }
 
-    public Vertex(ByteBuffer input, VertexAttrMap vam)
+    public void read(ByteBuffer input, VertexAttrMap vam)
     {
         this.x = Useful.readFloatLE(input, vam.xOffset);
         this.y = Useful.readFloatLE(input, vam.yOffset);
@@ -57,27 +73,6 @@ public class Vertex
         if (vam.hasAlpha)
         {
             this.a = input.get(vam.alphaOffset);
-        }
-    }
-
-    public Vertex(InputStream istream, VertexAttrMap vam) throws IOException
-    {
-        byte[] buffer = new byte[ vam.byteLength ];
-        istream.read(buffer);
-        this.x = Useful.readFloatLE(buffer, vam.xOffset);
-        this.y = Useful.readFloatLE(buffer, vam.yOffset);
-        this.z = Useful.readFloatLE(buffer, vam.zOffset);
-
-        if (vam.hasColour)
-        {
-            this.r = buffer[ vam.redOffset ];
-            this.g = buffer[ vam.greenOffset ];
-            this.b = buffer[ vam.blueOffset ];
-        }
-
-        if (vam.hasAlpha)
-        {
-            this.a = buffer[ vam.alphaOffset ];
         }
     }
 
