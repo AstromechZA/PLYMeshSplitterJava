@@ -1,10 +1,10 @@
 package org.uct.cs.simplify.util;
 
-public class StdOutProgressReporter implements IProgressReporter
+public class StdOutProgressReporter extends ProgressReporter
 {
     @Override
-    public void report(float percent)
+    public void output()
     {
-        System.out.printf("Progress: %.2f%%%n", percent * 100);
+        System.out.println(this.lastStatus);
     }
 }

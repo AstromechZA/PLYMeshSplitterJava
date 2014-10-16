@@ -1,34 +1,29 @@
 package org.uct.cs.simplify.model;
 
+import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
 public class FastBufferedFaceReader extends StreamingFaceReader implements AutoCloseable
 {
-    private long index;
-    private long count;
-    private BufferedInputStream istream;
+    protected final PLYReader reader;
+    protected final PLYElement faceElement;
+    protected long index;
+    protected long count;
+    protected BufferedInputStream istream;
 
     public FastBufferedFaceReader(PLYReader reader) throws IOException
     {
-        long c = reader.getHeader().getElement("face").getCount();
-        long p = reader.getElementDimension("face").getOffset();
-        long l = reader.getElementDimension("face").getLength();
+        this.reader = reader;
+        this.faceElement = reader.getHeader().getElement("face");
+        this.count = this.faceElement.getCount();
 
-        this.construct(reader.getFile(), p, c, l);
-    }
-
-    private void construct(File file, long position, long count, long length) throws IOException
-    {
-        this.count = count;
-        this.istream = new BufferedInputStream(new FileInputStream(file));
-        this.istream.skip(position);
-
+        this.istream = new BufferedInputStream(new FileInputStream(reader.getFile()));
+        this.istream.skip(reader.getElementDimension("face").getOffset());
     }
 
     public boolean hasNext()
@@ -39,17 +34,19 @@ public class FastBufferedFaceReader extends StreamingFaceReader implements AutoC
     public void next(Face f) throws IOException
     {
         istream.read();
-        this.index += 1;
         f.i = Useful.readIntLE(istream);
         f.j = Useful.readIntLE(istream);
         f.k = Useful.readIntLE(istream);
+
+
+        this.index += 1;
     }
 
     public Face next() throws IOException
     {
-        istream.read();
-        this.index += 1;
-        return new Face(Useful.readIntLE(istream), Useful.readIntLE(istream), Useful.readIntLE(istream));
+        Face f = new Face(0, 0, 0);
+        next(f);
+        return f;
     }
 
     public long getCount()

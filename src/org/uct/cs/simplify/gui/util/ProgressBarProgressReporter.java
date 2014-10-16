@@ -1,43 +1,25 @@
 package org.uct.cs.simplify.gui.util;
 
-import org.uct.cs.simplify.util.IProgressReporter;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.ProgressReporter;
 
 import javax.swing.*;
 
-public class ProgressBarProgressReporter implements IProgressReporter
+public class ProgressBarProgressReporter extends ProgressReporter
 {
     private final JProgressBar progressBar;
-    private final long startTime;
-    private long lastUpdated = 0;
 
-    public ProgressBarProgressReporter(JProgressBar progressBar)
+    public ProgressBarProgressReporter(JProgressBar progressBar, String taskName)
     {
         this.progressBar = progressBar;
         this.progressBar.setStringPainted(true);
         this.progressBar.setString("");
-        this.startTime = System.nanoTime();
     }
 
-    @Override
-    public void report(float percent)
-    {
-        this.progressBar.setValue((int) (percent * 100));
 
-        long now = System.nanoTime();
-        long elapsed = now - startTime;
-        if (percent > 0 && percent < 1)
-        {
-            if ((now - lastUpdated) > Useful.NANOSECONDS_PER_SECOND)
-            {
-                long remaining = (long) ((elapsed * (1 - percent)) / percent);
-                this.progressBar.setString("Remaining Time: " + Useful.formatTimeNoDecimal(remaining));
-                lastUpdated = now;
-            }
-        }
-        else
-        {
-            this.progressBar.setString("");
-        }
+    @Override
+    public void output()
+    {
+        this.progressBar.setString(this.lastStatus);
+        this.progressBar.setValue((int) (this.lastPercent * 100));
     }
 }

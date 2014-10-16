@@ -7,8 +7,8 @@ import org.uct.cs.simplify.splitter.NodeSplitter;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
-import org.uct.cs.simplify.util.IProgressReporter;
 import org.uct.cs.simplify.util.Outputter;
+import org.uct.cs.simplify.util.ProgressReporter;
 import org.uct.cs.simplify.util.TempFileManager;
 
 import java.io.File;
@@ -23,9 +23,9 @@ public class RecursiveFilePreparer
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
         SimplificationFactory simplificationFactory,
-        IProgressReporter progressReporter
+        ProgressReporter progressReporter
     )
-    throws IOException, InterruptedException
+        throws IOException, InterruptedException
     {
         return prepare(inputNode, 0, stopCondition, splitType, simplificationFactory, 0, 1, progressReporter);
     }
@@ -38,9 +38,9 @@ public class RecursiveFilePreparer
         SimplificationFactory simplificationFactory,
         float startProgress,
         float endProgress,
-        IProgressReporter progressReporter
+        ProgressReporter progressReporter
     )
-    throws IOException, InterruptedException
+        throws IOException, InterruptedException
     {
         // stopping condition
         if (stopCondition.met(depth, inputNode.getNumFaces()))

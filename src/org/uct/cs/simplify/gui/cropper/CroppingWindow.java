@@ -54,6 +54,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout(1, 1));
         this.setTitle("PHF Builder");
+        this.setResizable(false);
         setFancyLookAndFeel();
 
         // build components

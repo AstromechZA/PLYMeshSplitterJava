@@ -35,7 +35,7 @@ public class CroppingRunnable implements Runnable
         this.listener = listener;
         this.hullLines = hullLines;
         this.blueprint = blueprint;
-        this.progress = new ProgressBarProgressReporter(progressBar);
+        this.progress = new ProgressBarProgressReporter(progressBar, "Cropping");
     }
 
     @Override
@@ -61,6 +61,9 @@ public class CroppingRunnable implements Runnable
 
             try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempdatafile)))
             {
+
+                this.progress.changeTask("Cropping Vertices", false);
+
                 try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
                 {
                     int currentIndex = 0;
@@ -96,11 +99,13 @@ public class CroppingRunnable implements Runnable
                             v.writeToStream(ostream, vr.getVam());
                         }
 
-                        this.progress.report(((float) i / numVertices) * 0.5f);
+                        this.progress.report((i / (float) numVertices) * 0.5f);
                     }
                 }
 
-                try (StreamingFaceReader fr = new FastBufferedFaceReader(reader))
+                this.progress.changeTask("Cropping Faces", false);
+
+                try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
                 {
                     Face f = new Face(0, 0, 0);
                     int i = 0;
@@ -121,7 +126,7 @@ public class CroppingRunnable implements Runnable
                             f.writeToStream(ostream);
                         }
                         i++;
-                        this.progress.report(0.5f + ((float) i / numFaces) * 0.5f);
+                        this.progress.report(0.5f + (i / (float) numFaces) * 0.5f);
                     }
                 }
             }
@@ -135,17 +140,29 @@ public class CroppingRunnable implements Runnable
                 new VertexAttrMap(reader.getHeader().getElement("vertex"))
             );
 
+            this.progress.changeTask("Writing file...", true);
+
             try (FileOutputStream fostream = new FileOutputStream(outputFile))
             {
                 fostream.write((newHeader + "\n").getBytes());
 
-                try (FileChannel fcOUT = fostream.getChannel())
+                try (FileChannel channelOut = fostream.getChannel())
                 {
-                    long position = fcOUT.position();
-                    try (FileChannel fc = new FileInputStream(tempdatafile).getChannel())
+                    long position = channelOut.position();
+                    try (FileChannel channelIn = new FileInputStream(tempdatafile).getChannel())
                     {
-                        long length = fc.size();
-                        fcOUT.transferFrom(fc, position, length);
+                        long length = channelIn.size();
+                        long partLength = length / 100;
+
+                        for (int i = 0; i < 99; i++)
+                        {
+                            channelOut.transferFrom(channelIn, position, partLength);
+                            position += partLength;
+                            this.progress.report(i / 100.0f);
+                        }
+
+                        channelOut.transferFrom(channelIn, position, partLength + length % partLength);
+                        this.progress.report(1);
                     }
                 }
             }

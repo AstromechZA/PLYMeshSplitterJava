@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.filebuilder;
 
 import org.uct.cs.simplify.util.Outputter;
+import org.uct.cs.simplify.util.ProgressReporter;
 import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public class PHFBuilder
 {
-    public static String compile(PHFNode tree, File outputFile, Map<String, String> jsonPairs) throws IOException
+    public static String compile(PHFNode tree, File outputFile, Map<String, String> jsonPairs, ProgressReporter progressReporter) throws IOException
     {
         Outputter.info3f("Compressing Hierarchical tree into %s%n", outputFile);
         File tempBlockFile = TempFileManager.provide(Useful.getFilenameWithoutExt(outputFile.getName()));

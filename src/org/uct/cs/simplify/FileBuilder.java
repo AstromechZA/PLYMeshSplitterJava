@@ -30,7 +30,7 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         IMembershipBuilder membershipBuilder,
-        IProgressReporter reporter
+        ProgressReporter reporter
     )
         throws IOException, InterruptedException
     {
@@ -73,7 +73,7 @@ public class FileBuilder
         IMembershipBuilder membershipBuilder,
         SimplificationFactory simplificationFactory,
         IStoppingCondition stopCondition,
-        IProgressReporter progressReporter
+        ProgressReporter progressReporter
     )
         throws IOException, InterruptedException
     {
@@ -96,7 +96,7 @@ public class FileBuilder
         additionalJSON.put("scale_ratio", "" + scaleRatio);
 
         // compile into output file
-        String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON);
+        String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
 
         if (!keepNodes)

@@ -4,7 +4,6 @@ import org.uct.cs.simplify.FileBuilder;
 import org.uct.cs.simplify.gui.util.ProgressBarProgressReporter;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.util.ICompletionListener;
-import org.uct.cs.simplify.util.TempFileManager;
 
 import javax.swing.*;
 import java.io.File;
@@ -38,7 +37,7 @@ public class ProcessingRunnable implements Runnable
                 false,
                 this.swapYZ,
                 new MultiwayVariableKDTreeMembershipBuilder(4),
-                new ProgressBarProgressReporter(this.progressBar)
+                new ProgressBarProgressReporter(this.progressBar, "Processing")
             );
             success = true;
         }
@@ -47,14 +46,6 @@ public class ProcessingRunnable implements Runnable
             e.printStackTrace();
         }
 
-        try
-        {
-            TempFileManager.clear();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
         if (this.listener != null) this.listener.callback(success);
     }
 }

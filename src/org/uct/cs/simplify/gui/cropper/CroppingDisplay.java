@@ -149,6 +149,12 @@ public class CroppingDisplay extends JPanel
         return new Dimension(this.size, this.size);
     }
 
+    @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(this.size, this.size);
+    }
+
     private void bindClick()
     {
         this.addMouseListener(new MouseListener()
