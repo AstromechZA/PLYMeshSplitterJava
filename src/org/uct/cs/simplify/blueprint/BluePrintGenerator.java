@@ -87,7 +87,7 @@ public class BluePrintGenerator
                 pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
         }
-        return new BlueprintGeneratorResult(bi, center, ratio, r.getCenterX(), r.getCenterY());
+        return new BlueprintGeneratorResult(bi, parseAVG(coordinateSpace), center, ratio, r.getCenterX(), r.getCenterY());
     }
 
     /**
@@ -209,14 +209,16 @@ public class BluePrintGenerator
     public static class BlueprintGeneratorResult
     {
         public final BufferedImage output;
+        public final IAxisValueGetter av;
         public final int center;
         public final float ratio;
         public final double centerPrimary;
         public final double centerSecondary;
 
-        public BlueprintGeneratorResult(BufferedImage output, int center, float ratio, double centerPrimary, double centerSecondary)
+        public BlueprintGeneratorResult(BufferedImage output, IAxisValueGetter av, int center, float ratio, double centerPrimary, double centerSecondary)
         {
             this.output = output;
+            this.av = av;
             this.center = center;
             this.ratio = ratio;
             this.centerPrimary = centerPrimary;

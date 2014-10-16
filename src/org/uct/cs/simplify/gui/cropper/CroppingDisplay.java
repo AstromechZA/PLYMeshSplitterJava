@@ -98,6 +98,22 @@ public class CroppingDisplay extends JPanel
         }
     }
 
+    public void tryAddCriticalPoint(int x, int y)
+    {
+        if (!criticalPoints.isEmpty())
+        {
+            Point2D a = new Point2D(x, y);
+            for (Point2D point : criticalPoints)
+            {
+                if (point.distance(a) < NEARNESS_DISTANCE)
+                {
+                    return;
+                }
+            }
+        }
+        addCriticalPoint(x, y);
+    }
+
     public void addCriticalPoint(int x, int y)
     {
         if (x < 0 || y < 0 || x > this.size || y > this.size) throw new RuntimeException("point out of range");
@@ -144,12 +160,7 @@ public class CroppingDisplay extends JPanel
                 {
                     if (currentMode == WorkingMode.EDIT_MODE)
                     {
-                        addCriticalPoint(e.getX(), e.getY());
-                    }
-
-                    if (blueprint != null)
-                    {
-                        System.out.println(getWorldPointFromBlueprint(e.getX(), e.getY()));
+                        tryAddCriticalPoint(e.getX(), e.getY());
                     }
                 }
                 else if (e.getButton() == MouseEvent.BUTTON3)
@@ -218,6 +229,11 @@ public class CroppingDisplay extends JPanel
         this.currentMode = WorkingMode.NONE;
         this.criticalPoints.clear();
         this.actualHullPoints.clear();
+    }
+
+    public BluePrintGenerator.BlueprintGeneratorResult getBluePrint()
+    {
+        return blueprint;
     }
 
     public enum WorkingMode

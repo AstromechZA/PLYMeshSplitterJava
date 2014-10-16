@@ -3,6 +3,7 @@ package org.uct.cs.simplify.gui.cropper;
 import javafx.geometry.Point2D;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator.CoordinateSpace;
+import org.uct.cs.simplify.cropping.LineBase;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.ClickButtonActionListener;
 import org.uct.cs.simplify.util.ICompletionListener;
@@ -182,14 +183,22 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                 progressBar.grabFocus();
 
                 // start thread thing here
-                ArrayList<Point2D> worldHullPoints = new ArrayList<>();
+                // build lines
+                ArrayList<LineBase> hullLines = new ArrayList<>();
+                Point2D last = cropDisplay.getHull().get(cropDisplay.getHull().size() - 1);
                 for (Point2D p : cropDisplay.getHull())
                 {
-                    worldHullPoints.add(cropDisplay.getWorldPointFromBlueprint((int) p.getX(), (int) p.getY()));
+                    Point2D tl = cropDisplay.getBluePrint().getWorldPointFromImage((int) last.getX(), (int) last.getY());
+                    Point2D tp = cropDisplay.getBluePrint().getWorldPointFromImage((int) p.getX(), (int) p.getY());
+
+                    LineBase line = LineBase.makeLine(tl, tp);
+                    hullLines.add(line);
+                    System.out.printf("%s : %f,%f %f,%f%n", line.getClass().getName(), line.first.getX(), line.first.getY(), line.second.getX(), line.second.getY());
+                    last = p;
                 }
 
                 croppingThread = new Thread(
-                    new CroppingRunnable(progressBar, selectedInputFile, selectedOutputFile, CroppingWindow.this, worldHullPoints)
+                    new CroppingRunnable(progressBar, selectedInputFile, selectedOutputFile, CroppingWindow.this, hullLines, cropDisplay.getBluePrint())
                 );
 
                 croppingThread.start();
@@ -226,7 +235,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                 String baseFile = (selectedInputFile == null)
                     ? "output.phf"
                     : Useful
-                    .getFilenameWithoutExt(selectedInputFile.getAbsolutePath()) + ".phf";
+                    .getFilenameWithoutExt(selectedInputFile.getAbsolutePath()) + "_cropped.ply";
 
                 selectedOutputFile = getOutputFile(new File(baseFile));
                 if (selectedOutputFile == null)
@@ -270,6 +279,9 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     );
                     cropDisplay.reset();
                     cropDisplay.setBlueprint(b);
+
+                    pickedOutputFileDisplay.setEnabled(true);
+                    pickOutputFileBtn.setEnabled(true);
                 }
                 catch (IOException e)
                 {
@@ -312,8 +324,9 @@ public class CroppingWindow extends JFrame implements ICompletionListener
     public void callback(boolean success)
     {
         if (success)
-            JOptionPane.showMessageDialog(this, "File saved to " + this.selectedOutputFile.toPath());
+            JOptionPane.showMessageDialog(this, "File saved to " + this.selectedOutputFile);
         else
             JOptionPane.showMessageDialog(this, "Something went wrong! Check the log for more details.", "Error", JOptionPane.ERROR_MESSAGE);
+        this.repaint();
     }
 }
