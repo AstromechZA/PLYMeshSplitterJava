@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.blueprint;
 
+import javafx.geometry.Point2D;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
@@ -18,13 +19,13 @@ public class BluePrintGenerator
     private static final Color DEFAULT_FOREGROUND = Color.white;
     private static final int BYTE_MASK = 0xFF;
 
-    public static BufferedImage createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type, int skipSize)
+    public static BlueprintGeneratorResult createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type, int skipSize)
         throws IOException
     {
         return createImage(reader, resolution, DEFAULT_BACKGROUND, DEFAULT_FOREGROUND, alphaAdjustment, type, skipSize);
     }
 
-    public static BufferedImage createImage(
+    public static BlueprintGeneratorResult createImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment, CoordinateSpace type, int skipSize
     )
         throws IOException
@@ -44,7 +45,7 @@ public class BluePrintGenerator
      * @return The resulting BufferedImage
      * @throws IOException
      */
-    private static BufferedImage makeBufferedImage(
+    private static BlueprintGeneratorResult makeBufferedImage(
         PLYReader reader, int resolution, Color background, Color foreground, float alphaAdjustment,
         CoordinateSpace coordinateSpace,
         int skipSize
@@ -86,7 +87,7 @@ public class BluePrintGenerator
                 pixels[ index ] = blend(pixels[ index ], fgi, alphaAdjustment);
             }
         }
-        return bi;
+        return new BlueprintGeneratorResult(bi, center, ratio, r.getCenterX(), r.getCenterY());
     }
 
     /**
@@ -202,6 +203,31 @@ public class BluePrintGenerator
         public float getSecondaryAxisValue(Vertex v)
         {
             return v.z;
+        }
+    }
+
+    public static class BlueprintGeneratorResult
+    {
+        public final BufferedImage output;
+        public final int center;
+        public final float ratio;
+        public final double centerPrimary;
+        public final double centerSecondary;
+
+        public BlueprintGeneratorResult(BufferedImage output, int center, float ratio, double centerPrimary, double centerSecondary)
+        {
+            this.output = output;
+            this.center = center;
+            this.ratio = ratio;
+            this.centerPrimary = centerPrimary;
+            this.centerSecondary = centerSecondary;
+        }
+
+        public Point2D getWorldPointFromImage(int x, int y)
+        {
+            double tx = ((x - center) / ratio) + centerPrimary;
+            double ty = ((center - y) / ratio) + centerSecondary;
+            return new Point2D(tx, ty);
         }
     }
 }

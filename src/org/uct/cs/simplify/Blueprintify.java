@@ -30,7 +30,7 @@ public class Blueprintify
         for (BluePrintGenerator.CoordinateSpace coordinateSpace : BluePrintGenerator.CoordinateSpace.values())
         {
             outputFile = new File(outputDir, reader.getFile().getName() + '.' + coordinateSpace.name() + '.' + OUTPUT_FORMAT);
-            BufferedImage bi = BluePrintGenerator.createImage(reader, resolution, alphamod, coordinateSpace, skipsize);
+            BufferedImage bi = BluePrintGenerator.createImage(reader, resolution, alphamod, coordinateSpace, skipsize).output;
             ImageIO.write(bi, OUTPUT_FORMAT, outputFile);
 
             System.out.println("Saved blueprint to " + outputFile);

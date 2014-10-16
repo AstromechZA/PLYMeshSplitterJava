@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.gui.preprocessor;
 
 import org.uct.cs.simplify.gui.util.TextAreaOutputStream;
-import org.uct.cs.simplify.util.ClickButtonListener;
+import org.uct.cs.simplify.util.ClickButtonActionListener;
 import org.uct.cs.simplify.util.ICompletionListener;
 import org.uct.cs.simplify.util.Useful;
 
@@ -158,7 +158,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
     {
         // link Go button
         this.goButton.addActionListener(
-            new ClickButtonListener()
+            new ClickButtonActionListener()
             {
                 public void mouseClicked()
                 {
@@ -186,7 +186,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         // link pickInputFile button
         this.pickInputFileBtn.addActionListener(
-            new ClickButtonListener()
+            new ClickButtonActionListener()
             {
                 public void mouseClicked()
                 {
@@ -212,7 +212,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         // link pickOutputFileBtn button
         this.pickOutputFileBtn.addActionListener(
-            new ClickButtonListener()
+            new ClickButtonActionListener()
             {
                 public void mouseClicked()
                 {
@@ -241,7 +241,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         );
 
         this.resetInputsBtn.addActionListener(
-            new ClickButtonListener()
+            new ClickButtonActionListener()
             {
                 @Override
                 public void mouseClicked()
@@ -265,7 +265,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         );
 
         this.abortBtn.addActionListener(
-            new ClickButtonListener()
+            new ClickButtonActionListener()
             {
                 @Override
                 public void mouseClicked()
