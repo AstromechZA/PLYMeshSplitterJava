@@ -10,6 +10,7 @@ public class ProgressBarProgressReporter extends ProgressReporter
 
     public ProgressBarProgressReporter(JProgressBar progressBar, String taskName)
     {
+        this.taskName = taskName;
         this.progressBar = progressBar;
         this.progressBar.setStringPainted(true);
         this.lastStatus = String.format("%s : 0%% : ( Remaining Time: Unknown )", this.taskName);

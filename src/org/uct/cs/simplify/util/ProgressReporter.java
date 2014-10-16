@@ -46,6 +46,7 @@ public abstract class ProgressReporter
         if (reset)
         {
             report(0);
+            startTime = System.nanoTime();
         }
         else
         {
