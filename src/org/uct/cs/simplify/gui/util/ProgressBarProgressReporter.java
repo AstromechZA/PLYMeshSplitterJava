@@ -12,7 +12,8 @@ public class ProgressBarProgressReporter extends ProgressReporter
     {
         this.progressBar = progressBar;
         this.progressBar.setStringPainted(true);
-        this.progressBar.setString("");
+        this.lastStatus = String.format("%s : 0%% : ( Remaining Time: Unknown )", this.taskName);
+        this.progressBar.setString(this.lastStatus);
     }
 
 

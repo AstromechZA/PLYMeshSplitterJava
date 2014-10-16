@@ -24,7 +24,7 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
         Point3D center = boundingBox.getCenter();
         float p50 = (float) axisReader.read(center);
 
-        TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest, center);
+        TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest);
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
@@ -52,12 +52,11 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
         return false;
     }
 
-    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, Point3D center)
+    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis longest)
     {
         TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(2);
 
         // first calculate longest axis
-        Axis longest = Axis.getLongestAxis(boundingBox);
         IAxisReader axisReader = longest.getReader();
 
         Point3D minPoint = boundingBox.getMin();

@@ -36,7 +36,7 @@ public class PercentileFinder
 
             for (int i = 0; i < MAX_ITERATIONS; i++)
             {
-                int swing = testPercentile(vr, percentile, approximate, minThreshold, maxThreshold);
+                int swing = testPercentile(vr, approximate, minThreshold, maxThreshold);
                 if (swing < 0)
                 {
                     max = approximate;
@@ -55,7 +55,7 @@ public class PercentileFinder
         }
     }
 
-    private int testPercentile(MemoryMappedVertexReader vr, float percentile, double approximate, long minThreshold, long maxThreshold)
+    private int testPercentile(MemoryMappedVertexReader vr, double approximate, long minThreshold, long maxThreshold)
     {
         long numVertices = vr.getCount();
 

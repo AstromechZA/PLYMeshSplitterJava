@@ -16,7 +16,7 @@ public class doubleDataTypeReader implements IDataTypeReader
     public double read(BufferedInputStream stream) throws IOException
     {
         long o = stream.read();
-        o |= ((long) stream.read() << (8 * 1));
+        o |= ((long) stream.read() << 8);
         o |= ((long) stream.read() << (8 * 2));
         o |= ((long) stream.read() << (8 * 3));
         o |= ((long) stream.read() << (8 * 4));

@@ -22,12 +22,6 @@ public class IntIntHashMapWithKeyList extends TIntIntHashMap implements TIntIntM
         return r;
     }
 
-    @Override
-    public int get(int key)
-    {
-        return super.get(key);
-    }
-
     public TIntArrayList getKeyList()
     {
         return keyList;

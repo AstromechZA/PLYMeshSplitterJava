@@ -4,8 +4,8 @@ public abstract class ProgressReporter
 {
     protected String lastStatus = "";
     protected float lastPercent = 0;
+    protected String taskName = "";
     private long startTime = System.nanoTime();
-    private String taskName = "";
     private long lastUpdated = 0;
 
     public void report(float percent)

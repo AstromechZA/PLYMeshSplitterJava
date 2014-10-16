@@ -64,7 +64,6 @@ public class ScaleAndRecenter
             int numVertices = vertexE.getCount();
             int numFaces = faceE.getCount();
             long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
-            long vertexElementLength = reader.getElementDimension("vertex").getLength();
             long faceElementBegin = reader.getElementDimension("face").getOffset();
             long faceElementLength = reader.getElementDimension("face").getLength();
 

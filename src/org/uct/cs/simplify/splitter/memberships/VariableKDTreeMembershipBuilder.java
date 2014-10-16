@@ -55,13 +55,9 @@ public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
         return true;
     }
 
-    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis axis, double onPoint)
+    public static TIntObjectMap<XBoundingBox> splitBBIntoSubnodes(XBoundingBox boundingBox, Axis longest, double onPoint)
     {
         TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(2);
-
-        // first calculate longest axis
-        Axis longest = Axis.getLongestAxis(boundingBox);
-        IAxisReader axisReader = longest.getReader();
 
         Point3D minPoint = boundingBox.getMin();
         Point3D maxPoint = boundingBox.getMax();

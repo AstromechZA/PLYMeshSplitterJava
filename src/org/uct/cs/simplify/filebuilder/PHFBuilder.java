@@ -20,11 +20,14 @@ public class PHFBuilder
         List<PHFNode> nodes = tree.collectAllNodes();
         Outputter.info2f("Writing %d nodes to %s%n", nodes.size(), tempBlockFile.getPath());
 
+        progressReporter.changeTask("Compiling", true);
+
         int max_depth = 0;
         try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(tempBlockFile)))
         {
             long position = 0;
             int nodeIndex = 0;
+            int numNodes = nodes.size();
             for (PHFNode node : nodes)
             {
                 nodeIndex++;
@@ -39,6 +42,7 @@ public class PHFBuilder
                 position += length;
                 max_depth = Math.max(max_depth, node.getDepth());
 
+                progressReporter.report(nodeIndex / (float) numNodes);
             }
         }
 
@@ -58,6 +62,8 @@ public class PHFBuilder
         sb.append('}');
         String jsonheader = sb.toString();
 
+        progressReporter.changeTask("Writing final file", true);
+
         Outputter.info1f("%nWriting '%s' ..%n", outputFile.getPath());
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
         {
@@ -74,7 +80,21 @@ public class PHFBuilder
             )
             {
                 Outputter.debugf("Writing data (%s)%n", Useful.formatBytes(fcIN.size()));
-                fcOUT.transferFrom(fcIN, fcOUT.position(), fcIN.size());
+
+                long length = fcIN.size();
+                long position = fcOUT.position();
+
+                long partLength = length / 100;
+
+                for (int i = 0; i < 99; i++)
+                {
+                    fcOUT.transferFrom(fcIN, position, partLength);
+                    position += partLength;
+                    progressReporter.report(i / 100.0f);
+                }
+
+                fcOUT.transferFrom(fcIN, position, partLength + length % partLength);
+                progressReporter.report(1);
             }
         }
 
