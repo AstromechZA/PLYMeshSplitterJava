@@ -148,7 +148,7 @@ public class OutputValidator
         {
             Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("outputvalidator --input <path>", options);
+            formatter.printHelp("--input <path>", options);
             System.exit(1);
             return null;
         }

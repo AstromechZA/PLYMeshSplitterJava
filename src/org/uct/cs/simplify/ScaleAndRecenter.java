@@ -198,7 +198,7 @@ public class ScaleAndRecenter
         catch (ParseException e)
         {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("ScaleAndRecenter --filename <path> --output <path> --size <size>", options);
+            formatter.printHelp("--filename <path> --output <path> --size <size>", options);
             System.exit(1);
             return null;
         }

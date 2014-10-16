@@ -55,7 +55,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout(1, 1));
         this.setLocationRelativeTo(null);
-        this.setTitle("PHF Builder");
+        this.setTitle("PLY Preprocessor");
         setFancyLookAndFeel();
 
         // create top frame

@@ -100,7 +100,7 @@ public class Blueprintify
         catch (ParseException e)
         {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("BlueprintifyPLY --filename <path> --output <path>", options);
+            formatter.printHelp("--filename <path> --output <path>", options);
             System.exit(1);
             return null;
         }

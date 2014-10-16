@@ -178,7 +178,7 @@ public class FileBuilder
         {
             Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("filebuilder --input <path> --output <path>", options);
+            formatter.printHelp("--input <path> --output <path>", options);
             System.exit(1);
             return null;
         }
