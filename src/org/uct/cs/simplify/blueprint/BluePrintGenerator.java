@@ -71,7 +71,7 @@ public class BluePrintGenerator
 
         int center = resolution / 2;
         float bigdim = (float) Math.max(r.getWidth(), r.getHeight());
-        int border = 10;
+        int border = 20;
         float ratio = (resolution - border) / bigdim;
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))

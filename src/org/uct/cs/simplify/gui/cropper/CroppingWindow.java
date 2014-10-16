@@ -39,6 +39,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
     private File selectedInputFile;
     private File selectedOutputFile;
     private Thread croppingThread;
+    private JComboBox<Integer> samplingBox;
 
     public CroppingWindow()
     {
@@ -55,7 +56,44 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         this.setTitle("PHF Builder");
         setFancyLookAndFeel();
 
+        // build components
         this.cropDisplay = new CroppingDisplay(IMAGE_RESOLUTION);
+
+        this.pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
+        this.pickedInputFileDisplay.setEditable(false);
+
+        this.pickInputFileBtn = new JButton("Pick input file");
+
+        this.axisBox = new JComboBox<>(AXIS_STRINGS);
+        this.axisBox.setEnabled(false);
+
+        this.samplingBox = new JComboBox<>(new Integer[]{ 1, 10, 100, 1000, 10000, 100000 });
+        this.samplingBox.setEnabled(false);
+
+        this.loadButton = new JButton("Load input");
+        this.loadButton.setEnabled(false);
+
+        this.modeButton = new JButton("Edit area");
+        this.modeButton.setEnabled(false);
+
+        this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
+        this.pickedOutputFileDisplay.setEditable(false);
+        this.pickedOutputFileDisplay.setEnabled(false);
+
+        this.pickOutputFileBtn = new JButton("Pick output file");
+        this.pickOutputFileBtn.setEnabled(false);
+
+        this.goButton = new JButton("Crop!");
+        this.goButton.setEnabled(false);
+
+        this.progressBar = new JProgressBar();
+        this.progressBar.setValue(0);
+        Dimension d = this.progressBar.getPreferredSize();
+        d.height = 30;
+        this.progressBar.setPreferredSize(d);
+
+        // do layout
+
         this.add(cropDisplay, BorderLayout.CENTER);
 
         JPanel otherPanel = new JPanel();
@@ -64,59 +102,62 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(5, 5, 0, 5);
-        c.weightx = 0.25;
+        c.weightx = 0.5;
         c.gridy = 0;
         c.gridx = 0;
-        c.gridwidth = 3;
-        this.pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
-        this.pickedInputFileDisplay.setEditable(false);
+        c.gridwidth = 2;
         otherPanel.add(this.pickedInputFileDisplay, c);
 
-        c.gridx = 3;
-        this.pickInputFileBtn = new JButton("Pick input file");
+        c.gridx = 2;
+        c.gridwidth = 1;
         otherPanel.add(this.pickInputFileBtn, c);
-
-        c.gridx = 6;
-        this.axisBox = new JComboBox<>(AXIS_STRINGS);
-        otherPanel.add(this.axisBox, c);
-
-        c.gridx = 9;
-        this.loadButton = new JButton("Load input");
-        otherPanel.add(this.loadButton, c);
 
         c.gridy = 1;
         c.gridx = 0;
-        c.gridwidth = 12;
-        this.modeButton = new JButton("Edit area");
-        otherPanel.add(modeButton, c);
+        otherPanel.add(new JLabel("View:"), c);
+
+        c.gridx = 1;
+        c.gridwidth = 2;
+        otherPanel.add(this.axisBox, c);
 
         c.gridy = 2;
         c.gridx = 0;
-        c.gridwidth = 4;
-        this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
-        this.pickedOutputFileDisplay.setEditable(false);
-        this.pickedOutputFileDisplay.setEnabled(false);
+        otherPanel.add(new JLabel("Sampling:"), c);
+
+        c.gridx = 1;
+        c.gridwidth = 2;
+        otherPanel.add(samplingBox, c);
+
+        c.gridy = 3;
+        c.gridx = 0;
+        c.gridwidth = 3;
+        otherPanel.add(this.loadButton, c);
+
+        c.gridy = 4;
+        otherPanel.add(new JLabel(" "), c);
+
+        c.gridy = 5;
+        c.gridx = 0;
+        c.gridwidth = 3;
+        otherPanel.add(modeButton, c);
+
+        c.gridy = 6;
+        c.gridx = 0;
+        c.gridwidth = 2;
         otherPanel.add(this.pickedOutputFileDisplay, c);
 
-        c.gridy = 2;
-        c.gridx = 4;
-        this.pickOutputFileBtn = new JButton("Pick output file");
-        this.pickOutputFileBtn.setEnabled(false);
+        c.gridx = 2;
+        c.gridwidth = 1;
         otherPanel.add(this.pickOutputFileBtn, c);
 
-        c.gridy = 2;
-        c.gridx = 8;
-        this.goButton = new JButton("Crop!");
-        this.goButton.setEnabled(false);
+        c.gridy = 7;
+        c.gridx = 0;
+        c.gridwidth = 3;
         otherPanel.add(goButton, c);
 
-        this.add(otherPanel, BorderLayout.NORTH);
+        this.add(otherPanel, BorderLayout.WEST);
 
-        this.progressBar = new JProgressBar();
-        this.progressBar.setValue(0);
-        Dimension d = this.progressBar.getPreferredSize();
-        d.height = 30;
-        this.progressBar.setPreferredSize(d);
+
         this.add(this.progressBar, BorderLayout.SOUTH);
 
         this.pack();
@@ -154,14 +195,25 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                 if (cropDisplay.getMode() == CroppingDisplay.WorkingMode.EDIT_MODE)
                 {
                     cropDisplay.setMode(CroppingDisplay.WorkingMode.NONE);
-                    modeButton.setText("Edit Hull");
+
+                    pickInputFileBtn.setEnabled(true);
+                    pickOutputFileBtn.setEnabled(true);
+                    axisBox.setEnabled(true);
+                    samplingBox.setEnabled(true);
+                    loadButton.setEnabled(true);
                     goButton.setEnabled(cropDisplay.getHull().size() > 2);
                 }
                 else
                 {
                     cropDisplay.setMode(CroppingDisplay.WorkingMode.EDIT_MODE);
-                    modeButton.setText("Stop Editting");
+
+                    pickInputFileBtn.setEnabled(false);
+                    pickOutputFileBtn.setEnabled(false);
+                    axisBox.setEnabled(false);
+                    samplingBox.setEnabled(false);
+                    loadButton.setEnabled(false);
                     goButton.setEnabled(false);
+
                 }
             }
         });
@@ -216,14 +268,18 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                 if (selectedInputFile == null)
                 {
                     pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                    axisBox.setEnabled(false);
+                    samplingBox.setEnabled(false);
+                    loadButton.setEnabled(false);
                 }
                 else
                 {
                     pickedInputFileDisplay.setText(selectedInputFile.getPath());
+                    axisBox.setEnabled(true);
+                    samplingBox.setEnabled(true);
+                    loadButton.setEnabled(true);
+
                 }
-                goButton.setEnabled(
-                    (selectedInputFile != null) && (selectedOutputFile != null)
-                );
             }
         });
 
@@ -241,14 +297,13 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                 if (selectedOutputFile == null)
                 {
                     pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
+                    goButton.setEnabled(false);
                 }
                 else
                 {
                     pickedOutputFileDisplay.setText(selectedOutputFile.getPath());
+                    goButton.setEnabled(true);
                 }
-                goButton.setEnabled(
-                    (selectedInputFile != null) && (selectedOutputFile != null)
-                );
             }
         });
 
@@ -262,9 +317,6 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     PLYReader reader = new PLYReader(selectedInputFile);
 
                     long numVertices = reader.getHeader().getElement("vertex").getCount();
-                    int skipsize = (int) (numVertices / 1_000_000.0);
-                    if (skipsize == 0) skipsize = 1;
-
                     float alpha = (numVertices < 100_000) ? 1 : 0.1f;
 
                     BluePrintGenerator.CoordinateSpace c;
@@ -275,11 +327,12 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                         CroppingWindow.IMAGE_RESOLUTION,
                         alpha,
                         v,
-                        skipsize
+                        samplingBox.getItemAt(samplingBox.getSelectedIndex())
                     );
                     cropDisplay.reset();
                     cropDisplay.setBlueprint(b);
 
+                    modeButton.setEnabled(true);
                     pickedOutputFileDisplay.setEnabled(true);
                     pickOutputFileBtn.setEnabled(true);
                 }
