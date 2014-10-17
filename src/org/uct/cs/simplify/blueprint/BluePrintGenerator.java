@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.blueprint;
 
 import javafx.geometry.Point2D;
+import org.uct.cs.simplify.Constants;
 import org.uct.cs.simplify.model.MemoryMappedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
@@ -17,7 +18,6 @@ public class BluePrintGenerator
 {
     private static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2 * 100);
     private static final Color DEFAULT_FOREGROUND = Color.white;
-    private static final int BYTE_MASK = 0xFF;
 
     public static BlueprintGeneratorResult createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type, int skipSize)
         throws IOException
@@ -134,17 +134,17 @@ public class BluePrintGenerator
     private static int blend(int bgi, int fgi, float amount)
     {
         float namount = 1 - amount;
-        int dr = (bgi >> (8 * 2)) & BYTE_MASK;
-        int dg = (bgi >> 8) & BYTE_MASK;
-        int db = bgi & BYTE_MASK;
+        int dr = (bgi >> (8 * 2)) & Constants.BYTE_MASK;
+        int dg = (bgi >> 8) & Constants.BYTE_MASK;
+        int db = bgi & Constants.BYTE_MASK;
 
-        int sr = (fgi >> (8 * 2)) & BYTE_MASK;
-        int sg = (fgi >> 8) & BYTE_MASK;
-        int sb = fgi & BYTE_MASK;
+        int sr = (fgi >> (8 * 2)) & Constants.BYTE_MASK;
+        int sg = (fgi >> 8) & Constants.BYTE_MASK;
+        int sb = fgi & Constants.BYTE_MASK;
 
-        int rr = (int) ((sr * amount) + (dr * namount)) & BYTE_MASK;
-        int rg = (int) ((sg * amount) + (dg * namount)) & BYTE_MASK;
-        int rb = (int) ((sb * amount) + (db * namount)) & BYTE_MASK;
+        int rr = (int) ((sr * amount) + (dr * namount)) & Constants.BYTE_MASK;
+        int rg = (int) ((sg * amount) + (dg * namount)) & Constants.BYTE_MASK;
+        int rb = (int) ((sb * amount) + (db * namount)) & Constants.BYTE_MASK;
 
         return (rr << (8 * 2)) + (rg << 8) + rb;
     }

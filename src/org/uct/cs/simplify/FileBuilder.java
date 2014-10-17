@@ -21,9 +21,6 @@ import java.util.Map;
 
 public class FileBuilder
 {
-    public static final int FACES_PER_LEAF = 100_000;
-    private static final int RESCALE_SIZE = 1024;
-
     public static String run(
         File inputFile,
         File outputFile,
@@ -39,11 +36,11 @@ public class FileBuilder
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
         long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-        SimplificationFactory simplifier = new SimplificationFactory(numFaces);
+        SimplificationFactory simplifier = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT);
 
         if (membershipBuilder.isBalanced())
         {
-            float numLeaves = (numFaces / FACES_PER_LEAF);
+            float numLeaves = (numFaces / (float) Constants.FACES_PER_LEAF);
             int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
@@ -58,7 +55,7 @@ public class FileBuilder
         {
             Outputter.info1ln("Calculated Tree Depth: N/A (unbalanced tree)");
 
-            stopCondition = new LowerFaceBoundStoppingCondition(FACES_PER_LEAF);
+            stopCondition = new LowerFaceBoundStoppingCondition(Constants.FACES_PER_LEAF);
         }
 
 
@@ -86,7 +83,7 @@ public class FileBuilder
 
         // create scaled and recentered version of input
         File scaledFile = TempFileManager.provide("rescaled", ".ply");
-        double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, RESCALE_SIZE, swapYZ);
+        double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, Constants.PHF_RESCALE_SIZE, swapYZ);
 
         // build tree
         PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);

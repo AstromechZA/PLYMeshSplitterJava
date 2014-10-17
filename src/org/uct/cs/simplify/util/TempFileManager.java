@@ -107,10 +107,7 @@ public class TempFileManager
         if (!filesToDelete.isEmpty())
         {
             Outputter.errorf("Failed to clean up %d files. Please delete these manually:%n", filesToDelete.size());
-            for (Path path : filesToDelete)
-            {
-                Outputter.errorln(path);
-            }
+            filesToDelete.forEach(Outputter::errorln);
         }
     }
 }
