@@ -3,12 +3,12 @@ package org.uct.cs.simplify.util;
 public abstract class ProgressReporter
 {
     protected String lastStatus = "";
-    protected float lastPercent = 0;
+    protected double lastPercent = 0;
     protected String taskName = "";
     private long startTime = System.nanoTime();
     private long lastUpdated = 0;
 
-    public void report(float percent)
+    public void report(double percent)
     {
         this.lastPercent = percent;
 

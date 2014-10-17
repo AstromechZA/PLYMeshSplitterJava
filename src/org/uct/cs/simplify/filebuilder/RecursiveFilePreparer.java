@@ -27,7 +27,7 @@ public class RecursiveFilePreparer
     )
         throws IOException, InterruptedException
     {
-        return prepare(inputNode, 0, stopCondition, splitType, simplificationFactory, 0, 1, progressReporter);
+        return prepare(inputNode, 0, stopCondition, splitType, simplificationFactory, new ProgressSegment(), progressReporter);
     }
 
     public static PHFNode prepare(
@@ -36,8 +36,7 @@ public class RecursiveFilePreparer
         IStoppingCondition stopCondition,
         IMembershipBuilder splitType,
         SimplificationFactory simplificationFactory,
-        float startProgress,
-        float endProgress,
+        ProgressSegment progress,
         ProgressReporter progressReporter
     )
         throws IOException, InterruptedException
@@ -48,7 +47,7 @@ public class RecursiveFilePreparer
             // simply copy the node and return
             PHFNode outputNode = new PHFNode(inputNode.getLinkedFile());
             outputNode.setDepth(depth);
-            progressReporter.report(endProgress);
+            progressReporter.report(progress.end);
             return outputNode;
         }
         else
@@ -60,31 +59,27 @@ public class RecursiveFilePreparer
 
             // pre process child nodes
             List<PHFNode> processedNodes = new ArrayList<>(childNodes.size());
-            float diffProgress = (endProgress - startProgress) / childNodes.size();
-            float childProgress = startProgress;
-            for (PHFNode childNode : childNodes)
+            List<ProgressSegment> progressSegments = progress.split(childNodes.size());
+            List<File> processedFiles = new ArrayList<>(processedNodes.size());
+            int maxDepth = -1;
+
+            for (int i = 0; i < childNodes.size(); i++)
             {
-                processedNodes.add(prepare(
-                    childNode,
+                PHFNode n = prepare(
+                    childNodes.get(i),
                     depth + 1,
                     stopCondition,
                     splitType,
                     simplificationFactory,
-                    childProgress,
-                    childProgress + diffProgress,
+                    progressSegments.get(i),
                     progressReporter
-                ));
-                childProgress += diffProgress;
-            }
+                );
 
-            // collect list of files for stitching
-            List<File> processedFiles = new ArrayList<>(processedNodes.size());
-            int maxDepth = -1;
-            for (PHFNode n : processedNodes)
-            {
                 maxDepth = Math.max(n.getDepthOfDeepestChild(), maxDepth);
+                processedNodes.add(n);
                 processedFiles.add(n.getLinkedFile());
             }
+
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
             // load details of stitched model
@@ -108,8 +103,36 @@ public class RecursiveFilePreparer
 
             // print & report & return
             Outputter.info1f("Simplified from %d to %d faces. (depth: %d) (ratio: %f)%n", totalFaces, outputNode.getNumFaces(), depth, outputNode.getNumFaces() / (float) totalFaces);
-            progressReporter.report(endProgress);
+            progressReporter.report(progress.end);
             return outputNode;
+        }
+    }
+
+    private static class ProgressSegment
+    {
+        private double start, end;
+
+        public ProgressSegment()
+        {
+            this(0, 1);
+        }
+
+        public ProgressSegment(double start, double end)
+        {
+            this.start = start;
+            this.end = end;
+        }
+
+
+        public List<ProgressSegment> split(int nths)
+        {
+            List<ProgressSegment> o = new ArrayList<>(nths);
+            double diff = (end - start) / nths;
+            for (int i = 0; i < nths; i++)
+            {
+                o.add(new ProgressSegment(start + i * diff, start + diff + i * diff));
+            }
+            return o;
         }
     }
 
