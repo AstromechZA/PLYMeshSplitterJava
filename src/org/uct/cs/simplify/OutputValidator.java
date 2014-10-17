@@ -115,12 +115,11 @@ public class OutputValidator
             Outputter.info1ln("Face Summaries per depth:");
             for (Map.Entry<Integer, NumberSummary> entry : summaries.entrySet())
             {
-                Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | %.0f %n",
+                Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | total: %.0f %n",
                     entry.getKey(),
                     entry.getValue().count,
                     entry.getValue().min,
                     entry.getValue().max,
-                    entry.getValue().mean,
                     entry.getValue().p50,
                     entry.getValue().mean,
                     entry.getValue().total
@@ -186,13 +185,13 @@ public class OutputValidator
     {
         private final OrderedArrayList<Double> data;
 
-        private double min;
-        private double p50;
-        private double max;
-        private double mean;
+        public double min;
+        public double p50;
+        public double max;
+        public double mean;
 
-        private int count;
-        private double total;
+        public int count;
+        public double total;
 
         public NumberSummary(int initialCapacity)
         {
