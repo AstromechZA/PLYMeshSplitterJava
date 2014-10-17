@@ -12,7 +12,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
 {
     private final VertexAttrMap vam;
     private int blockSize;
-    private int count;
+    private long count;
     private MappedByteBuffer buffer;
     private RandomAccessFile raf;
     private FileChannel fc;
@@ -21,13 +21,13 @@ public class MemoryMappedVertexReader implements AutoCloseable
     public MemoryMappedVertexReader(PLYReader reader) throws IOException
     {
         this.vam = new VertexAttrMap(reader.getHeader().getElement("vertex"));
-        int c = reader.getHeader().getElement("vertex").getCount();
+        long c = reader.getHeader().getElement("vertex").getCount();
         long p = reader.getElementDimension("vertex").getOffset();
         int blockSize = reader.getHeader().getElement("vertex").getItemSize();
         this.construct(reader.getFile(), p, c, blockSize);
     }
 
-    private void construct(File f, long position, int count, int blockSize) throws IOException
+    private void construct(File f, long position, long count, int blockSize) throws IOException
     {
         this.count = count;
         this.blockSize = blockSize;
@@ -39,7 +39,7 @@ public class MemoryMappedVertexReader implements AutoCloseable
         this.buffer = this.fc.map(FileChannel.MapMode.READ_ONLY, position, count * blockSize);
     }
 
-    public int getCount()
+    public long getCount()
     {
         return this.count;
     }

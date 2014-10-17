@@ -72,17 +72,20 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         c.gridy = 1;
         c.gridx = 0;
+        c.weightx = 1;
         this.pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
         this.pickedInputFileDisplay.setEditable(false);
         topPanel.add(this.pickedInputFileDisplay, c);
 
         c.gridy = 1;
         c.gridx = 1;
+        c.weightx = 0;
         this.pickInputFileBtn = new JButton("Pick input file");
         topPanel.add(this.pickInputFileBtn, c);
 
         c.gridy = 2;
         c.gridx = 0;
+        c.weightx = 1;
         this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
         this.pickedOutputFileDisplay.setEditable(false);
         this.pickedOutputFileDisplay.setEnabled(false);
@@ -90,6 +93,7 @@ public class ProgressWindow extends JFrame implements ICompletionListener
 
         c.gridy = 2;
         c.gridx = 1;
+        c.weightx = 0;
         this.pickOutputFileBtn = new JButton("Pick output file");
         this.pickOutputFileBtn.setEnabled(false);
         topPanel.add(this.pickOutputFileBtn, c);

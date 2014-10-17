@@ -46,12 +46,12 @@ public class CroppingRunnable implements Runnable
         try (StatRecorder ignored = new StatRecorder())
         {
             PLYReader reader = new PLYReader(this.inputFile);
-            int numExcludedVertices = 0;
-            int numVertices = reader.getHeader().getElement("vertex").getCount();
-            int numExcludedFaces = 0;
-            int numFaces = reader.getHeader().getElement("face").getCount();
+            long numExcludedVertices = 0;
+            long numVertices = reader.getHeader().getElement("vertex").getCount();
+            long numExcludedFaces = 0;
+            long numFaces = reader.getHeader().getElement("face").getCount();
             CompactBitArray isExcluded = new CompactBitArray(1, numVertices);
-            TIntIntHashMap vertexIndexMap = new TIntIntHashMap(numVertices / 2);
+            TIntIntHashMap vertexIndexMap = new TIntIntHashMap((int) (numVertices / 2));
 
             BufferedImage bi = this.blueprint.output;
             int[] pixels = ((DataBufferInt) bi.getRaster().getDataBuffer()).getData();
@@ -66,9 +66,9 @@ public class CroppingRunnable implements Runnable
 
                 try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
                 {
-                    int currentIndex = 0;
+                    long currentIndex = 0;
                     Vertex v = new Vertex(0, 0, 0);
-                    for (int i = 0; i < numVertices; i++)
+                    for (long i = 0; i < numVertices; i++)
                     {
                         vr.get(i, v);
 
@@ -95,7 +95,7 @@ public class CroppingRunnable implements Runnable
                         }
                         else
                         {
-                            vertexIndexMap.put(i, currentIndex++);
+                            vertexIndexMap.put((int) (i), (int) (currentIndex++));
                             v.writeToStream(ostream, vr.getVam());
                         }
 
@@ -108,7 +108,7 @@ public class CroppingRunnable implements Runnable
                 try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
                 {
                     Face f = new Face(0, 0, 0);
-                    int i = 0;
+                    long i = 0;
                     while (fr.hasNext())
                     {
                         fr.next(f);

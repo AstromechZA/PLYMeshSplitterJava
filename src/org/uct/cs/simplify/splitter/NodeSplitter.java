@@ -106,7 +106,7 @@ public class NodeSplitter
         {
             Face face = new Face(0, 0, 0);
             int numVerticesOfFaceInSubnode;
-            int numFacesInSubnode = 0;
+            long numFacesInSubnode = 0;
             while (faceReader.hasNext())
             {
                 faceReader.next(face);
@@ -158,11 +158,11 @@ public class NodeSplitter
 
     private static class GatheringResult
     {
-        public final int numFaces;
+        public final long numFaces;
         public final int numVertices;
         public final IntIntHashMapWithKeyList vertexIndexMap;
 
-        public GatheringResult(int numFacesInSubnode, IntIntHashMapWithKeyList vertexIndexMap)
+        public GatheringResult(long numFacesInSubnode, IntIntHashMapWithKeyList vertexIndexMap)
         {
             this.numFaces = numFacesInSubnode;
             this.numVertices = vertexIndexMap.size();

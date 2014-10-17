@@ -61,8 +61,8 @@ public class ScaleAndRecenter
         {
             PLYElement vertexE = reader.getHeader().getElement("vertex");
             PLYElement faceE = reader.getHeader().getElement("face");
-            int numVertices = vertexE.getCount();
-            int numFaces = faceE.getCount();
+            long numVertices = vertexE.getCount();
+            long numFaces = faceE.getCount();
             long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
             long faceElementBegin = reader.getElementDimension("face").getOffset();
             long faceElementLength = reader.getElementDimension("face").getLength();
@@ -82,7 +82,7 @@ public class ScaleAndRecenter
                 try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
                     Vertex v = new Vertex(0, 0, 0);
-                    for (int n = 0; n < numVertices; n++)
+                    for (long n = 0; n < numVertices; n++)
                     {
                         fcIN.read(blockBufferIN);
                         blockBufferIN.flip();
@@ -103,7 +103,7 @@ public class ScaleAndRecenter
 
                 try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
                 {
-                    for (int i = 0; i < numFaces; i++)
+                    for (long i = 0; i < numFaces; i++)
                     {
                         for (PLYPropertyBase base : faceE.getProperties())
                         {

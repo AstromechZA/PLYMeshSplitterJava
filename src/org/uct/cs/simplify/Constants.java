@@ -12,10 +12,10 @@ public class Constants
     public static final IMembershipBuilder MEMBERSHIP_BUILDER = new MultiwayVariableKDTreeMembershipBuilder(4);
 
     // desired number of faces in root node of output
-    public static final int FACES_IN_ROOT = 400_000;
+    public static final long FACES_IN_ROOT = 400_000;
 
     // max number of faces per leaf node
-    public static final int MAX_FACES_PER_LEAF = 100_000;
+    public static final long MAX_FACES_PER_LEAF = 100_000;
 
     // make sure the mesh fits inside a box of this size (Viewer depends on this)
     public static final int PHF_RESCALE_SIZE = 1024;

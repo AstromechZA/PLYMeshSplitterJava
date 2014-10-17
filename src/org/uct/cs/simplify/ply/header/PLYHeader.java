@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,7 +147,7 @@ public class PLYHeader
         return sb.toString();
     }
 
-    public static PLYHeader constructHeader(int numVertices, int numFaces, VertexAttrMap vam)
+    public static PLYHeader constructHeader(long numVertices, long numFaces, VertexAttrMap vam)
     {
         List<PLYElement> elements = new ArrayList<>(7);
         PLYElement eVertex = new PLYElement("vertex", numVertices);

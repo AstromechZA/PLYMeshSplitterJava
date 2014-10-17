@@ -40,8 +40,8 @@ public class NaiveMeshStitcher
 
         writeMesh2FacesStitched(faceFile, reader2, stitchResult.getStitchTransform());
 
-        int numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
-        int numFaces = mesh1faces.getCount() + mesh2faces.getCount();
+        long numVertices = mesh1vertices.getCount() + mesh2vertices.getCount() - stitchResult.getStitchedCount();
+        long numFaces = mesh1faces.getCount() + mesh2faces.getCount();
 
         Outputter.debugf("Stitched %d vertices.%n", stitchResult.getStitchedCount());
 
@@ -57,12 +57,12 @@ public class NaiveMeshStitcher
             File vertexFile,
             PLYReader reader2,
             TObjectIntHashMap mesh1VertexMap,
-            int startingIndex,
-            int mesh2NumVertices,
+            long startingIndex,
+            long mesh2NumVertices,
             VertexAttrMap outVam
     ) throws IOException
     {
-        int[] mesh2VertexIndices = new int[ mesh2NumVertices ];
+        int[] mesh2VertexIndices = new int[ (int) mesh2NumVertices ];
         int stitched = 0;
         try (
             BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(vertexFile, true));
@@ -80,7 +80,7 @@ public class NaiveMeshStitcher
                 }
                 else
                 {
-                    mesh2VertexIndices[ i ] = startingIndex++;
+                    mesh2VertexIndices[ i ] = (int) (startingIndex++);
                     v.writeToStream(ostream, outVam);
                 }
             }
@@ -127,9 +127,9 @@ public class NaiveMeshStitcher
     }
 
     @SuppressWarnings("unchecked")
-    private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, int mesh1NumVertices) throws IOException
+    private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, long mesh1NumVertices) throws IOException
     {
-        TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap(mesh1NumVertices);
+        TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap((int) mesh1NumVertices);
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
         {
             Vertex v = new Vertex(0, 0, 0);
@@ -143,7 +143,7 @@ public class NaiveMeshStitcher
     }
 
     private static PLYHeader writeFinalPLYModel(
-        File outputFile, File vertexFile, File faceFile, int numVertices, int numFaces, VertexAttrMap outVam
+        File outputFile, File vertexFile, File faceFile, long numVertices, long numFaces, VertexAttrMap outVam
     ) throws IOException
     {
         PLYHeader newHeader = PLYHeader.constructHeader(numVertices, numFaces, outVam);

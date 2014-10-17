@@ -2,9 +2,9 @@ package org.uct.cs.simplify.splitter.stopcondition;
 
 public class LowerFaceBoundStoppingCondition implements IStoppingCondition
 {
-    private final int minFaces;
+    private final long minFaces;
 
-    public LowerFaceBoundStoppingCondition(int minFaces)
+    public LowerFaceBoundStoppingCondition(long minFaces)
     {
         this.minFaces = minFaces;
     }

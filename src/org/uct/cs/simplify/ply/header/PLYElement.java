@@ -11,11 +11,11 @@ import java.util.List;
 public class PLYElement
 {
     private final String name;
-    private final int count;
+    private final long count;
     private final List<PLYPropertyBase> properties;
     private Integer itemSize;
 
-    public PLYElement(String name, int count)
+    public PLYElement(String name, long count)
     {
         this.name = name.toLowerCase();
         this.count = count;
@@ -28,7 +28,7 @@ public class PLYElement
     {
         s = s.trim();
         String[] parts = s.split(" ");
-        return new PLYElement(parts[1], Integer.parseInt(parts[2]));
+        return new PLYElement(parts[ 1 ], Long.parseLong(parts[ 2 ]));
     }
 
     public void addProperty(PLYPropertyBase p)
@@ -39,7 +39,8 @@ public class PLYElement
             if (p instanceof PLYListProperty)
             {
                 this.itemSize = null;
-            } else if (p instanceof PLYProperty)
+            }
+            else if (p instanceof PLYProperty)
             {
                 this.itemSize += ((PLYProperty) p).getTypeReader().bytesAtATime();
             }
@@ -51,7 +52,7 @@ public class PLYElement
         return this.name;
     }
 
-    public int getCount()
+    public long getCount()
     {
         return this.count;
     }

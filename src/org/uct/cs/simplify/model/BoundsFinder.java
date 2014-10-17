@@ -28,8 +28,8 @@ public class BoundsFinder
                 maxz = -Float.MAX_VALUE;
 
             Vertex v = new Vertex(0, 0, 0);
-            int c = vr.getCount();
-            for (int i = 0; i < c; i += nth)
+            long c = vr.getCount();
+            for (long i = 0; i < c; i += nth)
             {
                 vr.get(i, v);
 

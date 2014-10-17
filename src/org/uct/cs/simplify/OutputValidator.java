@@ -55,7 +55,7 @@ public class OutputValidator
                         node.numFaces * BYTES_PER_FACE;
                     check(node.blockLength, l);
 
-                    for (int i = 0; i < node.numVertices; i++)
+                    for (long i = 0; i < node.numVertices; i++)
                     {
                         float x = Useful.readFloatLE(istream);
                         float y = Useful.readFloatLE(istream);
@@ -68,7 +68,7 @@ public class OutputValidator
 
                     if (hasVertexColour)
                     {
-                        for (int i = 0; i < node.numVertices; i++)
+                        for (long i = 0; i < node.numVertices; i++)
                         {
                             byte r = (byte) istream.read();
                             byte g = (byte) istream.read();
@@ -79,7 +79,7 @@ public class OutputValidator
                         }
                     }
 
-                    for (int i = 0; i < node.numFaces; i++)
+                    for (long i = 0; i < node.numFaces; i++)
                     {
                         int f = Useful.readIntLE(istream);
                         int g = Useful.readIntLE(istream);

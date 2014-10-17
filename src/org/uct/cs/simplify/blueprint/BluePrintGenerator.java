@@ -76,9 +76,9 @@ public class BluePrintGenerator
 
         try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
         {
-            int c = vr.getCount();
+            long c = vr.getCount();
             Vertex v = new Vertex(0, 0, 0);
-            for (int i = 0; i < c; i += skipSize)
+            for (long i = 0; i < c; i += skipSize)
             {
                 vr.get(i, v);
                 int tx = (int) (center + ((avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio));
@@ -114,8 +114,8 @@ public class BluePrintGenerator
             float pr, se;
 
             Vertex v;
-            int c = vr.getCount();
-            for (int i = 0; i < c; i++)
+            long c = vr.getCount();
+            for (long i = 0; i < c; i++)
             {
                 v = vr.get(i);
                 pr = avg.getPrimaryAxisValue(v);
