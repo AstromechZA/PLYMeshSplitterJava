@@ -93,7 +93,6 @@ public class RecursiveFilePreparer
             // calculate target number of faces based on target simplification ratio
             long totalFaces = stitchedHeader.getElement("face").getCount();
             float ratio = simplificationFactory.getSimplificationRatioForDepth(depth, maxDepth, totalFaces);
-            Outputter.info2f("Approximate ratio: %f%n", ratio);
             long targetFaces = (long) (totalFaces * ratio);
 
             // simplify file

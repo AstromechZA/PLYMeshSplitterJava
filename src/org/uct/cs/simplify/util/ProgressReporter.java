@@ -10,9 +10,6 @@ public abstract class ProgressReporter
 
     public void report(float percent)
     {
-        if (percent < 0) percent = 0;
-        if (percent > 1) percent = 1;
-
         this.lastPercent = percent;
 
         long now = System.nanoTime();

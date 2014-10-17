@@ -28,6 +28,4 @@ public class Constants
     public static final int SHORT_MASK = 0xFFFF;
     public static final int INT_MASK = 0xFFFFFFFF;
     public static final long LONG_MASK = 0xFFFFFFFFL;
-
-
 }

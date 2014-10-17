@@ -16,16 +16,12 @@ import java.util.*;
 
 public class OutputValidator
 {
-
     public static final int BYTES_PER_VERTEX = 12;
     public static final int BYTES_PER_FACE = 12;
-    public static final int DEFAULT_ALPHA = 255;
 
-    public static void main(String[] args) throws IOException
+    public static void run(File file) throws IOException
     {
-        CommandLine cmd = getCommandLine(args);
-
-        try (BufferedInputStream istream = new BufferedInputStream(new FileInputStream(new File(cmd.getOptionValue("input")))))
+        try (BufferedInputStream istream = new BufferedInputStream(new FileInputStream(file)))
         {
             int streamLength = istream.available();
             int headerLength = Useful.readIntLE(istream);
@@ -131,6 +127,12 @@ public class OutputValidator
             }
 
         }
+    }
+
+    public static void main(String[] args) throws IOException
+    {
+        CommandLine cmd = getCommandLine(args);
+        run(new File(cmd.getOptionValue("input")));
     }
 
     private static void check(byte a, byte b)

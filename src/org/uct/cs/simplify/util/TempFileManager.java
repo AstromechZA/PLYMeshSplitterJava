@@ -76,6 +76,7 @@ public class TempFileManager
         try
         {
             Files.deleteIfExists(f.toPath());
+            filesToDelete.remove(f.toPath());
         }
         catch (IOException e)
         {

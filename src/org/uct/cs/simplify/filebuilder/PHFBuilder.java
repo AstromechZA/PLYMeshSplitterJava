@@ -62,9 +62,8 @@ public class PHFBuilder
         sb.append('}');
         String jsonheader = sb.toString();
 
-        progressReporter.changeTask("Writing final file", true);
-
         Outputter.info1f("%nWriting '%s' ..%n", outputFile.getPath());
+        progressReporter.changeTask("Writing final file", true);
         try (FileOutputStream fostream = new FileOutputStream(outputFile))
         {
             int l = jsonheader.length();

@@ -35,7 +35,7 @@ public class FileBuilder
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
         long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-        SimplificationFactory simplifier = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT);
+        SimplificationFactory simplifier = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT, membershipBuilder.getSplitRatio());
 
         if (membershipBuilder.isBalanced())
         {
@@ -95,6 +95,8 @@ public class FileBuilder
         String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
 
+        OutputValidator.run(outputFile);
+
         if (!keepNodes)
         {
             try
@@ -125,7 +127,7 @@ public class FileBuilder
             cmd.hasOption("keeptemp"),
             cmd.hasOption("swapyz"),
             Constants.MEMBERSHIP_BUILDER,
-            new StdOutProgressReporter()
+            new StdOutProgressReporter("Preprocessing")
         );
 
         if (cmd.hasOption("dumpjson"))

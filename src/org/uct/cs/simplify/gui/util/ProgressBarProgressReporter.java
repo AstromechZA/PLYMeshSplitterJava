@@ -23,6 +23,5 @@ public class ProgressBarProgressReporter extends ProgressReporter
     {
         this.progressBar.setString(this.lastStatus);
         this.progressBar.setValue((int) (this.lastPercent * 100));
-        this.progressBar.repaint();
     }
 }

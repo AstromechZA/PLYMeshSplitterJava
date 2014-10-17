@@ -5,10 +5,12 @@ import org.uct.cs.simplify.Constants;
 public class SimplificationFactory
 {
     private final float overallRatio;
+    private final int splitRatio;
 
-    public SimplificationFactory(long numFacesInEntireMesh, long numFacesInRoot)
+    public SimplificationFactory(long numFacesInEntireMesh, long numFacesInRoot, int splitRatio)
     {
         this.overallRatio = numFacesInRoot / (float) numFacesInEntireMesh;
+        this.splitRatio = splitRatio;
     }
 
     public float getSimplificationRatioForDepth(int depth, int maxDepth)
@@ -26,11 +28,13 @@ public class SimplificationFactory
 
     public float getSimplificationRatioForDepth(int depth, int maxDepth, long numFaces)
     {
-        // is leaf node?
-        if (depth == maxDepth)
+        // is root node?
+        if (depth == 0)
         {
-            return Constants.MAX_FACES_PER_LEAF / (float) numFaces;
+            return Constants.FACES_IN_ROOT / (float) numFaces;
         }
+
+        // interior?
         return getSimplificationRatioForDepth(depth, maxDepth);
     }
 
