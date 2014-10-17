@@ -7,7 +7,6 @@ import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
-import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
@@ -40,14 +39,14 @@ public class FileBuilder
 
         if (membershipBuilder.isBalanced())
         {
-            float numLeaves = (numFaces / (float) Constants.FACES_PER_LEAF);
+            float numLeaves = (numFaces / (float) Constants.MAX_FACES_PER_LEAF);
             int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
 
             for (int i = 0; i < numLevels; i++)
             {
-                Outputter.info2f("Ratio for lvl %d: %f%n", i, simplifier.getSimplificationRioForDepth(i, numLevels));
+                Outputter.info2f("Ratio for lvl %d: %f%n", i, simplifier.getSimplificationRatioForDepth(i, numLevels));
             }
             stopCondition = new DepthStoppingCondition(numLevels);
         }
@@ -55,7 +54,7 @@ public class FileBuilder
         {
             Outputter.info1ln("Calculated Tree Depth: N/A (unbalanced tree)");
 
-            stopCondition = new LowerFaceBoundStoppingCondition(Constants.FACES_PER_LEAF);
+            stopCondition = new LowerFaceBoundStoppingCondition(Constants.MAX_FACES_PER_LEAF);
         }
 
 
@@ -125,7 +124,7 @@ public class FileBuilder
             outputFile,
             cmd.hasOption("keeptemp"),
             cmd.hasOption("swapyz"),
-            new MultiwayVariableKDTreeMembershipBuilder(4),
+            Constants.MEMBERSHIP_BUILDER,
             new StdOutProgressReporter()
         );
 
