@@ -115,14 +115,15 @@ public class OutputValidator
             Outputter.info1ln("Face Summaries per depth:");
             for (Map.Entry<Integer, NumberSummary> entry : summaries.entrySet())
             {
-                Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f |%n",
+                Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | %.0f %n",
                     entry.getKey(),
                     entry.getValue().count,
                     entry.getValue().min,
                     entry.getValue().max,
                     entry.getValue().mean,
                     entry.getValue().p50,
-                    entry.getValue().mean
+                    entry.getValue().mean,
+                    entry.getValue().total
                 );
             }
 
