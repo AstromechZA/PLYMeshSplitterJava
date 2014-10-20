@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 public class Useful
 {
 
+    public static final long NANOSECONDS_PER_HOUR = 360_000_000_000L;
     public static final long NANOSECONDS_PER_MINUTE = 60_000_000_000L;
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
     public static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
@@ -24,6 +25,7 @@ public class Useful
 
     public static String formatTime(long ns)
     {
+        if (ns > NANOSECONDS_PER_HOUR) return String.format("%.2f hours", ns / (double) NANOSECONDS_PER_HOUR);
         if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
         if (ns > NANOSECONDS_PER_SECOND) return String.format("%.2f seconds", ns / (double) NANOSECONDS_PER_SECOND);
         if (ns > NANOSECONDS_PER_MILLISECONDS)
@@ -35,6 +37,7 @@ public class Useful
 
     public static String formatTimeNoDecimal(long ns)
     {
+        if (ns > NANOSECONDS_PER_HOUR) return String.format("%.0f hours", ns / (double) NANOSECONDS_PER_HOUR);
         if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.0f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
         if (ns > NANOSECONDS_PER_SECOND) return String.format("%.0f seconds", ns / (double) NANOSECONDS_PER_SECOND);
         if (ns > NANOSECONDS_PER_MILLISECONDS)
