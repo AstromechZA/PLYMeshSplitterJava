@@ -8,7 +8,10 @@ import org.uct.cs.simplify.util.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OutputValidator
 {
@@ -32,16 +35,15 @@ public class OutputValidator
             JSONArray nodesJ = o.getJSONArray("nodes");
             Outputter.info2f("number of nodes: %d%n", nodesJ.length());
 
-            List<SomeNode> nodes = new ArrayList<>();
+            SomeNode[] nodes = new SomeNode[ nodesJ.length() ];
             for (int i = 0; i < nodesJ.length(); i++)
             {
-                nodes.add(new SomeNode(nodesJ.getJSONObject(i)));
+                SomeNode n = (new SomeNode(nodesJ.getJSONObject(i)));
+                nodes[ n.id ] = n;
             }
 
-            Collections.sort(nodes);
-
             long currentPosition = 0;
-            try (ProgressBar pb = new ProgressBar("Checking Nodes", nodes.size()))
+            try (ProgressBar pb = new ProgressBar("Checking Nodes", nodes.length))
             {
                 for (SomeNode node : nodes)
                 {
@@ -83,6 +85,12 @@ public class OutputValidator
                         checkLt(h, node.numVertices);
                     }
                     currentPosition += node.blockLength;
+
+                    if (node.parentId >= 0)
+                    {
+                        nodes[ node.parentId ].children.add(node);
+                    }
+
                     pb.tick();
                 }
             }
@@ -92,21 +100,40 @@ public class OutputValidator
 
             Outputter.info3ln("All checks passed successfully");
 
-            HashMap<Integer, NumberSummary> summaries = new HashMap<>();
+            HashMap<Integer, NumberSummary> faceSummaries = new HashMap<>();
+            HashMap<Integer, NumberSummary> simpSummaries = new HashMap<>();
             for (SomeNode node : nodes)
             {
-                if (summaries.containsKey(node.depth))
+                if (node.children.size() > 0)
                 {
-                    summaries.get(node.depth).add(node.numFaces);
+                    long total = 0;
+                    for (SomeNode child : node.children)
+                    {
+                        total += child.numFaces;
+                    }
+                    double ratio = node.numFaces / (double) total;
+                    if (simpSummaries.containsKey(node.depth))
+                    {
+                        simpSummaries.get(node.depth).add(ratio);
+                    }
+                    else
+                    {
+                        simpSummaries.put(node.depth, new NumberSummary(10, ratio));
+                    }
+                }
+
+                if (faceSummaries.containsKey(node.depth))
+                {
+                    faceSummaries.get(node.depth).add(node.numFaces);
                 }
                 else
                 {
-                    summaries.put(node.depth, new NumberSummary(10, node.numFaces));
+                    faceSummaries.put(node.depth, new NumberSummary(10, node.numFaces));
                 }
             }
 
             Outputter.info1ln("Face Summaries per depth:");
-            for (Map.Entry<Integer, NumberSummary> entry : summaries.entrySet())
+            for (Map.Entry<Integer, NumberSummary> entry : faceSummaries.entrySet())
             {
                 Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | total: %.0f %n",
                     entry.getKey(),
@@ -117,6 +144,18 @@ public class OutputValidator
                     entry.getValue().mean,
                     entry.getValue().total
                 );
+                if (simpSummaries.containsKey(entry.getKey()))
+                {
+                    NumberSummary ss = simpSummaries.get(entry.getKey());
+                    Outputter.info1f("   | nodes: %4d | min: %8.2f | max: %8.2f | median: %11.2f | mean: %11.2f | total: %.2f %n",
+                        ss.count,
+                        ss.min,
+                        ss.max,
+                        ss.p50,
+                        ss.mean,
+                        ss.total
+                    );
+                }
             }
         }
     }
@@ -235,6 +274,7 @@ public class OutputValidator
         public final double min_z;
         public final double max_z;
         public final int depth;
+        public final List<SomeNode> children = new ArrayList<>();
 
         public SomeNode(JSONObject o)
         {
