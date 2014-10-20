@@ -56,6 +56,8 @@ public class NodeSplitter
             TempFileManager.release(tempFaceFile);
         }
 
+        TempFileManager.release(reader.getFile());
+
         return output;
     }
 
