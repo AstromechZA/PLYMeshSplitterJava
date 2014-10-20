@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter.memberships;
 
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.axis.IAxisReader;
@@ -22,7 +22,7 @@ public class PercentileFinder
 
     public double findPercentile(float percentile, double lowerBound, double upperBound) throws IOException
     {
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(this.modelReader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(this.modelReader))
         {
             long numVertices = vr.getCount();
             long percentileTarget = (long) (numVertices * percentile);
@@ -55,15 +55,16 @@ public class PercentileFinder
         }
     }
 
-    private int testPercentile(MemoryMappedVertexReader vr, double approximate, long minThreshold, long maxThreshold)
+    private int testPercentile(FastBufferedVertexReader vr, double approximate, long minThreshold, long maxThreshold) throws IOException
     {
+        vr.reset();
         long numVertices = vr.getCount();
 
         long count = 0;
         Vertex v = new Vertex(0, 0, 0);
-        for (long i = 0; i < numVertices; i++)
+        while (vr.hasNext())
         {
-            vr.get(i, v);
+            vr.next(v);
             if (this.axisReader.read(v) < approximate)
             {
                 count++;

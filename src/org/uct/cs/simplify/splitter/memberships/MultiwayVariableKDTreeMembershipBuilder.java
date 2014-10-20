@@ -3,7 +3,7 @@ package org.uct.cs.simplify.splitter.memberships;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
@@ -67,15 +67,15 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
         maxPoint = boundingBox.getMax();
         subNodes.put(nodeId, new XBoundingBox(minPoint, maxPoint));
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
-            long c = vr.getCount();
             Vertex v = new Vertex(0, 0, 0);
             int numBits = (int) Math.ceil(Math.log(this.order) / Math.log(2));
-            CompactBitArray memberships = new CompactBitArray(numBits, c);
-            for (int i = 0; i < c; i++)
+            CompactBitArray memberships = new CompactBitArray(numBits, vr.getCount());
+            long vertexIndex = 0;
+            while (vr.hasNext())
             {
-                vr.get(i, v);
+                vr.next(v);
                 float value = axisReader.read(v);
                 int membership = 0;
                 for (double point : splitPoints)
@@ -83,7 +83,8 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
                     if (value < point) break;
                     membership++;
                 }
-                memberships.set(i, membership);
+                memberships.set(vertexIndex, membership);
+                vertexIndex++;
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }

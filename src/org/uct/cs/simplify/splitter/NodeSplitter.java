@@ -52,6 +52,7 @@ public class NodeSplitter
                 PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
+                System.out.println(result.numFaces);
             }
             TempFileManager.release(tempFaceFile);
         }
@@ -63,7 +64,7 @@ public class NodeSplitter
     {
         try (BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(subNodeFile)))
         {
-            try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+            try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
             {
                 Vertex v = new Vertex(0, 0, 0);
                 VertexAttrMap vam = vr.getVam();
@@ -74,7 +75,9 @@ public class NodeSplitter
                 while (iter.hasNext())
                 {
                     int i = iter.next();
-                    vr.get(i, v);
+                    if (i < vr.getIndex()) vr.reset();
+                    vr.skipForwardTo(i);
+                    vr.next(v);
                     v.writeToStream(fostream, vam);
                 }
             }

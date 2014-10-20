@@ -18,7 +18,7 @@ public class BoundsFinder
 
     private static XBoundingBox getBoundingBoxInner(PLYReader reader, int nth) throws IOException
     {
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
                 maxx = -Float.MAX_VALUE,
@@ -28,11 +28,9 @@ public class BoundsFinder
                 maxz = -Float.MAX_VALUE;
 
             Vertex v = new Vertex(0, 0, 0);
-            long c = vr.getCount();
-            for (long i = 0; i < c; i += nth)
+            while (vr.hasNext())
             {
-                vr.get(i, v);
-
+                vr.next(v);
                 minx = Math.min(minx, v.x);
                 maxx = Math.max(maxx, v.x);
 

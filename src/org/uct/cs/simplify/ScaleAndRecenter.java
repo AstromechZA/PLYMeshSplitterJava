@@ -30,12 +30,14 @@ public class ScaleAndRecenter
     public static double run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
     {
         // first have to identify bounds in order to work out ranges and center
+        Outputter.info1ln("Calculating bounding box");
         XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
         Point3D center = new Point3D(
             (bb.getMinX() + bb.getMaxX()) / 2,
             (bb.getMinY() + bb.getMaxY()) / 2,
             (bb.getMinZ() + bb.getMaxZ()) / 2
         );
+
 
         // calculate transform
         // - mesh size is the length of the longest axis
@@ -50,6 +52,10 @@ public class ScaleAndRecenter
         ));
         // - translate to center
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
+
+        Outputter.info2f("X: %s -> %s%n", bb.getMinX(), bb.getMaxX());
+        Outputter.info2f("Y: %s -> %s%n", bb.getMinY(), bb.getMaxY());
+        Outputter.info2f("Z: %s -> %s%n", bb.getMinZ(), bb.getMaxZ());
 
         // debug
         Outputter.info3ln("Rescaling and Centering...");

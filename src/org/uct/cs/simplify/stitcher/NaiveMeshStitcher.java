@@ -54,35 +54,37 @@ public class NaiveMeshStitcher
     }
 
     private static VertexStitchResult getStitchTransform(
-            File vertexFile,
-            PLYReader reader2,
-            TObjectIntHashMap mesh1VertexMap,
-            long startingIndex,
-            long mesh2NumVertices,
-            VertexAttrMap outVam
+        File vertexFile,
+        PLYReader reader2,
+        TObjectIntHashMap mesh1VertexMap,
+        long startingIndex,
+        long mesh2NumVertices,
+        VertexAttrMap outVam
     ) throws IOException
     {
         int[] mesh2VertexIndices = new int[ (int) mesh2NumVertices ];
         int stitched = 0;
         try (
             BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(vertexFile, true));
-            MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader2)
+            FastBufferedVertexReader vr = new FastBufferedVertexReader(reader2)
         )
         {
             Vertex v = new Vertex(0, 0, 0);
-            for (int i = 0; i < mesh2NumVertices; i++)
+            int vertexIndex = 0;
+            while (vr.hasNext())
             {
-                vr.get(i, v);
+                vr.next(v);
                 if (mesh1VertexMap.containsKey(v))
                 {
-                    mesh2VertexIndices[ i ] = mesh1VertexMap.get(v);
+                    mesh2VertexIndices[ vertexIndex ] = mesh1VertexMap.get(v);
                     stitched++;
                 }
                 else
                 {
-                    mesh2VertexIndices[ i ] = (int) (startingIndex++);
+                    mesh2VertexIndices[ vertexIndex ] = (int) (startingIndex++);
                     v.writeToStream(ostream, outVam);
                 }
+                vertexIndex++;
             }
         }
         return new VertexStitchResult(stitched, mesh2VertexIndices);
@@ -100,9 +102,9 @@ public class NaiveMeshStitcher
             {
                 fr.next(face);
                 fostream.write((byte) 3);
-                Useful.writeIntLE(fostream, indexTransform[face.i]);
-                Useful.writeIntLE(fostream, indexTransform[face.j]);
-                Useful.writeIntLE(fostream, indexTransform[face.k]);
+                Useful.writeIntLE(fostream, indexTransform[ face.i ]);
+                Useful.writeIntLE(fostream, indexTransform[ face.j ]);
+                Useful.writeIntLE(fostream, indexTransform[ face.k ]);
             }
         }
     }
@@ -112,14 +114,14 @@ public class NaiveMeshStitcher
         ElementDimension vertexE = reader.getElementDimension("vertex");
         ElementDimension faceE = reader.getElementDimension("face");
 
-        try(FileChannel fcIN = new RandomAccessFile(inputFile, "r").getChannel())
+        try (FileChannel fcIN = new RandomAccessFile(inputFile, "r").getChannel())
         {
-            try(FileChannel fcOUT = new FileOutputStream(vertexFile).getChannel())
+            try (FileChannel fcOUT = new FileOutputStream(vertexFile).getChannel())
             {
                 fcIN.transferTo(vertexE.getOffset(), vertexE.getLength(), fcOUT);
             }
 
-            try(FileChannel fcOUT = new FileOutputStream(faceFile).getChannel())
+            try (FileChannel fcOUT = new FileOutputStream(faceFile).getChannel())
             {
                 fcIN.transferTo(faceE.getOffset(), faceE.getLength(), fcOUT);
             }
@@ -130,13 +132,15 @@ public class NaiveMeshStitcher
     private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, long mesh1NumVertices) throws IOException
     {
         TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap((int) mesh1NumVertices);
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader1))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader1))
         {
             Vertex v = new Vertex(0, 0, 0);
-            for (int i = 0; i < mesh1NumVertices; i++)
+            int vertexIndex = 0;
+            while (vr.hasNext())
             {
-                vr.get(i, v);
-                mesh1Vertices.put(v, i);
+                vr.next(v);
+                mesh1Vertices.put(v, vertexIndex);
+                vertexIndex++;
             }
         }
         return mesh1Vertices;

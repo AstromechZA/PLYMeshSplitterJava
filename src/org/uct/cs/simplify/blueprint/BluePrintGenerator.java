@@ -2,7 +2,7 @@ package org.uct.cs.simplify.blueprint;
 
 import javafx.geometry.Point2D;
 import org.uct.cs.simplify.Constants;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 
@@ -74,13 +74,12 @@ public class BluePrintGenerator
         int border = 20;
         float ratio = (resolution - border) / bigdim;
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
-            long c = vr.getCount();
             Vertex v = new Vertex(0, 0, 0);
-            for (long i = 0; i < c; i += skipSize)
+            while (vr.hasNext())
             {
-                vr.get(i, v);
+                vr.next(v);
                 int tx = (int) (center + ((avg.getPrimaryAxisValue(v) - r.getCenterX()) * ratio));
                 int ty = (int) (center - ((avg.getSecondaryAxisValue(v) - r.getCenterY()) * ratio));
                 int index = ty * w + tx;
@@ -105,7 +104,7 @@ public class BluePrintGenerator
 
     private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg) throws IOException
     {
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
                 maxx = -Float.MAX_VALUE,
@@ -113,11 +112,10 @@ public class BluePrintGenerator
                 maxy = -Float.MAX_VALUE;
             float pr, se;
 
-            Vertex v;
-            long c = vr.getCount();
-            for (long i = 0; i < c; i++)
+            Vertex v = new Vertex(0, 0, 0);
+            while (vr.hasNext())
             {
-                v = vr.get(i);
+                vr.next(v);
                 pr = avg.getPrimaryAxisValue(v);
                 se = avg.getSecondaryAxisValue(v);
 

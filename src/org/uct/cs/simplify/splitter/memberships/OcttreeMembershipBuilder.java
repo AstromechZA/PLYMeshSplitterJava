@@ -3,7 +3,7 @@ package org.uct.cs.simplify.splitter.memberships;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.model.MemoryMappedVertexReader;
+import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
@@ -106,17 +106,17 @@ public class OcttreeMembershipBuilder implements IMembershipBuilder
             )
         );
 
-        try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
-
-            long c = vr.getCount();
-            CompactBitArray memberships = new CompactBitArray(3, c);
-            OctantFinder ofinder = new OctantFinder(center);
             Vertex v = new Vertex(0, 0, 0);
-            for (int i = 0; i < c; i++)
+            CompactBitArray memberships = new CompactBitArray(3, vr.getCount());
+            long vertexIndex = 0;
+            OctantFinder ofinder = new OctantFinder(center);
+            while (vr.hasNext())
             {
-                vr.get(i, v);
-                memberships.set(i, ofinder.getNode(v.x, v.y, v.z));
+                vr.next(v);
+                memberships.set(vertexIndex, ofinder.getNode(v.x, v.y, v.z));
+                vertexIndex++;
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }

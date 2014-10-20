@@ -95,7 +95,15 @@ public class FileBuilder
         String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
 
-        OutputValidator.run(outputFile);
+        try
+        {
+            OutputValidator.run(outputFile);
+        }
+        catch (RuntimeException e)
+        {
+            System.err.println("Validation Failed!");
+            e.printStackTrace();
+        }
 
         if (!keepNodes)
         {

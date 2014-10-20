@@ -64,13 +64,14 @@ public class CroppingRunnable implements Runnable
 
                 this.progress.changeTask("Cropping Vertices", false);
 
-                try (MemoryMappedVertexReader vr = new MemoryMappedVertexReader(reader))
+                try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
                 {
+                    long vertexIndex = 0;
                     long currentIndex = 0;
                     Vertex v = new Vertex(0, 0, 0);
-                    for (long i = 0; i < numVertices; i++)
+                    while (vr.hasNext())
                     {
-                        vr.get(i, v);
+                        vr.next(v);
 
                         float x = this.blueprint.av.getPrimaryAxisValue(v);
                         float y = this.blueprint.av.getSecondaryAxisValue(v);
@@ -80,7 +81,7 @@ public class CroppingRunnable implements Runnable
                         {
                             if (line.doesExclude(x, y))
                             {
-                                isExcluded.set(i, 1);
+                                isExcluded.set(vertexIndex, 1);
                                 numExcludedVertices++;
                                 excluded = true;
                                 break;
@@ -95,11 +96,12 @@ public class CroppingRunnable implements Runnable
                         }
                         else
                         {
-                            vertexIndexMap.put((int) (i), (int) (currentIndex++));
+                            vertexIndexMap.put((int) (vertexIndex), (int) (currentIndex++));
                             v.writeToStream(ostream, vr.getVam());
                         }
 
-                        this.progress.report((i / (float) numVertices) * 0.5f);
+                        this.progress.report((vertexIndex / (float) numVertices) * 0.5f);
+                        vertexIndex++;
                     }
                 }
 
