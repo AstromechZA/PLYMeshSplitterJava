@@ -43,7 +43,6 @@ public class FileBuilder
             int numLevels = (int) Math.ceil(Math.log(numLeaves) / Math.log(membershipBuilder.getSplitRatio()));
 
             Outputter.info1f("Calculated Tree Depth: %d (%d splits)%n", numLevels + 1, numLevels);
-
             for (int i = 0; i < numLevels; i++)
             {
                 Outputter.info2f("Ratio for lvl %d: %f%n", i, simplifier.getSimplificationRatioForDepth(i, numLevels));
@@ -53,10 +52,8 @@ public class FileBuilder
         else
         {
             Outputter.info1ln("Calculated Tree Depth: N/A (unbalanced tree)");
-
             stopCondition = new LowerFaceBoundStoppingCondition(Constants.MAX_FACES_PER_LEAF);
         }
-
 
         return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplifier, stopCondition, reporter);
     }

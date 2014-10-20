@@ -19,7 +19,7 @@ public class OutputValidator
     {
         try (ReliableBufferedInputStream istream = new ReliableBufferedInputStream(new FileInputStream(file)))
         {
-            int streamLength = istream.available();
+            long streamLength = file.length();
             int headerLength = Useful.readIntLE(istream);
             String jsonHeader = Useful.readString(istream, headerLength);
             Outputter.info2f("header length: %s%n", headerLength);
@@ -118,7 +118,6 @@ public class OutputValidator
                     entry.getValue().total
                 );
             }
-
         }
     }
 
