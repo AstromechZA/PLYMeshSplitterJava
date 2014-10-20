@@ -2,11 +2,10 @@ package org.uct.cs.simplify.ply.reader;
 
 import org.uct.cs.simplify.ply.header.*;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.LinkedHashMap;
 
 public class PLYReader
@@ -56,9 +55,10 @@ public class PLYReader
         long dataOffset = this.header.getDataOffset();
         long payloadSize = this.file.length() - dataOffset;
 
-        try (RandomAccessFile raf = new RandomAccessFile(this.file, "r"); FileChannel fc = raf.getChannel())
+        try (BufferedInputStream istream = new BufferedInputStream(new FileInputStream(this.file)))
         {
-            MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, dataOffset, payloadSize);
+            // skip to start
+            istream.skip(dataOffset);
 
             int cursor = 0;
 
@@ -80,29 +80,31 @@ public class PLYReader
                     this.elementDimensions
                         .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
                     break;
-                } else if (e.getItemSize() != null)
+                }
+                else if (e.getItemSize() != null)
                 {
                     long elementSize = e.getCount() * e.getItemSize();
                     this.elementDimensions
                         .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
+                    istream.skip(elementSize);
                     cursor += elementSize;
-                    buffer.position(cursor);
-                } else
+                }
+                else
                 {
-                    long elementSize = calculateSizeOfListElement(e, buffer);
+                    long elementSize = calculateSizeOfListElement(e, istream);
                     this.elementDimensions
                         .put(e.getName(), new ElementDimension(dataOffset + elementPosition, elementSize));
 
+                    istream.skip(elementSize);
                     cursor += elementSize;
-                    buffer.position(cursor);
                 }
             }
         }
 
     }
 
-    private static long calculateSizeOfListElement(PLYElement e, MappedByteBuffer buffer)
+    private static long calculateSizeOfListElement(PLYElement e, BufferedInputStream stream) throws IOException
     {
         long total = 0;
 
@@ -114,14 +116,14 @@ public class PLYReader
                 if (p instanceof PLYListProperty)
                 {
                     PLYListProperty pp = (PLYListProperty) p;
-                    int listSize = (int) pp.getLengthTypeReader().read(buffer);
+                    int listSize = (int) pp.getLengthTypeReader().read(stream);
                     int s = listSize * pp.getLengthTypeReader().bytesAtATime();
-                    buffer.position(buffer.position() + s);
+                    stream.skip(s);
                 }
                 else if (p instanceof PLYProperty)
                 {
                     PLYProperty pp = (PLYProperty) p;
-                    buffer.position(buffer.position() + pp.getTypeReader().bytesAtATime());
+                    stream.skip(pp.getTypeReader().bytesAtATime());
                 }
             }
         }
