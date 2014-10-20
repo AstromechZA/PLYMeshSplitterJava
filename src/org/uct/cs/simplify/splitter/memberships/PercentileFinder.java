@@ -11,7 +11,7 @@ import java.io.IOException;
 public class PercentileFinder
 {
     public static final int MAX_ITERATIONS = 10;
-    private static final double APPROXIMATION_THRESHOLD = 0.001;
+    private static final double APPROXIMATION_THRESHOLD = 0.00001;
     private final PLYReader modelReader;
     private final IAxisReader axisReader;
 
