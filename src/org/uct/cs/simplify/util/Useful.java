@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 public class Useful
 {
 
-    public static final long NANOSECONDS_PER_HOUR = 360_000_000_000L;
+    public static final long NANOSECONDS_PER_HOUR = 3_600_000_000_000L;
     public static final long NANOSECONDS_PER_MINUTE = 60_000_000_000L;
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
     public static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
