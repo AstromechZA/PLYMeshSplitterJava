@@ -64,7 +64,7 @@ public class NodeSplitter
     {
         try (BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(subNodeFile)))
         {
-            try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
+            try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
             {
                 Vertex v = new Vertex(0, 0, 0);
                 VertexAttrMap vam = vr.getVam();

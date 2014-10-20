@@ -56,7 +56,7 @@ public class PLYDataCompressor
         long vbuffersize = vertexE.getCount() * BYTES_PER_VERTEX;
         long fbuffersize = faceE.getCount() * BYTES_PER_FACE;
 
-        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
+        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
         {
             Vertex v = new Vertex(0, 0, 0);
             while (vr.hasNext())

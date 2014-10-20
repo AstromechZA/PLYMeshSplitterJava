@@ -64,7 +64,7 @@ public class CroppingRunnable implements Runnable
 
                 this.progress.changeTask("Cropping Vertices", false);
 
-                try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
+                try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
                 {
                     long vertexIndex = 0;
                     long currentIndex = 0;

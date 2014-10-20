@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-public class FastBufferedVertexReader extends StreamingVertexReader implements AutoCloseable
+public class ReliableBufferedVertexReader extends StreamingVertexReader implements AutoCloseable
 {
     protected final PLYReader reader;
     protected final PLYElement vertexElement;
@@ -23,7 +23,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     protected FileChannel inputChannel;
 
 
-    public FastBufferedVertexReader(PLYReader reader) throws IOException
+    public ReliableBufferedVertexReader(PLYReader reader) throws IOException
     {
         this.reader = reader;
         this.vertexElement = reader.getHeader().getElement("vertex");
@@ -87,7 +87,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
         return vam;
     }
 
-    public void skipForwardTo(int i) throws IOException
+    public void skipForwardTo(long i) throws IOException
     {
         if (index == i)
         {

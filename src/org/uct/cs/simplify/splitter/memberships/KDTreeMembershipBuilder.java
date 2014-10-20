@@ -3,7 +3,7 @@ package org.uct.cs.simplify.splitter.memberships;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.model.FastBufferedVertexReader;
+import org.uct.cs.simplify.model.ReliableBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
@@ -26,7 +26,7 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
 
         TIntObjectMap<XBoundingBox> subNodes = splitBBIntoSubnodes(boundingBox, longest);
 
-        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
+        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
         {
             Vertex v = new Vertex(0, 0, 0);
             CompactBitArray memberships = new CompactBitArray(1, vr.getCount());
