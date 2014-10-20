@@ -24,7 +24,7 @@ public class PercentileFinder
     public double findPercentile(float percentile, double lowerBound, double upperBound) throws IOException
     {
         long numVertices = modelReader.getHeader().getElement("vertex").getCount();
-        long skips = (numVertices / 10_000_000);
+        long skips = (numVertices / 100_000_000);
         double divNumVertices = numVertices / (double) (skips + 1);
         long percentileTarget = (long) (divNumVertices * percentile);
         long maxError = (long) (APPROXIMATION_THRESHOLD * divNumVertices);
