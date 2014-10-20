@@ -129,6 +129,8 @@ public class FileBuilder
         File outputFile = new File(cmd.getOptionValue("output"));
         File outputDir = outputFile.getParentFile();
 
+        if (cmd.hasOption("d")) Outputter.setCurrentLevel(Outputter.DEBUG);
+
         String jsonHeader = run(
             inputFile,
             outputFile,
@@ -173,6 +175,8 @@ public class FileBuilder
         Option dumpJSON = new Option("j", "dumpjson", false, "Dump the JSON header into separate file");
         options.addOption(dumpJSON);
 
+        Option debug = new Option("d", "debug", false, "Debug output");
+        options.addOption(debug);
 
         CommandLine cmd;
         try

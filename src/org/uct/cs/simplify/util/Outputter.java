@@ -8,6 +8,11 @@ public class Outputter
     public static final int INFO_2 = 2;
     public static final int INFO_3 = 3;
 
+    public static void setCurrentLevel(int l)
+    {
+        currentLevel = l;
+    }
+
     public static void println(int logLevel, Object o)
     {
         if (logLevel >= currentLevel) System.out.println(o);

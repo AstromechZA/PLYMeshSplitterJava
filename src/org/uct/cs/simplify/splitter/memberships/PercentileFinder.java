@@ -63,8 +63,6 @@ public class PercentileFinder
 
     private int testPercentile(FastBufferedVertexReader vr, double approximate, long minThreshold, long maxThreshold) throws IOException
     {
-        long numVertices = vr.getCount();
-
         long count = 0;
         Vertex v = new Vertex(0, 0, 0);
         while (vr.hasNext())
@@ -81,8 +79,6 @@ public class PercentileFinder
 
     private int testPercentile(FastBufferedVertexReader vr, double approximate, long minThreshold, long maxThreshold, long skips) throws IOException
     {
-        long numVertices = vr.getCount();
-
         long count = 0;
         Vertex v = new Vertex(0, 0, 0);
         while (vr.hasNext())

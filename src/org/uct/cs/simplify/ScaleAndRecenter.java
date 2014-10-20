@@ -60,10 +60,6 @@ public class ScaleAndRecenter
         PLYElement faceE = reader.getHeader().getElement("face");
         long numVertices = vertexE.getCount();
         long numFaces = faceE.getCount();
-        long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
-        long vertexElementLength = reader.getElementDimension("vertex").getLength();
-        long faceElementBegin = reader.getElementDimension("face").getOffset();
-        long faceElementLength = reader.getElementDimension("face").getLength();
 
         if (numVertices > Integer.MAX_VALUE)
         {
