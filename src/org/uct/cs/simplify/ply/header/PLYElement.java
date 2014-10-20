@@ -13,7 +13,8 @@ public class PLYElement
     private final String name;
     private final long count;
     private final List<PLYPropertyBase> properties;
-    private Integer itemSize;
+    private int itemSize;
+    private boolean containsListProp;
 
     public PLYElement(String name, long count)
     {
@@ -22,6 +23,7 @@ public class PLYElement
         this.itemSize = 0;
         //noinspection CollectionWithoutInitialCapacity
         this.properties = new ArrayList<>();
+        this.containsListProp = false;
     }
 
     public static PLYElement FromString(String s)
@@ -34,11 +36,12 @@ public class PLYElement
     public void addProperty(PLYPropertyBase p)
     {
         this.properties.add(p);
-        if (this.itemSize != null)
+        if (!this.containsListProp)
         {
             if (p instanceof PLYListProperty)
             {
-                this.itemSize = null;
+                this.containsListProp = true;
+                this.itemSize = 0;
             }
             else if (p instanceof PLYProperty)
             {
@@ -57,9 +60,14 @@ public class PLYElement
         return this.count;
     }
 
-    public Integer getItemSize()
+    public int getItemSize()
     {
         return this.itemSize;
+    }
+
+    public boolean hasListProperty()
+    {
+        return this.containsListProp;
     }
 
     public List<PLYPropertyBase> getProperties()

@@ -23,7 +23,7 @@ public class CompactBitArray
         this.blocksPerInt = INTEGER_SIZE / this.blockLength;
 
         // now we setup
-        int numBlocks = (int) Math.ceil((float) this.blockLength * this.length / INTEGER_SIZE);
+        int numBlocks = (int) Math.ceil(((long) this.blockLength * this.length) / (double) INTEGER_SIZE);
         this.data = new int[ numBlocks ];
         this.bitMask = (1 << this.bits) - 1;
     }

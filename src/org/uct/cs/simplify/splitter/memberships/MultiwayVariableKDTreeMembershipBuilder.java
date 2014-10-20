@@ -3,10 +3,11 @@ package org.uct.cs.simplify.splitter.memberships;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import javafx.geometry.Point3D;
-import org.uct.cs.simplify.model.ReliableBufferedVertexReader;
+import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
+import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 import org.uct.cs.simplify.util.axis.Axis;
 import org.uct.cs.simplify.util.axis.IAxisReader;
@@ -67,24 +68,27 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
         maxPoint = boundingBox.getMax();
         subNodes.put(nodeId, new XBoundingBox(minPoint, maxPoint));
 
-        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
+        try (FastBufferedVertexReader vr = new FastBufferedVertexReader(reader))
         {
             Vertex v = new Vertex(0, 0, 0);
             int numBits = (int) Math.ceil(Math.log(this.order) / Math.log(2));
             CompactBitArray memberships = new CompactBitArray(numBits, vr.getCount());
-            long vertexIndex = 0;
-            while (vr.hasNext())
+            try (ProgressBar pb = new ProgressBar("Scanning", vr.getCount()))
             {
-                vr.next(v);
-                float value = axisReader.read(v);
-                int membership = 0;
-                for (double point : splitPoints)
+                long vertexIndex = 0;
+                while (vr.hasNext())
                 {
-                    if (value < point) break;
-                    membership++;
+                    vr.next(v);
+                    int membership = 0;
+                    for (double point : splitPoints)
+                    {
+                        if (axisReader.read(v) < point) break;
+                        membership++;
+                    }
+                    memberships.set(vertexIndex, membership);
+                    vertexIndex++;
+                    pb.tick();
                 }
-                memberships.set(vertexIndex, membership);
-                vertexIndex++;
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }

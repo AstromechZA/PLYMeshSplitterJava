@@ -3,12 +3,8 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.uct.cs.simplify.util.OrderedArrayList;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.ProgressBar;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,7 +17,7 @@ public class OutputValidator
 
     public static void run(File file) throws IOException
     {
-        try (BufferedInputStream istream = new BufferedInputStream(new FileInputStream(file)))
+        try (ReliableBufferedInputStream istream = new ReliableBufferedInputStream(new FileInputStream(file)))
         {
             int streamLength = istream.available();
             int headerLength = Useful.readIntLE(istream);

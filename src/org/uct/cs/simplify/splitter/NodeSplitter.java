@@ -52,7 +52,6 @@ public class NodeSplitter
                 PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
-                System.out.println(result.numFaces);
             }
             TempFileManager.release(tempFaceFile);
         }

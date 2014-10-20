@@ -56,9 +56,9 @@ public class PLYDataCompressor
         long vbuffersize = vertexE.getCount() * BYTES_PER_VERTEX;
         long fbuffersize = faceE.getCount() * BYTES_PER_FACE;
 
-        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
+        Vertex v = new Vertex(0, 0, 0);
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
         {
-            Vertex v = new Vertex(0, 0, 0);
             while (vr.hasNext())
             {
                 vr.next(v);
@@ -66,7 +66,10 @@ public class PLYDataCompressor
                 Useful.writeFloatLE(ostream, v.y);
                 Useful.writeFloatLE(ostream, v.z);
             }
-            vr.reset();
+        }
+
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+        {
             while (vr.hasNext())
             {
                 vr.next(v);

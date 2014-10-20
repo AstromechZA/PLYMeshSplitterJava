@@ -2,18 +2,16 @@ package org.uct.cs.simplify;
 
 import javafx.geometry.Point3D;
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.model.BoundsFinder;
-import org.uct.cs.simplify.model.Vertex;
-import org.uct.cs.simplify.model.VertexAttrMap;
-import org.uct.cs.simplify.ply.header.*;
+import org.uct.cs.simplify.model.*;
+import org.uct.cs.simplify.ply.header.PLYElement;
+import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.*;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class ScaleAndRecenter
 {
@@ -38,7 +36,6 @@ public class ScaleAndRecenter
             (bb.getMinZ() + bb.getMaxZ()) / 2
         );
 
-
         // calculate transform
         // - mesh size is the length of the longest axis
         double scale = targetSize / (2 * Math.abs(
@@ -53,94 +50,69 @@ public class ScaleAndRecenter
         // - translate to center
         Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
-        Outputter.info2f("X: %s -> %s%n", bb.getMinX(), bb.getMaxX());
-        Outputter.info2f("Y: %s -> %s%n", bb.getMinY(), bb.getMaxY());
-        Outputter.info2f("Z: %s -> %s%n", bb.getMinZ(), bb.getMaxZ());
-
         // debug
         Outputter.info3ln("Rescaling and Centering...");
         Outputter.info2f("%s -> %s%n", reader.getFile(), outputFile);
         Outputter.debugf("Scale ratio: %f%n", scale);
         Outputter.info1f("Swapping YZ axis: %s%n", swapYZ);
 
-        try (FileChannel fcIN = new FileInputStream(reader.getFile()).getChannel())
+        PLYElement vertexE = reader.getHeader().getElement("vertex");
+        PLYElement faceE = reader.getHeader().getElement("face");
+        long numVertices = vertexE.getCount();
+        long numFaces = faceE.getCount();
+        long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
+        long vertexElementLength = reader.getElementDimension("vertex").getLength();
+        long faceElementBegin = reader.getElementDimension("face").getOffset();
+        long faceElementLength = reader.getElementDimension("face").getLength();
+
+        if (numVertices > Integer.MAX_VALUE)
         {
-            PLYElement vertexE = reader.getHeader().getElement("vertex");
-            PLYElement faceE = reader.getHeader().getElement("face");
-            long numVertices = vertexE.getCount();
-            long numFaces = faceE.getCount();
-            long vertexElementBegin = reader.getElementDimension("vertex").getOffset();
-            long faceElementBegin = reader.getElementDimension("face").getOffset();
-            long faceElementLength = reader.getElementDimension("face").getLength();
+            throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + Integer.MAX_VALUE + " vertices.");
+        }
 
-            try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
+        if (numFaces > (Integer.MAX_VALUE * 2L))
+        {
+            throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + (Integer.MAX_VALUE * 2L) + " faces.");
+        }
+
+        try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
+        {
+            VertexAttrMap vam = new VertexAttrMap(vertexE);
+            // construct new header
+            PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
+
+            ostream.write((header + "\n").getBytes());
+
+            try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
             {
-                VertexAttrMap vam = new VertexAttrMap(vertexE);
-                // construct new header
-                PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
-
-                ostream.write((header + "\n").getBytes());
-
-                fcIN.position(vertexElementBegin);
-                ByteBuffer blockBufferIN = ByteBuffer.allocateDirect(vertexE.getItemSize());
-                blockBufferIN.order(ByteOrder.LITTLE_ENDIAN);
-
                 try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                 {
                     Vertex v = new Vertex(0, 0, 0);
-                    for (long n = 0; n < numVertices; n++)
+                    while (vr.hasNext())
                     {
-                        fcIN.read(blockBufferIN);
-                        blockBufferIN.flip();
-
-                        v.read(blockBufferIN, vam);
+                        vr.next(v);
                         v.transform(translate, (float) scale);
                         if (swapYZ) v.swapYZ();
                         v.writeToStream(ostream, vam);
-
-                        blockBufferIN.clear();
                         progress.tick();
                     }
                 }
+            }
 
-                fcIN.position(reader.getElementDimension("face").getOffset());
-                MappedByteBuffer buffer = fcIN.map(FileChannel.MapMode.READ_ONLY, faceElementBegin, faceElementLength);
-                buffer.order(ByteOrder.LITTLE_ENDIAN);
-
+            try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
+            {
                 try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
                 {
-                    for (long i = 0; i < numFaces; i++)
+                    Face f = new Face(0, 0, 0);
+                    while (fr.hasNext())
                     {
-                        for (PLYPropertyBase base : faceE.getProperties())
-                        {
-                            if (base.getName().equals("vertex_indices"))
-                            {
-                                buffer.get();
-                                ostream.write(3);
-                                Useful.writeIntLE(ostream, buffer.getInt());
-                                Useful.writeIntLE(ostream, buffer.getInt());
-                                Useful.writeIntLE(ostream, buffer.getInt());
-                            }
-                            else if (base instanceof PLYListProperty)
-                            {
-                                PLYListProperty listProperty = (PLYListProperty) base;
-                                int l = (int) listProperty.getLengthTypeReader().read(buffer);
-                                for (int j = 0; j < l; j++)
-                                {
-                                    listProperty.getTypeReader().read(buffer);
-                                }
-                            }
-                            else if (base instanceof PLYProperty)
-                            {
-                                ((PLYProperty) base).getTypeReader().read(buffer);
-                            }
-                        }
+                        fr.next(f);
+                        f.writeToStream(ostream);
                         progress.tick();
                     }
                 }
             }
         }
-
         return scale;
     }
 

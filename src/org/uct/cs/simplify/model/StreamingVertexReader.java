@@ -13,4 +13,6 @@ public abstract class StreamingVertexReader implements AutoCloseable
     public abstract long getCount();
 
     public abstract void close() throws IOException;
+
+    public abstract VertexAttrMap getVam();
 }

@@ -73,53 +73,53 @@ public class FileBuilder
     )
         throws IOException, InterruptedException
     {
-        StatRecorder sr = new StatRecorder();
-        // use the directory of the outputfile as the default output directory
-        File outputDir = outputFile.getParentFile();
-
-        // generate tempfiles in the outputdir
-        TempFileManager.setWorkingDirectory(outputDir.toPath());
-
-        // create scaled and recentered version of input
-        File scaledFile = TempFileManager.provide("rescaled", ".ply");
-        double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, Constants.PHF_RESCALE_SIZE, swapYZ);
-
-        // build tree
-        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
-
-        // additional json keys
-        Map<String, String> additionalJSON = new HashMap<>();
-        additionalJSON.put("scale_ratio", "" + scaleRatio);
-
-        // compile into output file
-        String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
-        Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
-
-        try
+        try (StatRecorder sr = new StatRecorder())
         {
-            OutputValidator.run(outputFile);
-        }
-        catch (RuntimeException e)
-        {
-            System.err.println("Validation Failed!");
-            e.printStackTrace();
-        }
+            // use the directory of the outputfile as the default output directory
+            File outputDir = outputFile.getParentFile();
 
-        if (!keepNodes)
-        {
+            // generate tempfiles in the outputdir
+            TempFileManager.setWorkingDirectory(outputDir.toPath());
+
+            // create scaled and recentered version of input
+            File scaledFile = TempFileManager.provide("rescaled", ".ply");
+            double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, Constants.PHF_RESCALE_SIZE, swapYZ);
+
+            // build tree
+            PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
+
+            // additional json keys
+            Map<String, String> additionalJSON = new HashMap<>();
+            additionalJSON.put("scale_ratio", "" + scaleRatio);
+
+            // compile into output file
+            String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
+            Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
+
             try
             {
-                TempFileManager.clear();
+                OutputValidator.run(outputFile);
             }
-            catch (InterruptedException e)
+            catch (RuntimeException e)
             {
+                System.err.println("Validation Failed!");
                 e.printStackTrace();
             }
-        }
 
-        sr.close();
-        //sr.dump(new File(outputDir, "memdump"));
-        return jsonHeader;
+            if (!keepNodes)
+            {
+                try
+                {
+                    TempFileManager.clear();
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+            return jsonHeader;
+        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException

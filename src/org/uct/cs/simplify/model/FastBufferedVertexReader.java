@@ -2,28 +2,24 @@ package org.uct.cs.simplify.model;
 
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.ReliableBufferedInputStream;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 
-public class ReliableBufferedVertexReader extends StreamingVertexReader implements AutoCloseable
+public class FastBufferedVertexReader extends StreamingVertexReader implements AutoCloseable
 {
     protected final PLYReader reader;
     protected final PLYElement vertexElement;
     protected final VertexAttrMap vam;
     protected final long start;
     protected final int blockSize;
-    protected final ByteBuffer blockBuffer;
+    protected final byte[] blockBuffer;
     protected long index;
     protected long count;
-    protected FileInputStream istream;
-    protected FileChannel inputChannel;
+    protected ReliableBufferedInputStream istream;
 
-
-    public ReliableBufferedVertexReader(PLYReader reader) throws IOException
+    public FastBufferedVertexReader(PLYReader reader) throws IOException
     {
         this.reader = reader;
         this.vertexElement = reader.getHeader().getElement("vertex");
@@ -32,12 +28,10 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
 
         this.start = reader.getElementDimension("vertex").getOffset();
 
-        this.istream = new FileInputStream(reader.getFile());
-        this.inputChannel = this.istream.getChannel();
-        this.inputChannel.position(this.start);
+        this.istream = new ReliableBufferedInputStream(new FileInputStream(reader.getFile()));
+        this.istream.skip(this.start);
         this.blockSize = this.vertexElement.getItemSize();
-        this.blockBuffer = ByteBuffer.allocateDirect(this.blockSize);
-        this.blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        this.blockBuffer = new byte[ this.blockSize ];
     }
 
     @Override
@@ -54,14 +48,18 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
         return v;
     }
 
+    public void skipNext(long n) throws IOException
+    {
+        this.index += n;
+        this.istream.skip(n * this.blockSize);
+    }
+
     @Override
     public void next(Vertex v) throws IOException
     {
-        inputChannel.read(blockBuffer);
-        blockBuffer.flip();
+        this.istream.read(this.blockBuffer, 0, this.blockSize);
         v.read(blockBuffer, vam);
         this.index++;
-        blockBuffer.clear();
     }
 
     @Override
@@ -76,36 +74,10 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
         this.istream.close();
     }
 
-    public void reset() throws IOException
-    {
-        this.index = 0;
-        this.inputChannel.position(this.start);
-    }
-
     @Override
     public VertexAttrMap getVam()
     {
-        return vam;
+        return this.vam;
     }
 
-    public void skipForwardTo(long i) throws IOException
-    {
-        if (index == i)
-        {
-            return;
-        }
-        if (index <= i)
-        {
-            this.inputChannel.position(this.start + i * this.blockSize);
-        }
-        else
-        {
-            throw new RuntimeException("Cannot skip backwards! (" + index + " -> " + i);
-        }
-    }
-
-    public long getIndex()
-    {
-        return index;
-    }
 }

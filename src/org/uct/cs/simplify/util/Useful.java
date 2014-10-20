@@ -66,10 +66,10 @@ public class Useful
 
     public static int readIntLE(byte[] input, int pos)
     {
-        int o = input[pos] & BYTE_MASK;
-        o |= (input[pos + 1] & BYTE_MASK) << 8;
-        o |= (input[pos + 2] & BYTE_MASK) << (8 * 2);
-        o |= (input[pos + 3] & BYTE_MASK) << (8 * 3);
+        int o = input[ pos ] & BYTE_MASK;
+        o |= (input[ pos + 1 ] & BYTE_MASK) << 8;
+        o |= (input[ pos + 2 ] & BYTE_MASK) << (8 * 2);
+        o |= (input[ pos + 3 ] & BYTE_MASK) << (8 * 3);
         return o;
     }
 
@@ -104,7 +104,7 @@ public class Useful
     public static String readString(InputStream istream, int length) throws IOException
     {
         byte[] buff = new byte[ length ];
-        istream.read(buff);
+        istream.read(buff, 0, length);
         return new String(buff);
     }
 

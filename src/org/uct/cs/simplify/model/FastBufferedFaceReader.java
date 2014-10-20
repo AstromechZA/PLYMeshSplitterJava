@@ -2,9 +2,9 @@ package org.uct.cs.simplify.model;
 
 import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.ReliableBufferedInputStream;
 import org.uct.cs.simplify.util.Useful;
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ public class FastBufferedFaceReader extends StreamingFaceReader implements AutoC
     protected final PLYElement faceElement;
     protected long index;
     protected long count;
-    protected BufferedInputStream istream;
+    protected ReliableBufferedInputStream istream;
 
     public FastBufferedFaceReader(PLYReader reader) throws IOException
     {
@@ -22,7 +22,8 @@ public class FastBufferedFaceReader extends StreamingFaceReader implements AutoC
         this.faceElement = reader.getHeader().getElement("face");
         this.count = this.faceElement.getCount();
 
-        this.istream = new BufferedInputStream(new FileInputStream(reader.getFile()));
+        this.istream = new ReliableBufferedInputStream(new FileInputStream(reader.getFile()));
+
         this.istream.skip(reader.getElementDimension("face").getOffset());
     }
 

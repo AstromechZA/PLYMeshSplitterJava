@@ -18,7 +18,7 @@ public class BoundsFinder
 
     private static XBoundingBox getBoundingBoxInner(PLYReader reader, int nth) throws IOException
     {
-        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
         {
             float minx = Float.MAX_VALUE,
                 maxx = -Float.MAX_VALUE,

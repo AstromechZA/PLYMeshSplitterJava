@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.ply.datatypes;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public interface IDataTypeReader
@@ -23,5 +23,5 @@ public interface IDataTypeReader
         else throw new IllegalArgumentException("Unknown DataType " + dt);
     }
 
-    double read(BufferedInputStream stream) throws IOException;
+    double read(InputStream stream) throws IOException;
 }

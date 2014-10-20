@@ -66,7 +66,7 @@ public class NaiveMeshStitcher
         int stitched = 0;
         try (
             BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(vertexFile, true));
-            ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader2)
+            StreamingVertexReader vr = new FastBufferedVertexReader(reader2)
         )
         {
             Vertex v = new Vertex(0, 0, 0);
@@ -132,7 +132,7 @@ public class NaiveMeshStitcher
     private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, long mesh1NumVertices) throws IOException
     {
         TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap((int) mesh1NumVertices);
-        try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader1))
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader1))
         {
             Vertex v = new Vertex(0, 0, 0);
             int vertexIndex = 0;

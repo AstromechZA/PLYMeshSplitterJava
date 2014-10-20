@@ -1,7 +1,7 @@
 package org.uct.cs.simplify.ply.datatypes;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 public class charDataTypeReader implements IDataTypeReader
@@ -13,7 +13,7 @@ public class charDataTypeReader implements IDataTypeReader
     }
 
     @Override
-    public double read(BufferedInputStream stream) throws IOException
+    public double read(InputStream stream) throws IOException
     {
         return stream.read();
     }
