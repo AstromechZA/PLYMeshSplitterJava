@@ -147,13 +147,11 @@ public class OutputValidator
                 if (simpSummaries.containsKey(entry.getKey()))
                 {
                     NumberSummary ss = simpSummaries.get(entry.getKey());
-                    Outputter.info1f("   | nodes: %4d | min: %8.2f | max: %8.2f | median: %11.2f | mean: %11.2f | total: %.2f %n",
-                        ss.count,
+                    Outputter.info1f("   simplification ratios: | min: %5.5f | max: %5.5f | median: %5.5f | mean: %5.5f %n",
                         ss.min,
                         ss.max,
                         ss.p50,
-                        ss.mean,
-                        ss.total
+                        ss.mean
                     );
                 }
             }
