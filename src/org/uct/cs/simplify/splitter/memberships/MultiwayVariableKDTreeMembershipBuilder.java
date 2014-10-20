@@ -7,6 +7,7 @@ import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 import org.uct.cs.simplify.util.axis.Axis;
@@ -47,6 +48,8 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
             lastSplitPoint = percentileFinder.findPercentile(i * div, lastSplitPoint, max);
             splitPoints[ i - 1 ] = lastSplitPoint;
         }
+
+        Outputter.debugln("Splitpoints: " + splitPoints.toString());
 
         // build subnode bounding boxes
         TIntObjectMap<XBoundingBox> subNodes = new TIntObjectHashMap<>(this.order);

@@ -52,12 +52,14 @@ public class NodeSplitter
                 PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
                 child.setDepth(parent.getDepth() + 1);
                 output.add(child);
+                Outputter.debugf("Subnode size: %d faces.%n", result.numFaces);
             }
             TempFileManager.release(tempFaceFile);
         }
 
         TempFileManager.release(reader.getFile());
 
+        Outputter.debugln("Splitting finished");
         return output;
     }
 
@@ -163,7 +165,7 @@ public class NodeSplitter
     private static class GatheringResult
     {
         public final long numFaces;
-        public final int numVertices;
+        public final long numVertices;
         public final IntIntHashMapWithKeyList vertexIndexMap;
 
         public GatheringResult(long numFacesInSubnode, IntIntHashMapWithKeyList vertexIndexMap)

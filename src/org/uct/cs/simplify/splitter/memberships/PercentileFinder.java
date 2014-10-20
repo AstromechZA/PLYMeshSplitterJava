@@ -3,6 +3,7 @@ package org.uct.cs.simplify.splitter.memberships;
 import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
+import org.uct.cs.simplify.util.Outputter;
 import org.uct.cs.simplify.util.axis.IAxisReader;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.io.IOException;
 public class PercentileFinder
 {
     public static final int MAX_ITERATIONS = 10;
-    private static final double APPROXIMATION_THRESHOLD = 0.01;
+    private static final double APPROXIMATION_THRESHOLD = 0.001;
     private final PLYReader modelReader;
     private final IAxisReader axisReader;
 
@@ -22,10 +23,11 @@ public class PercentileFinder
 
     public double findPercentile(float percentile, double lowerBound, double upperBound) throws IOException
     {
-
         long numVertices = modelReader.getHeader().getElement("vertex").getCount();
-        long percentileTarget = (long) (numVertices * percentile);
-        long maxError = (long) (APPROXIMATION_THRESHOLD * numVertices);
+        long skips = (numVertices / 10_000_000);
+        double divNumVertices = numVertices / (double) (skips + 1);
+        long percentileTarget = (long) (divNumVertices * percentile);
+        long maxError = (long) (APPROXIMATION_THRESHOLD * divNumVertices);
         long maxThreshold = percentileTarget + maxError;
         long minThreshold = percentileTarget - maxError;
 
@@ -33,13 +35,13 @@ public class PercentileFinder
         double max = upperBound;
         double approximate = (min + max) / 2;
 
-        long skips = (numVertices / 100_000_000) + 1;
+        Outputter.debugf("attempting to find p%d from %d vertices (skip %d)%n", (int) (percentile * 100), (long) divNumVertices, skips);
 
         for (int i = 0; i < MAX_ITERATIONS; i++)
         {
             try (FastBufferedVertexReader vr = new FastBufferedVertexReader(this.modelReader))
             {
-                int swing = (skips == 1) ?
+                int swing = (skips == 0) ?
                     testPercentile(vr, approximate, minThreshold, maxThreshold)
                     :
                     testPercentile(vr, approximate, minThreshold, maxThreshold, skips);

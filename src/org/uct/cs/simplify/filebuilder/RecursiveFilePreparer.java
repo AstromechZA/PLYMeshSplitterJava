@@ -80,6 +80,7 @@ public class RecursiveFilePreparer
                 processedFiles.add(n.getLinkedFile());
             }
 
+            Outputter.debugf("Stitching %d files%n", processedFiles.size());
             File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
 
             // load details of stitched model
