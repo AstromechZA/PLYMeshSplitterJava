@@ -147,7 +147,7 @@ public class OutputValidator
                 if (simpSummaries.containsKey(entry.getKey()))
                 {
                     NumberSummary ss = simpSummaries.get(entry.getKey());
-                    Outputter.info1f("   simplification ratios: | min: %5.5f | max: %5.5f | median: %5.5f | mean: %5.5f %n",
+                    Outputter.info1f("   | simplification ratios: | min: %5.5f | max: %5.5f | median: %5.5f | mean: %5.5f %n",
                         ss.min,
                         ss.max,
                         ss.p50,
