@@ -73,9 +73,6 @@ public class OutputValidator
                             byte r = (byte) istream.read();
                             byte g = (byte) istream.read();
                             byte b = (byte) istream.read();
-
-                            check(r, g);
-                            check(g, b);
                         }
                     }
 
