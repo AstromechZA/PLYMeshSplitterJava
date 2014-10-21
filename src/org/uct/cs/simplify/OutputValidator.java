@@ -68,9 +68,9 @@ public class OutputValidator
                     {
                         for (long i = 0; i < node.numVertices; i++)
                         {
-                            byte r = (byte) istream.read();
-                            byte g = (byte) istream.read();
-                            byte b = (byte) istream.read();
+                            istream.read();
+                            istream.read();
+                            istream.read();
                         }
                     }
 
@@ -257,7 +257,7 @@ public class OutputValidator
 
     }
 
-    private static class SomeNode implements Comparable<SomeNode>
+    private static class SomeNode
     {
         public final int id;
         public final int parentId;
@@ -289,12 +289,6 @@ public class OutputValidator
             this.min_z = o.getDouble("min_z");
             this.max_z = o.getDouble("max_z");
             this.depth = o.getInt("depth");
-        }
-
-        @Override
-        public int compareTo(SomeNode o)
-        {
-            return Long.compare(this.blockOffset, o.blockOffset);
         }
     }
 }

@@ -35,7 +35,7 @@ public class FileBuilder
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
         long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
-        SimplificationFactory simplifier = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT, membershipBuilder.getSplitRatio());
+        SimplificationFactory simplifier = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT);
 
         if (membershipBuilder.isBalanced())
         {

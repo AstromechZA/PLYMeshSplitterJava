@@ -5,12 +5,10 @@ import org.uct.cs.simplify.Constants;
 public class SimplificationFactory
 {
     private final float overallRatio;
-    private final int splitRatio;
 
-    public SimplificationFactory(long numFacesInEntireMesh, long numFacesInRoot, int splitRatio)
+    public SimplificationFactory(long numFacesInEntireMesh, long numFacesInRoot)
     {
         this.overallRatio = numFacesInRoot / (float) numFacesInEntireMesh;
-        this.splitRatio = splitRatio;
     }
 
     public float getSimplificationRatioForDepth(int depth, int maxDepth)
@@ -19,7 +17,7 @@ public class SimplificationFactory
         float range = oneOverD * Constants.RATIO_VARIANCE_RANGE;
 
         float start = oneOverD - range;
-        float diff = range * 2.0f / (maxDepth - 1);
+        float diff = (range * 2.0f) / (maxDepth - 1);
 
         float fraction = start + diff * depth;
 

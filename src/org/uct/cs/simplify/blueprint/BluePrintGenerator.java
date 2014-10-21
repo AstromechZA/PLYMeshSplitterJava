@@ -71,9 +71,9 @@ public class BluePrintGenerator
         int w = bi.getWidth();
 
         int center = resolution / 2;
-        float bigdim = (float) Math.max(r.getWidth(), r.getHeight());
+        double bigdim = Math.max(r.getWidth(), r.getHeight());
         int border = 20;
-        float ratio = (resolution - border) / bigdim;
+        double ratio = (resolution - border) / bigdim;
 
         try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
         {
@@ -210,11 +210,11 @@ public class BluePrintGenerator
         public final BufferedImage output;
         public final IAxisValueGetter av;
         public final int center;
-        public final float ratio;
+        public final double ratio;
         public final double centerPrimary;
         public final double centerSecondary;
 
-        public BlueprintGeneratorResult(BufferedImage output, IAxisValueGetter av, int center, float ratio, double centerPrimary, double centerSecondary)
+        public BlueprintGeneratorResult(BufferedImage output, IAxisValueGetter av, int center, double ratio, double centerPrimary, double centerSecondary)
         {
             this.output = output;
             this.av = av;
