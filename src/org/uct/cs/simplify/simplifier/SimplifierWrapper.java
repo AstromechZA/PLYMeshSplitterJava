@@ -15,7 +15,8 @@ public class SimplifierWrapper
 
     static
     {
-        PATH_TO_EXECUTABLE = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + "simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
+        ClassLoader cl = SimplifierWrapper.class.getClassLoader();
+        PATH_TO_EXECUTABLE = cl.getResource(".").getPath() + "simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
     }
 
     public static File simplify(File input, long numFaces)
