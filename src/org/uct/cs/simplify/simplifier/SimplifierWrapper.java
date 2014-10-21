@@ -6,18 +6,13 @@ import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SimplifierWrapper
 {
-    private static final String PATH_TO_EXECUTABLE;
-
-    static
-    {
-        ClassLoader cl = SimplifierWrapper.class.getClassLoader();
-        PATH_TO_EXECUTABLE = cl.getResource(".").getPath() + "simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
-    }
+    private static final String PATH_TO_EXECUTABLE = "simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
 
     public static File simplify(File input, long numFaces)
     throws IOException, InterruptedException
@@ -32,14 +27,18 @@ public class SimplifierWrapper
     }
 
     public static File simplify(File input, long numFaces, boolean preserveBoundary, XBoundingBox bb)
-    throws IOException, InterruptedException
+        throws IOException, InterruptedException
     {
         File tt = TempFileManager.provide("simp", ".ply");
         Outputter.info2f("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
 
         List<String> argsList = new ArrayList<>();
-        argsList.add(PATH_TO_EXECUTABLE);
+
+        String path = SimplifierWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String decodedPath = URLDecoder.decode(path.substring(0, path.lastIndexOf('/')), "UTF-8") + '/';
+
+        argsList.add(decodedPath + PATH_TO_EXECUTABLE);
         argsList.add("" + 0);
         argsList.add(input.getAbsolutePath());
         argsList.add(tt.getAbsolutePath());
