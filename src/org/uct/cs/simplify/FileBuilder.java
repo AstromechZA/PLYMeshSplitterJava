@@ -6,7 +6,7 @@ import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
-import org.uct.cs.simplify.splitter.memberships.*;
+import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
@@ -155,28 +155,7 @@ public class FileBuilder
         IMembershipBuilder mb = Constants.MEMBERSHIP_BUILDER;
         if (cmd.hasOption("hierarchy"))
         {
-            String s = cmd.getOptionValue("hierarchy").toLowerCase();
-            if (s.equals("octree"))
-            {
-                mb = new OcttreeMembershipBuilder();
-            }
-            else if (s.equals("kdtree"))
-            {
-                mb = new KDTreeMembershipBuilder();
-            }
-            else if (s.equals("vkdtree"))
-            {
-                mb = new VariableKDTreeMembershipBuilder();
-            }
-            else if (s.startsWith("mkdtree"))
-            {
-                int n = Integer.parseInt(s.substring(7, 8));
-                mb = new MultiwayVariableKDTreeMembershipBuilder(n);
-            }
-            else
-            {
-                throw new IllegalArgumentException("'" + s + "' is not a valid name for a hiearchy");
-            }
+            mb = IMembershipBuilder.get(cmd.getOptionValue("hierarchy"));
         }
 
         String jsonHeader = run(
