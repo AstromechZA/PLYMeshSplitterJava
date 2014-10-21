@@ -15,6 +15,8 @@ public class TempFileManager
     private static final ArrayDeque<Path> filesToDelete = new ArrayDeque<>(10);
     private static Path workingDirectory;
     private static boolean deleteOnExit = true;
+    private static long filesCreated = 0;
+    private static long bytesUsed = 0;
 
     public static Path getWorkingDirectory() throws IOException
     {
@@ -28,6 +30,8 @@ public class TempFileManager
 
     public static void setWorkingDirectory(Path workingDirectory) throws IOException
     {
+        workingDirectory = workingDirectory.resolve("temporary files");
+
         if (!Files.exists(workingDirectory))
         {
             Files.createDirectories(workingDirectory);
@@ -64,6 +68,7 @@ public class TempFileManager
     public static File provide(String pref, String suff, boolean deleteOnExit) throws IOException
     {
         Path f = Files.createTempFile(getWorkingDirectory(), pref, suff);
+        filesCreated++;
         if (deleteOnExit)
         {
             filesToDelete.add(f);
@@ -75,7 +80,11 @@ public class TempFileManager
     {
         try
         {
-            Files.deleteIfExists(f.toPath());
+            if (Files.exists(f.toPath()))
+            {
+                bytesUsed += f.length();
+                Files.delete(f.toPath());
+            }
             filesToDelete.remove(f.toPath());
         }
         catch (IOException e)
@@ -86,7 +95,7 @@ public class TempFileManager
 
     public static void clear() throws InterruptedException
     {
-        Outputter.info3f("Removing %d Temporary Files%n", filesToDelete.size());
+        Outputter.info2f("Removing %d Temporary Files%n", filesToDelete.size());
         System.gc();
 
         int errorlimit = 10;
@@ -95,7 +104,11 @@ public class TempFileManager
             Path p = filesToDelete.removeFirst();
             try
             {
-                Files.deleteIfExists(p);
+                if (Files.exists(p))
+                {
+                    bytesUsed += p.toFile().length();
+                    Files.delete(p);
+                }
             }
             catch (IOException e)
             {
@@ -105,10 +118,19 @@ public class TempFileManager
             }
         }
 
+        Outputter.debugf("Tempfiles used: %d. Bytes written: %s%n", filesCreated, Useful.formatBytes(bytesUsed));
+
         if (!filesToDelete.isEmpty())
         {
             Outputter.errorf("Failed to clean up %d files. Please delete these manually:%n", filesToDelete.size());
             filesToDelete.forEach(Outputter::errorln);
         }
+    }
+
+    public static void resetStatsAndLists()
+    {
+        filesCreated = 0;
+        bytesUsed = 0;
+        filesToDelete.clear();
     }
 }

@@ -14,7 +14,8 @@ public class Useful
     public static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
     public static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
     public static final long KILOBYTE = 1024;
-    public static final long MEGABYTE = 1048576;
+    public static final long MEGABYTE = KILOBYTE * 1024;
+    public static final long GIGABYTE = MEGABYTE * 1024;
     public static final int BYTE_MASK = 255;
 
     public static String getFilenameWithoutExt(String fn)
@@ -49,6 +50,7 @@ public class Useful
 
     public static String formatBytes(double bytes)
     {
+        if (bytes > GIGABYTE) return String.format("%.2f GB", bytes / GIGABYTE);
         if (bytes > MEGABYTE) return String.format("%.2f MB", bytes / MEGABYTE);
         if (bytes > KILOBYTE) return String.format("%.2f KB", bytes / KILOBYTE);
         return String.format("%.2f B", bytes);
