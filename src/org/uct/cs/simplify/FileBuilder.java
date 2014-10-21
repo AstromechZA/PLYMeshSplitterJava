@@ -6,7 +6,7 @@ import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.*;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
@@ -105,7 +105,7 @@ public class FileBuilder
                     Useful.getFilenameWithoutExt(outputFile.getName()) + "_tree.png"
                 );
                 Outputter.info1f("Saving tree image to %s%n", o);
-                BufferedImage bi = TreeDrawer.Draw(tree, 1024, 1024);
+                BufferedImage bi = TreeDrawer.Draw(tree, 512 * membershipBuilder.getSplitRatio(), 1024);
                 ImageIO.write(bi, "png", o);
             }
 
@@ -152,13 +152,40 @@ public class FileBuilder
 
         if (cmd.hasOption("d")) Outputter.setCurrentLevel(Outputter.DEBUG);
 
+        IMembershipBuilder mb = Constants.MEMBERSHIP_BUILDER;
+        if (cmd.hasOption("hierarchy"))
+        {
+            String s = cmd.getOptionValue("hierarchy").toLowerCase();
+            if (s.equals("octree"))
+            {
+                mb = new OcttreeMembershipBuilder();
+            }
+            else if (s.equals("kdtree"))
+            {
+                mb = new KDTreeMembershipBuilder();
+            }
+            else if (s.equals("vkdtree"))
+            {
+                mb = new VariableKDTreeMembershipBuilder();
+            }
+            else if (s.startsWith("mkdtree"))
+            {
+                int n = Integer.parseInt(s.substring(7, 8));
+                mb = new MultiwayVariableKDTreeMembershipBuilder(n);
+            }
+            else
+            {
+                throw new IllegalArgumentException("'" + s + "' is not a valid name for a hiearchy");
+            }
+        }
+
         String jsonHeader = run(
             inputFile,
             outputFile,
             cmd.hasOption("keeptemp"),
             cmd.hasOption("swapyz"),
             cmd.hasOption("treeimage"),
-            Constants.MEMBERSHIP_BUILDER,
+            mb,
             new StdOutProgressReporter("Preprocessing")
         );
 
@@ -202,6 +229,10 @@ public class FileBuilder
 
         Option treeimage = new Option("t", "treeimage", false, "Dump image of the tree into a separate file");
         options.addOption(treeimage);
+
+        Option hierarchy = new Option("h", "hierarchy", true, "Pick the hierarchical level of detail structure to be used." +
+            " Choose one of: [octree, kdtree, vkdtree, mkdtreeN] where N is a number from 2 -> 8.");
+        options.addOption(hierarchy);
 
         CommandLine cmd;
         try
