@@ -62,7 +62,7 @@ public class KDTreeMembershipBuilder implements IMembershipBuilder
 
         Point3D minPoint = boundingBox.getMin();
         Point3D maxPoint = boundingBox.getMax();
-        double split = (axisReader.read(maxPoint) - axisReader.read(minPoint)) / 2;
+        double split = (axisReader.read(maxPoint) + axisReader.read(minPoint)) / 2;
 
         Point3D mid1 = longest.modifyPointValue(maxPoint, split);
         Point3D mid2 = longest.modifyPointValue(minPoint, split);

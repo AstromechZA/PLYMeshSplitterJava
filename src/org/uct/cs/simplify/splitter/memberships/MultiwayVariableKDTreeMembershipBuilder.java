@@ -20,7 +20,7 @@ public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuild
 
     public MultiwayVariableKDTreeMembershipBuilder(int order)
     {
-        if (order < 2)
+        if (order <= 2)
             throw new RuntimeException("MultiwayVariableKDTreeMembershipBuilder must have an order of greater than 2 subnodes.");
 
         this.order = order;

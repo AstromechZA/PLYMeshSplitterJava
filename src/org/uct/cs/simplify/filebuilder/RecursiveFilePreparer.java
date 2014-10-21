@@ -95,7 +95,7 @@ public class RecursiveFilePreparer
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());
 
             // delete stitched model
-            TempFileManager.release(stitchedModel);
+            if (processedFiles.size() > 1) TempFileManager.release(stitchedModel);
 
             // build output file
             PHFNode outputNode = new PHFNode(simplifiedFile);
