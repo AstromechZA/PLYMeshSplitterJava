@@ -1,6 +1,7 @@
 package org.uct.cs.simplify.treedrawer;
 
 import org.uct.cs.simplify.filebuilder.PHFNode;
+import org.uct.cs.simplify.util.Useful;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -51,7 +52,7 @@ public class TreeDrawer
 
         double ratio = n.getNumFaces() / (double) total;
 
-        g.setColor(ColourFor(ratio));
+        g.setColor(Useful.colourFor(ratio));
 
         int subwidths = (x2 - x1) / numc;
         int wpad = (x2 - x1) / (2 * numc);
@@ -72,39 +73,5 @@ public class TreeDrawer
             g.drawLine(mid, y, mm, yy);
             SubDraw(g, n.getChildren().get(i), xx1, xx2, yy, dd);
         }
-    }
-
-    private static Color ColourFor(double ratio)
-    {
-        if (ratio > 1) ratio = 1;
-        if (ratio < 0) ratio = 0;
-
-        Color c = new Color(255, 255, 255);
-        double r = 1;
-        double g = 1;
-        double b = 1;
-
-        if (ratio < (0.25))
-        {
-            r = 0;
-            g = 4 * (ratio);
-        }
-        else if (ratio < (0.5))
-        {
-            r = 0;
-            b = 1 + 4 * (0.25 - ratio);
-        }
-        else if (ratio < (0.75))
-        {
-            r = 4 * (ratio - 0.5);
-            b = 0;
-        }
-        else
-        {
-            g = 1 + 4 * (0.75 - ratio);
-            b = 0;
-        }
-
-        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255));
     }
 }

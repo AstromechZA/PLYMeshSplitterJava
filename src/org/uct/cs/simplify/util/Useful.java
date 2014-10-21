@@ -1,5 +1,6 @@
 package org.uct.cs.simplify.util;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -116,6 +117,40 @@ public class Useful
     public static float readFloatLE(InputStream istream) throws IOException
     {
         return Float.intBitsToFloat(readIntLE(istream));
+    }
+
+    public static Color colourFor(double ratio)
+    {
+        if (ratio > 1) ratio = 1;
+        if (ratio < 0) ratio = 0;
+
+        Color c = new Color(255, 255, 255);
+        double r = 1;
+        double g = 1;
+        double b = 1;
+
+        if (ratio < (0.25))
+        {
+            r = 0;
+            g = 4 * (ratio);
+        }
+        else if (ratio < (0.5))
+        {
+            r = 0;
+            b = 1 + 4 * (0.25 - ratio);
+        }
+        else if (ratio < (0.75))
+        {
+            r = 4 * (ratio - 0.5);
+            b = 0;
+        }
+        else
+        {
+            g = 1 + 4 * (0.75 - ratio);
+            b = 0;
+        }
+
+        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255));
     }
 }
 
