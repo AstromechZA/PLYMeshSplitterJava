@@ -1,8 +1,5 @@
 package org.uct.cs.simplify.util;
 
-/**
- * Created by Ben on 2014-10-21.
- */
 public class NumberSummary
 {
     private final OrderedArrayList<Double> data;
@@ -46,6 +43,16 @@ public class NumberSummary
             int middle = count / 2;
             p50 = (data.get(middle - 1) + data.get(middle)) / 2;
         }
+    }
+
+    public double calculateStdDev()
+    {
+        double total = 0;
+        for (Double d : data)
+        {
+            total += Math.pow(Math.abs(d - mean), 2);
+        }
+        return Math.sqrt(total / data.size());
     }
 
 }

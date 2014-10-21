@@ -102,6 +102,9 @@ public class OutputValidator
 
             HashMap<Integer, NumberSummary> faceSummaries = new HashMap<>();
             HashMap<Integer, NumberSummary> simpSummaries = new HashMap<>();
+            NumberSummary leafSize = new NumberSummary(nodes.length);
+            NumberSummary leafDepth = new NumberSummary(nodes.length);
+
             for (SomeNode node : nodes)
             {
                 if (node.children.size() > 0)
@@ -121,6 +124,11 @@ public class OutputValidator
                         simpSummaries.put(node.depth, new NumberSummary(10, ratio));
                     }
                 }
+                else
+                {
+                    leafDepth.add(node.depth);
+                    leafSize.add(node.numFaces);
+                }
 
                 if (faceSummaries.containsKey(node.depth))
                 {
@@ -131,6 +139,17 @@ public class OutputValidator
                     faceSummaries.put(node.depth, new NumberSummary(10, node.numFaces));
                 }
             }
+
+            Outputter.info1ln("Tree Analysis:");
+            Outputter.info1f("Leaf Depth: Min: %f %n", leafDepth.min);
+            Outputter.info1f("Leaf Depth: P50: %f %n", leafDepth.p50);
+            Outputter.info1f("Leaf Depth: Max: %f %n", leafDepth.max);
+            Outputter.info1f("Leaf Depth: Mean: %f %n", leafDepth.mean);
+            Outputter.info1f("Leaf Size: Min: %f %n", leafSize.min);
+            Outputter.info1f("Leaf Size: P50: %f %n", leafSize.p50);
+            Outputter.info1f("Leaf Size: Max: %f %n", leafSize.max);
+            Outputter.info1f("Leaf Size: Mean: %f %n", leafSize.mean);
+            Outputter.info1f("Leaf Size: StdDev: %f %n%n", leafSize.calculateStdDev());
 
             Outputter.info1ln("Face Summaries per depth:");
             for (Map.Entry<Integer, NumberSummary> entry : faceSummaries.entrySet())

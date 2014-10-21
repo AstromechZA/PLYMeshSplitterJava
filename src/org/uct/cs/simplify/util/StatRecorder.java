@@ -46,13 +46,13 @@ public class StatRecorder implements AutoCloseable
 
         long elapsed = System.nanoTime() - this.startTime;
 
-        System.out.printf("%n=== Memory Stats =========%n");
+        System.out.printf("%n=== Memory Stats ===========================%n");
         System.out.printf("Mem : Min :      (%12d) %s%n", (long) ns.min, Useful.formatBytes((long) ns.min));
         System.out.printf("Mem : P50 :      (%12d) %s%n", (long) ns.p50, Useful.formatBytes((long) ns.p50));
         System.out.printf("Mem : Max :      (%12d) %s%n", (long) ns.max, Useful.formatBytes((long) ns.max));
         System.out.printf("Mem : Mean :     (%12d) %s%n", (long) ns.mean, Useful.formatBytes((long) ns.mean));
         System.out.printf("Time:            (%12s) %s%n", elapsed / Useful.NANOSECONDS_PER_SECOND, Useful.formatTime(elapsed));
-        System.out.printf("==========================%n");
+        System.out.printf("============================================%n");
     }
 
     public int getInterval()
