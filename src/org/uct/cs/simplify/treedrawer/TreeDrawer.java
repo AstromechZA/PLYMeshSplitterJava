@@ -43,7 +43,23 @@ public class TreeDrawer
             return;
         }
 
+        long total = 0;
+        for (PHFNode node : n.getChildren())
+        {
+            total += node.getNumFaces();
+        }
+
+        double ratio = n.getNumFaces() / (double) total;
+
+        g.setColor(ColourFor(ratio));
+
         int subwidths = (x2 - x1) / numc;
+        int wpad = (x2 - x1) / (2 * numc);
+
+        int[] ax = new int[]{ mid, x2 - wpad, x1 + wpad };
+        int[] ay = new int[]{ y, y + dd, y + dd };
+
+        g.fillPolygon(ax, ay, 3);
 
         for (int i = 0; i < numc; i++)
         {
@@ -52,8 +68,43 @@ public class TreeDrawer
             int yy = y + dd;
             int mm = (xx1 + xx2) / 2;
 
+            g.setColor(Color.black);
             g.drawLine(mid, y, mm, yy);
             SubDraw(g, n.getChildren().get(i), xx1, xx2, yy, dd);
         }
+    }
+
+    private static Color ColourFor(double ratio)
+    {
+        if (ratio > 1) ratio = 1;
+        if (ratio < 0) ratio = 0;
+
+        Color c = new Color(255, 255, 255);
+        double r = 1;
+        double g = 1;
+        double b = 1;
+
+        if (ratio < (0.25))
+        {
+            r = 0;
+            g = 4 * (ratio);
+        }
+        else if (ratio < (0.5))
+        {
+            r = 0;
+            b = 1 + 4 * (0.25 - ratio);
+        }
+        else if (ratio < (0.75))
+        {
+            r = 4 * (ratio - 0.5);
+            b = 0;
+        }
+        else
+        {
+            g = 1 + 4 * (0.75 - ratio);
+            b = 0;
+        }
+
+        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255));
     }
 }

@@ -2,10 +2,7 @@ package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.StdOutProgressReporter;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,12 +33,17 @@ public class BulkTesting
 
             try
             {
+                StatRecorder sr = new StatRecorder(500);
+
                 String json = FileBuilder.run(fi, o, false, true, true, mb, new StdOutProgressReporter("process"));
                 File headerFile = new File(fo, Useful.getFilenameWithoutExt(fo.getName()) + "_" + hierarchy + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
                 {
                     fw.write(json);
                 }
+
+                sr.close();
+                sr.dump(new File(fo, Useful.getFilenameWithoutExt(fo.getName()) + "_" + hierarchy + ".memdump"));
             }
             catch (IOException | InterruptedException e)
             {
@@ -51,6 +53,7 @@ public class BulkTesting
             try
             {
                 TempFileManager.clear();
+                TempFileManager.resetStatsAndLists();
             }
             catch (InterruptedException e)
             {

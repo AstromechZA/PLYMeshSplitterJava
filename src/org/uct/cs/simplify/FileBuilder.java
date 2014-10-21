@@ -84,63 +84,60 @@ public class FileBuilder
     )
         throws IOException, InterruptedException
     {
-        try (StatRecorder sr = new StatRecorder())
+        // use the directory of the outputfile as the default output directory
+        File outputDir = outputFile.getParentFile();
+
+        // generate tempfiles in the outputdir
+        TempFileManager.setWorkingDirectory(outputDir.toPath());
+
+        // create scaled and recentered version of input
+        File scaledFile = TempFileManager.provide("rescaled", ".ply");
+        double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, Constants.PHF_RESCALE_SIZE, swapYZ);
+
+        // build tree
+        PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
+
+        if (treeImage)
         {
-            // use the directory of the outputfile as the default output directory
-            File outputDir = outputFile.getParentFile();
+            File o = new File(outputDir,
+                Useful.getFilenameWithoutExt(outputFile.getName()) + "_tree.png"
+            );
+            Outputter.info1f("Saving tree image to %s%n", o);
+            BufferedImage bi = TreeDrawer.Draw(tree, 2048, 1024);
+            ImageIO.write(bi, "png", o);
+        }
 
-            // generate tempfiles in the outputdir
-            TempFileManager.setWorkingDirectory(outputDir.toPath());
+        // additional json keys
+        Map<String, String> additionalJSON = new HashMap<>();
+        additionalJSON.put("scale_ratio", "" + scaleRatio);
 
-            // create scaled and recentered version of input
-            File scaledFile = TempFileManager.provide("rescaled", ".ply");
-            double scaleRatio = ScaleAndRecenter.run(inputFile, scaledFile, Constants.PHF_RESCALE_SIZE, swapYZ);
+        // compile into output file
+        String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
+        Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
 
-            // build tree
-            PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
+        try
+        {
+            OutputValidator.run(outputFile);
+        }
+        catch (RuntimeException e)
+        {
+            System.err.println("Validation Failed!");
+            e.printStackTrace();
+        }
 
-            if (treeImage)
-            {
-                File o = new File(outputDir,
-                    Useful.getFilenameWithoutExt(outputFile.getName()) + "_tree.png"
-                );
-                Outputter.info1f("Saving tree image to %s%n", o);
-                BufferedImage bi = TreeDrawer.Draw(tree, 512 * membershipBuilder.getSplitRatio(), 1024);
-                ImageIO.write(bi, "png", o);
-            }
-
-            // additional json keys
-            Map<String, String> additionalJSON = new HashMap<>();
-            additionalJSON.put("scale_ratio", "" + scaleRatio);
-
-            // compile into output file
-            String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
-            Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
-
+        if (!keepNodes)
+        {
             try
             {
-                OutputValidator.run(outputFile);
+                TempFileManager.clear();
             }
-            catch (RuntimeException e)
+            catch (InterruptedException e)
             {
-                System.err.println("Validation Failed!");
                 e.printStackTrace();
             }
-
-            if (!keepNodes)
-            {
-                try
-                {
-                    TempFileManager.clear();
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-
-            return jsonHeader;
         }
+
+        return jsonHeader;
     }
 
     public static void main(String[] args) throws IOException, InterruptedException
@@ -158,22 +155,25 @@ public class FileBuilder
             mb = IMembershipBuilder.get(cmd.getOptionValue("hierarchy"));
         }
 
-        String jsonHeader = run(
-            inputFile,
-            outputFile,
-            cmd.hasOption("keeptemp"),
-            cmd.hasOption("swapyz"),
-            cmd.hasOption("treeimage"),
-            mb,
-            new StdOutProgressReporter("Preprocessing")
-        );
-
-        if (cmd.hasOption("dumpjson"))
+        try (StatRecorder sr = new StatRecorder())
         {
-            File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
-            try (FileWriter fw = new FileWriter(headerFile))
+            String jsonHeader = run(
+                inputFile,
+                outputFile,
+                cmd.hasOption("keeptemp"),
+                cmd.hasOption("swapyz"),
+                cmd.hasOption("treeimage"),
+                mb,
+                new StdOutProgressReporter("Preprocessing")
+            );
+
+            if (cmd.hasOption("dumpjson"))
             {
-                fw.write(jsonHeader);
+                File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
+                try (FileWriter fw = new FileWriter(headerFile))
+                {
+                    fw.write(jsonHeader);
+                }
             }
         }
     }
