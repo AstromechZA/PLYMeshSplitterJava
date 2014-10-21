@@ -31,9 +31,17 @@ public class TreeDrawer
     private static void SubDraw(Graphics2D g, PHFNode n, int x1, int x2, int y, int dd)
     {
         int numc = n.getChildren().size();
-        if (numc == 0) return;
 
         int mid = (x1 + x2) / 2;
+
+        if (numc == 0)
+        {
+            g.setColor(Color.red);
+            g.fillRect(mid - 3, y - 3, 6, 6);
+            g.setColor(Color.black);
+            g.drawRect(mid - 3, y - 3, 6, 6);
+            return;
+        }
 
         int subwidths = (x2 - x1) / numc;
 
