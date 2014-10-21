@@ -37,30 +37,21 @@ public class StatRecorder implements AutoCloseable
         this.backgroundThread.interrupt();
         this.backgroundThread.join();
 
-        long min = Integer.MAX_VALUE;
-        long max = Integer.MIN_VALUE;
-        long start = this.recordings.get(0).usage;
-        long end = this.recordings.get(this.recordings.size() - 1).usage;
-        long total = 0;
+        NumberSummary ns = new NumberSummary(this.recordings.size());
 
         for (Recording p : this.recordings)
         {
-            long v = p.usage;
-            if (v < min) min = v;
-            if (v > max) max = v;
-            total += v;
+            ns.add(p.usage);
         }
 
-        double average = total / (double) this.recordings.size();
         long elapsed = System.nanoTime() - this.startTime;
 
         System.out.printf("%n=== Memory Stats =========%n");
-        System.out.printf("Mem : Start :   %s%n", Useful.formatBytes(start));
-        System.out.printf("Mem : Min :     %s%n", Useful.formatBytes(min));
-        System.out.printf("Mem : Average : %s%n", Useful.formatBytes(average));
-        System.out.printf("Mem : Max :     %s%n", Useful.formatBytes(max));
-        System.out.printf("Mem : End :     %s%n", Useful.formatBytes(end));
-        System.out.printf("Time:           %s%n", Useful.formatTime(elapsed));
+        System.out.printf("Mem : Min :      (%12d) %s%n", (long) ns.min, Useful.formatBytes((long) ns.min));
+        System.out.printf("Mem : P50 :      (%12d) %s%n", (long) ns.p50, Useful.formatBytes((long) ns.p50));
+        System.out.printf("Mem : Max :      (%12d) %s%n", (long) ns.max, Useful.formatBytes((long) ns.max));
+        System.out.printf("Mem : Mean :     (%12d) %s%n", (long) ns.mean, Useful.formatBytes((long) ns.mean));
+        System.out.printf("Time:            %s%n", Useful.formatTime(elapsed));
         System.out.printf("==========================%n");
     }
 
@@ -72,6 +63,17 @@ public class StatRecorder implements AutoCloseable
     private void add(long ms, long used)
     {
         this.recordings.add(new Recording(ms, used));
+    }
+
+    public void dump(File out) throws IOException
+    {
+        try (PrintWriter writer = new PrintWriter(new FileOutputStream(out)))
+        {
+            for (Recording recording : this.recordings)
+            {
+                writer.printf("%d,%d%n", recording.time, recording.usage);
+            }
+        }
     }
 
     private static class MemRecorderThread implements Runnable
@@ -101,17 +103,6 @@ public class StatRecorder implements AutoCloseable
             catch (InterruptedException e)
             {
                 //
-            }
-        }
-    }
-
-    public void dump(File out) throws IOException
-    {
-        try (PrintWriter writer = new PrintWriter(new FileOutputStream(out)))
-        {
-            for (Recording recording : this.recordings)
-            {
-                writer.printf("%d,%d%n", recording.time, recording.usage);
             }
         }
     }

@@ -118,7 +118,7 @@ public class TempFileManager
             }
         }
 
-        Outputter.info1f("Tempfiles used: %d. Bytes written: %s%n", filesCreated, Useful.formatBytes(bytesUsed));
+        Outputter.info1f("Tempfiles used: %d. Bytes written: (%d) %s%n", filesCreated, bytesUsed, Useful.formatBytes(bytesUsed));
 
         if (!filesToDelete.isEmpty())
         {
