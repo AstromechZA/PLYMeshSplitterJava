@@ -10,8 +10,11 @@ import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
+import org.uct.cs.simplify.treedrawer.TreeDrawer;
 import org.uct.cs.simplify.util.*;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,6 +28,7 @@ public class FileBuilder
         File outputFile,
         boolean keepNodes,
         boolean swapYZ,
+        boolean treeImage,
         IMembershipBuilder membershipBuilder,
         ProgressReporter reporter
     )
@@ -64,7 +68,7 @@ public class FileBuilder
             stopCondition = new LowerFaceBoundStoppingCondition(Constants.MAX_FACES_PER_LEAF);
         }
 
-        return run(inputFile, outputFile, keepNodes, swapYZ, membershipBuilder, simplifier, stopCondition, reporter);
+        return run(inputFile, outputFile, keepNodes, swapYZ, treeImage, membershipBuilder, simplifier, stopCondition, reporter);
     }
 
     public static String run(
@@ -72,6 +76,7 @@ public class FileBuilder
         File outputFile,
         boolean keepNodes,
         boolean swapYZ,
+        boolean treeImage,
         IMembershipBuilder membershipBuilder,
         SimplificationFactory simplificationFactory,
         IStoppingCondition stopCondition,
@@ -93,6 +98,16 @@ public class FileBuilder
 
             // build tree
             PHFNode tree = RecursiveFilePreparer.prepare(new PHFNode(scaledFile), stopCondition, membershipBuilder, simplificationFactory, progressReporter);
+
+            if (treeImage)
+            {
+                File o = new File(outputDir,
+                    Useful.getFilenameWithoutExt(outputFile.getName()) + "_tree.png"
+                );
+                Outputter.info1f("Saving tree image to %s%n", o);
+                BufferedImage bi = TreeDrawer.Draw(tree, 1024, 1024);
+                ImageIO.write(bi, "png", o);
+            }
 
             // additional json keys
             Map<String, String> additionalJSON = new HashMap<>();
@@ -142,6 +157,7 @@ public class FileBuilder
             outputFile,
             cmd.hasOption("keeptemp"),
             cmd.hasOption("swapyz"),
+            cmd.hasOption("treeimage"),
             Constants.MEMBERSHIP_BUILDER,
             new StdOutProgressReporter("Preprocessing")
         );
@@ -178,11 +194,14 @@ public class FileBuilder
         Option swapYZ = new Option("s", "swapyz", false, "Rotate model 90 around X. (convert coordinate frame)");
         options.addOption(swapYZ);
 
-        Option dumpJSON = new Option("j", "dumpjson", false, "Dump the JSON header into separate file");
+        Option dumpJSON = new Option("j", "dumpjson", false, "Dump the JSON header into a separate file");
         options.addOption(dumpJSON);
 
         Option debug = new Option("d", "debug", false, "Debug output");
         options.addOption(debug);
+
+        Option treeimage = new Option("t", "treeimage", false, "Dump image of the tree into a separate file");
+        options.addOption(treeimage);
 
         CommandLine cmd;
         try

@@ -36,6 +36,7 @@ public class ProcessingRunnable implements Runnable
                 this.outputFile,
                 false,
                 this.swapYZ,
+                false,
                 new MultiwayVariableKDTreeMembershipBuilder(4),
                 new ProgressBarProgressReporter(this.progressBar, "Processing")
             );
