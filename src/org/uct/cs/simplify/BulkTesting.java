@@ -8,6 +8,7 @@ import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.Useful;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class BulkTesting
@@ -35,7 +36,12 @@ public class BulkTesting
 
             try
             {
-                FileBuilder.run(fi, o, false, true, true, mb, new StdOutProgressReporter("process"));
+                String json = FileBuilder.run(fi, o, false, true, true, mb, new StdOutProgressReporter("process"));
+                File headerFile = new File(fo, Useful.getFilenameWithoutExt(fo.getName()) + "_" + hierarchy + ".json");
+                try (FileWriter fw = new FileWriter(headerFile))
+                {
+                    fw.write(json);
+                }
             }
             catch (IOException | InterruptedException e)
             {
