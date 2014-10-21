@@ -16,6 +16,7 @@ public class TempFileManager
     private static Path workingDirectory;
     private static boolean deleteOnExit = true;
     private static long filesCreated = 0;
+    private static long filesDeleted = 0;
     private static long bytesUsed = 0;
 
     public static Path getWorkingDirectory() throws IOException
@@ -82,8 +83,10 @@ public class TempFileManager
         {
             if (Files.exists(f.toPath()))
             {
-                bytesUsed += f.length();
+                long l = f.length();
                 Files.delete(f.toPath());
+                bytesUsed += l;
+                filesDeleted++;
             }
             filesToDelete.remove(f.toPath());
         }
@@ -106,8 +109,10 @@ public class TempFileManager
             {
                 if (Files.exists(p))
                 {
-                    bytesUsed += p.toFile().length();
+                    long l = p.toFile().length();
                     Files.delete(p);
+                    bytesUsed += l;
+                    filesDeleted++;
                 }
             }
             catch (IOException e)
@@ -118,7 +123,7 @@ public class TempFileManager
             }
         }
 
-        Outputter.info1f("Tempfiles used: %d. Bytes written: (%d) %s%n", filesCreated, bytesUsed, Useful.formatBytes(bytesUsed));
+        Outputter.info1f("Tempfiles used: %d. Bytes written: (%d) %s%n", filesDeleted, bytesUsed, Useful.formatBytes(bytesUsed));
 
         if (!filesToDelete.isEmpty())
         {
@@ -130,6 +135,7 @@ public class TempFileManager
     public static void resetStatsAndLists()
     {
         filesCreated = 0;
+        filesDeleted = 0;
         bytesUsed = 0;
         filesToDelete.clear();
     }
