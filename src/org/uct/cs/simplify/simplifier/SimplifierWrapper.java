@@ -6,10 +6,17 @@ import org.uct.cs.simplify.util.TempFileManager;
 import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimplifierWrapper
 {
-    private static final String PATH_TO_EXECUTABLE = "./simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
+    private static final String PATH_TO_EXECUTABLE;
+
+    static
+    {
+        PATH_TO_EXECUTABLE = Thread.currentThread().getContextClassLoader().getResource(".").getPath() + "simplifier/" + (OSDetect.isWindows ? "tridecimator_win.exe" : "tridecimator_unix");
+    }
 
     public static File simplify(File input, long numFaces)
     throws IOException, InterruptedException
@@ -30,29 +37,27 @@ public class SimplifierWrapper
         Outputter.info2f("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
         Runtime r = Runtime.getRuntime();
 
-        String flags = " -P";
+        List<String> argsList = new ArrayList<>();
+        argsList.add(PATH_TO_EXECUTABLE);
+        argsList.add("" + 0);
+        argsList.add(input.getAbsolutePath());
+        argsList.add(tt.getAbsolutePath());
+        argsList.add("" + numFaces);
+        argsList.add("-P");
+
         if (preserveBoundary)
         {
-            flags += String.format(
-                " -By %f %f %f %f %f %f", bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY(), bb.getMinZ(),
-                bb.getMaxZ()
-            );
+            argsList.add("-By");
+            argsList.add("" + bb.getMinX());
+            argsList.add("" + bb.getMaxX());
+            argsList.add("" + bb.getMinY());
+            argsList.add("" + bb.getMaxY());
+            argsList.add("" + bb.getMinZ());
+            argsList.add("" + bb.getMaxZ());
         }
 
-        String inputS = input.getAbsolutePath();
-        String outputS = tt.getAbsolutePath();
-        if (inputS.contains(" ")) inputS = "\"" + inputS + "\"";
-        if (outputS.contains(" ")) outputS = "\"" + outputS + "\"";
-
-        Process proc = r.exec(
-            String.format(
-                "%s 0 %s %s %d" + flags,
-                PATH_TO_EXECUTABLE,
-                inputS,
-                outputS,
-                numFaces
-            )
-        );
+        String[] args = argsList.toArray(new String[ argsList.size() ]);
+        Process proc = r.exec(args);
 
         StreamGobbler stdOutGobble = new StreamGobbler(proc.getInputStream());
         StreamGobbler errorGobble = new StreamGobbler(proc.getErrorStream());
