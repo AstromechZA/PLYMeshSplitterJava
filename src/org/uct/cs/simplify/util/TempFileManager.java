@@ -95,7 +95,7 @@ public class TempFileManager
 
     public static void clear() throws InterruptedException
     {
-        Outputter.info2f("Removing %d Temporary Files%n", filesToDelete.size());
+        Outputter.info1f("Removing %d Temporary Files%n", filesToDelete.size());
         System.gc();
 
         int errorlimit = 10;
@@ -118,7 +118,7 @@ public class TempFileManager
             }
         }
 
-        Outputter.debugf("Tempfiles used: %d. Bytes written: %s%n", filesCreated, Useful.formatBytes(bytesUsed));
+        Outputter.info1f("Tempfiles used: %d. Bytes written: %s%n", filesCreated, Useful.formatBytes(bytesUsed));
 
         if (!filesToDelete.isEmpty())
         {
