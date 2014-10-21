@@ -83,7 +83,7 @@ public class BulkTesting
         {
             Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("--input <path>", options);
+            formatter.printHelp("--input <path> --output <folder>", options);
             System.exit(1);
             return null;
         }
