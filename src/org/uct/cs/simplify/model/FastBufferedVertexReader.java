@@ -15,12 +15,25 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     protected final long start;
     protected final int blockSize;
     protected final byte[] blockBuffer;
+    protected final long count;
+    protected final ReliableBufferedInputStream istream;
+    protected final long nth;
+    protected final long skip;
+    protected final long skipBytes;
     protected long index;
-    protected long count;
-    protected ReliableBufferedInputStream istream;
+
 
     public FastBufferedVertexReader(PLYReader reader) throws IOException
     {
+        this(reader, 1);
+    }
+
+    public FastBufferedVertexReader(PLYReader reader, long nth) throws IOException
+    {
+        if (nth < 1) throw new IllegalArgumentException("nth must be at least 1");
+
+        this.nth = nth;
+        this.skip = nth - 1;
         this.reader = reader;
         this.vertexElement = reader.getHeader().getElement("vertex");
         this.count = this.vertexElement.getCount();
@@ -32,6 +45,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
         this.istream.skip(this.start);
         this.blockSize = this.vertexElement.getItemSize();
         this.blockBuffer = new byte[ this.blockSize ];
+        this.skipBytes = this.skip * this.blockSize;
     }
 
     @Override
@@ -48,18 +62,19 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
         return v;
     }
 
-    public void skipNext(long n) throws IOException
-    {
-        this.index += n;
-        this.istream.skip(n * this.blockSize);
-    }
-
     @Override
     public void next(Vertex v) throws IOException
     {
         this.istream.read(this.blockBuffer, 0, this.blockSize);
         v.read(blockBuffer, vam);
-        this.index++;
+        this.index += nth;
+        this.istream.skip(this.skipBytes);
+    }
+
+    public long getSampling()
+    {
+        if (skip == 0) return this.getCount();
+        return (long) Math.ceil((double) (this.getCount()) / this.nth);
     }
 
     @Override

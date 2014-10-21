@@ -32,6 +32,15 @@ public class FileBuilder
     {
         IStoppingCondition stopCondition;
 
+        if (outputFile.isDirectory())
+        {
+            throw new RuntimeException("The output file you specified is a directory! Please specify a file with the extension '.phf'");
+        }
+        if (!outputFile.getName().endsWith(".phf"))
+        {
+            throw new RuntimeException("Please specify a file with the extension '.phf'");
+        }
+
         Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
 
         long numFaces = new PLYHeader(inputFile).getElement("face").getCount();

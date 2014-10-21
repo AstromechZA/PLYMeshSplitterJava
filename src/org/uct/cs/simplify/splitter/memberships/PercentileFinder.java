@@ -11,7 +11,6 @@ import java.io.IOException;
 public class PercentileFinder
 {
     public static final int MAX_ITERATIONS = 10;
-    private static final double APPROXIMATION_THRESHOLD = 0.00001;
     private final PLYReader modelReader;
     private final IAxisReader axisReader;
 
@@ -24,27 +23,20 @@ public class PercentileFinder
     public double findPercentile(float percentile, double lowerBound, double upperBound) throws IOException
     {
         long numVertices = modelReader.getHeader().getElement("vertex").getCount();
-        long skips = (numVertices / 100_000_000);
-        double divNumVertices = numVertices / (double) (skips + 1);
-        long percentileTarget = (long) (divNumVertices * percentile);
-        long maxError = (long) (APPROXIMATION_THRESHOLD * divNumVertices);
-        long maxThreshold = percentileTarget + maxError;
-        long minThreshold = percentileTarget - maxError;
+
+        long nth = (numVertices / 100_000_000) + 1;
 
         double min = lowerBound;
         double max = upperBound;
         double approximate = (min + max) / 2;
 
-        Outputter.debugf("attempting to find p%d from %d vertices (skip %d)%n", (int) (percentile * 100), (long) divNumVertices, skips);
+        Outputter.debugf("attempting to find p%d from %d vertices (nth %d)%n", (int) (percentile * 100), numVertices, nth);
 
         for (int i = 0; i < MAX_ITERATIONS; i++)
         {
-            try (FastBufferedVertexReader vr = new FastBufferedVertexReader(this.modelReader))
+            try (FastBufferedVertexReader vr = new FastBufferedVertexReader(this.modelReader, nth))
             {
-                int swing = (skips == 0) ?
-                    testPercentile(vr, approximate, minThreshold, maxThreshold)
-                    :
-                    testPercentile(vr, approximate, minThreshold, maxThreshold, skips);
+                int swing = testPercentile(vr, approximate, (long) Math.ceil(vr.getSampling() * percentile));
                 if (swing < 0)
                 {
                     max = approximate;
@@ -60,10 +52,11 @@ public class PercentileFinder
                 approximate = (min + max) / 2;
             }
         }
+
         return approximate;
     }
 
-    private int testPercentile(FastBufferedVertexReader vr, double approximate, long minThreshold, long maxThreshold) throws IOException
+    private int testPercentile(FastBufferedVertexReader vr, double approximate, long targetCount) throws IOException
     {
         long count = 0;
         Vertex v = new Vertex(0, 0, 0);
@@ -73,26 +66,9 @@ public class PercentileFinder
             if (this.axisReader.read(v) < approximate)
             {
                 count++;
-                if (count > maxThreshold) return -1;
+                if (count > targetCount) return -1;
             }
         }
-        return (count < minThreshold) ? 1 : 0;
-    }
-
-    private int testPercentile(FastBufferedVertexReader vr, double approximate, long minThreshold, long maxThreshold, long skips) throws IOException
-    {
-        long count = 0;
-        Vertex v = new Vertex(0, 0, 0);
-        while (vr.hasNext())
-        {
-            vr.next(v);
-            if (this.axisReader.read(v) < approximate)
-            {
-                count++;
-                if (count > maxThreshold) return -1;
-            }
-            vr.skipNext(skips);
-        }
-        return (count < minThreshold) ? 1 : 0;
+        return (count < targetCount) ? 1 : 0;
     }
 }
