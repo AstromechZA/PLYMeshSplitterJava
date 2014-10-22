@@ -13,10 +13,10 @@ public class BoundsFinder
 
     public static XBoundingBox getBoundingBox(PLYReader reader) throws IOException
     {
-        return getBoundingBoxInner(reader, 1);
+        return getBoundingBoxInner(reader);
     }
 
-    private static XBoundingBox getBoundingBoxInner(PLYReader reader, int nth) throws IOException
+    private static XBoundingBox getBoundingBoxInner(PLYReader reader) throws IOException
     {
         try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
         {

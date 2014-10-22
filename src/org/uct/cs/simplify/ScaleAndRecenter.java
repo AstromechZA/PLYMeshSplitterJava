@@ -27,93 +27,96 @@ public class ScaleAndRecenter
 
     public static double run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
     {
-        // first have to identify bounds in order to work out ranges and center
-        Outputter.info1ln("Calculating bounding box");
-        XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
-        Point3D center = new Point3D(
-            (bb.getMinX() + bb.getMaxX()) / 2,
-            (bb.getMinY() + bb.getMaxY()) / 2,
-            (bb.getMinZ() + bb.getMaxZ()) / 2
-        );
+        try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("rescaling"))
+        {
+            // first have to identify bounds in order to work out ranges and center
+            Outputter.info1ln("Calculating bounding box");
+            XBoundingBox bb = BoundsFinder.getBoundingBox(reader);
+            Point3D center = new Point3D(
+                (bb.getMinX() + bb.getMaxX()) / 2,
+                (bb.getMinY() + bb.getMaxY()) / 2,
+                (bb.getMinZ() + bb.getMaxZ()) / 2
+            );
 
-        // calculate transform
-        // - mesh size is the length of the longest axis
-        double scale = targetSize / (2 * Math.abs(
-            Math.max(
+            // calculate transform
+            // - mesh size is the length of the longest axis
+            double scale = targetSize / (2 * Math.abs(
                 Math.max(
-                    bb.getMaxX() - center.getX(),
-                    bb.getMaxY() - center.getY()
-                ),
-                bb.getMaxZ() - center.getZ()
-            )
-        ));
-        // - translate to center
-        Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
+                    Math.max(
+                        bb.getMaxX() - center.getX(),
+                        bb.getMaxY() - center.getY()
+                    ),
+                    bb.getMaxZ() - center.getZ()
+                )
+            ));
+            // - translate to center
+            Point3D translate = new Point3D(-center.getX(), -center.getY(), -center.getZ());
 
-        // debug
-        Outputter.info3ln("Rescaling and Centering...");
-        Outputter.info2f("%s -> %s%n", reader.getFile(), outputFile);
-        Outputter.debugf("Scale ratio: %f%n", scale);
-        Outputter.info1f("Swapping YZ axis: %s%n", swapYZ);
+            // debug
+            Outputter.info3ln("Rescaling and Centering...");
+            Outputter.info2f("%s -> %s%n", reader.getFile(), outputFile);
+            Outputter.debugf("Scale ratio: %f%n", scale);
+            Outputter.info1f("Swapping YZ axis: %s%n", swapYZ);
 
-        PLYElement vertexE = reader.getHeader().getElement("vertex");
-        PLYElement faceE = reader.getHeader().getElement("face");
-        long numVertices = vertexE.getCount();
-        long numFaces = faceE.getCount();
+            PLYElement vertexE = reader.getHeader().getElement("vertex");
+            PLYElement faceE = reader.getHeader().getElement("face");
+            long numVertices = vertexE.getCount();
+            long numFaces = faceE.getCount();
 
-        if (numVertices > Integer.MAX_VALUE)
-        {
-            throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + Integer.MAX_VALUE + " vertices.");
-        }
-
-        if (numFaces > (Integer.MAX_VALUE * 2L))
-        {
-            throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + (Integer.MAX_VALUE * 2L) + " faces.");
-        }
-
-        try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
-        {
-            VertexAttrMap vam = new VertexAttrMap(vertexE);
-            // construct new header
-            PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
-
-            ostream.write((header + "\n").getBytes());
-
-            try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+            if (numVertices > Integer.MAX_VALUE)
             {
-                try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
+                throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + Integer.MAX_VALUE + " vertices.");
+            }
+
+            if (numFaces > (Integer.MAX_VALUE * 2L))
+            {
+                throw new RuntimeException("WOAH. Even we can't deal with a mesh containing more than " + (Integer.MAX_VALUE * 2L) + " faces.");
+            }
+
+            try (BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(outputFile)))
+            {
+                VertexAttrMap vam = new VertexAttrMap(vertexE);
+                // construct new header
+                PLYHeader header = PLYHeader.constructHeader(numVertices, numFaces, vam);
+
+                ostream.write((header + "\n").getBytes());
+
+                try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
                 {
-                    Vertex v = new Vertex(0, 0, 0);
-                    while (vr.hasNext())
+                    try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                     {
-                        vr.next(v);
-                        v.transform(translate, (float) scale);
-                        if (swapYZ) v.swapYZ();
-                        v.writeToStream(ostream, vam);
-                        progress.tick();
+                        Vertex v = new Vertex(0, 0, 0);
+                        while (vr.hasNext())
+                        {
+                            vr.next(v);
+                            v.transform(translate, (float) scale);
+                            if (swapYZ) v.swapYZ();
+                            v.writeToStream(ostream, vam);
+                            progress.tick();
+                        }
+                    }
+                }
+
+                try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
+                {
+                    try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
+                    {
+                        Face f = new Face(0, 0, 0);
+                        while (fr.hasNext())
+                        {
+                            fr.next(f);
+                            if (f.i >= numVertices) throw new RuntimeException("Bad vertex index in face!");
+                            if (f.j >= numVertices) throw new RuntimeException("Bad vertex index in face!");
+                            if (f.k >= numVertices) throw new RuntimeException("Bad vertex index in face!");
+
+                            f.writeToStream(ostream);
+                            progress.tick();
+                        }
                     }
                 }
             }
-
-            try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
-            {
-                try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
-                {
-                    Face f = new Face(0, 0, 0);
-                    while (fr.hasNext())
-                    {
-                        fr.next(f);
-                        if (f.i >= numVertices) throw new RuntimeException("Bad vertex index in face!");
-                        if (f.j >= numVertices) throw new RuntimeException("Bad vertex index in face!");
-                        if (f.k >= numVertices) throw new RuntimeException("Bad vertex index in face!");
-
-                        f.writeToStream(ostream);
-                        progress.tick();
-                    }
-                }
-            }
+            return scale;
         }
-        return scale;
     }
 
     public static void main(String[] args)

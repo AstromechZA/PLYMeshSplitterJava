@@ -62,18 +62,18 @@ public class StatRecorder implements AutoCloseable
         return this.intervalMs;
     }
 
-    private void add(long ms, long used)
+    private synchronized void add(long ms, long used)
     {
         this.recordings.add(new Recording(ms, used));
     }
 
-    public void dump(File out) throws IOException
+    public synchronized void dump(File out) throws IOException
     {
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(out)))
         {
             for (Recording recording : this.recordings)
             {
-                writer.printf("%d,%d%n", recording.time, recording.usage);
+                writer.printf("%d,%d,%s%n", recording.time, recording.usage, recording.state);
             }
         }
     }
@@ -112,11 +112,13 @@ public class StatRecorder implements AutoCloseable
     private static class Recording
     {
         final long time, usage;
+        final String state;
 
         private Recording(long time, long usage)
         {
             this.time = time;
             this.usage = usage;
+            this.state = StateHolder.state;
         }
     }
 }

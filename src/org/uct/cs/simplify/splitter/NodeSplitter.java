@@ -23,44 +23,47 @@ public class NodeSplitter
         IMembershipBuilder membershipBuilder
     ) throws IOException
     {
-        Outputter.info1f(
-            "Splitting %s into %d subnodes%n", parent.getLinkedFile().getPath(), membershipBuilder.getSplitRatio()
-        );
-        // output object for subnodes
-
-        // build reader object
-        PLYReader reader = new PLYReader(parent.getLinkedFile());
-
-        Outputter.info1ln("Calculating subnode memberships..");
-
-        MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
-
-        Outputter.debugln("Subnode memberships created.");
-
-        ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
-        for (int nodeID : mr.subNodes.keys())
+        try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("splitting"))
         {
-            Outputter.debugf("Creating subnode %d%n", nodeID);
-            File tempFaceFile = TempFileManager.provide("faces");
-            GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
-            if (result.numFaces > 0)
+            Outputter.info1f(
+                "Splitting %s into %d subnodes%n", parent.getLinkedFile().getPath(), membershipBuilder.getSplitRatio()
+            );
+            // output object for subnodes
+
+            // build reader object
+            PLYReader reader = new PLYReader(parent.getLinkedFile());
+
+            Outputter.info1ln("Calculating subnode memberships..");
+
+            MembershipBuilderResult mr = membershipBuilder.build(reader, parent.getBoundingBox());
+
+            Outputter.debugln("Subnode memberships created.");
+
+            ArrayList<PHFNode> output = new ArrayList<>(mr.subNodes.size());
+            for (int nodeID : mr.subNodes.keys())
             {
-                File subNodeFile = TempFileManager.provide("node", ".ply");
+                Outputter.debugf("Creating subnode %d%n", nodeID);
+                File tempFaceFile = TempFileManager.provide("faces");
+                GatheringResult result = gatherVerticesAndWriteFaces(reader, mr.memberships, tempFaceFile, nodeID);
+                if (result.numFaces > 0)
+                {
+                    File subNodeFile = TempFileManager.provide("node", ".ply");
 
-                writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
+                    writeSubnodePLYModel(reader, subNodeFile, tempFaceFile, result);
 
-                PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
-                child.setDepth(parent.getDepth() + 1);
-                output.add(child);
-                Outputter.debugf("Subnode size: %d faces.%n", result.numFaces);
+                    PHFNode child = new PHFNode(mr.subNodes.get(nodeID), result.numVertices, result.numFaces, subNodeFile);
+                    child.setDepth(parent.getDepth() + 1);
+                    output.add(child);
+                    Outputter.debugf("Subnode size: %d faces.%n", result.numFaces);
+                }
+                TempFileManager.release(tempFaceFile);
             }
-            TempFileManager.release(tempFaceFile);
+
+            TempFileManager.release(reader.getFile());
+
+            Outputter.debugln("Splitting finished");
+            return output;
         }
-
-        TempFileManager.release(reader.getFile());
-
-        Outputter.debugln("Splitting finished");
-        return output;
     }
 
     private static void writeSubnodePLYModel(PLYReader reader, File subNodeFile, File tempFaceFile, GatheringResult result) throws IOException

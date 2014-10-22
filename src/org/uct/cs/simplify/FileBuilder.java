@@ -178,6 +178,12 @@ public class FileBuilder
                     fw.write(jsonHeader);
                 }
             }
+
+            if (cmd.hasOption("dumpmem"))
+            {
+                File memFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".memdump");
+                sr.dump(memFile);
+            }
         }
     }
 
@@ -205,6 +211,9 @@ public class FileBuilder
 
         Option dumpJSON = new Option("j", "dumpjson", false, "Dump the JSON header into a separate file");
         options.addOption(dumpJSON);
+
+        Option dumpMem = new Option("m", "dumpmem", false, "Dump the JVM memory usage into a separate file");
+        options.addOption(dumpMem);
 
         Option debug = new Option("d", "debug", false, "Debug output");
         options.addOption(debug);

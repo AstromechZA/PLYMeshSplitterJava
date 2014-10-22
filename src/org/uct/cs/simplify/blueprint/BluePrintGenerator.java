@@ -75,7 +75,7 @@ public class BluePrintGenerator
         int border = 20;
         double ratio = (resolution - border) / bigdim;
 
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader, skipSize))
         {
             Vertex v = new Vertex(0, 0, 0);
             while (vr.hasNext())
@@ -103,9 +103,9 @@ public class BluePrintGenerator
         return new YZAxisValueGetter();
     }
 
-    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg, int skipsize) throws IOException
+    private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg, int skipSize) throws IOException
     {
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader, skipSize))
         {
             float minx = Float.MAX_VALUE,
                 maxx = -Float.MAX_VALUE,

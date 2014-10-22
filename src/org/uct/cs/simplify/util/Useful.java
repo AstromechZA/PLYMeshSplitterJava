@@ -124,7 +124,6 @@ public class Useful
         if (ratio > 1) ratio = 1;
         if (ratio < 0) ratio = 0;
 
-        Color c = new Color(255, 255, 255);
         double r = 1;
         double g = 1;
         double b = 1;

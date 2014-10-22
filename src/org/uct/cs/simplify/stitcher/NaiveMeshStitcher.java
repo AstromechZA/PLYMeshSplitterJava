@@ -6,10 +6,7 @@ import org.uct.cs.simplify.ply.header.PLYElement;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.ElementDimension;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.Pair;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.Useful;
+import org.uct.cs.simplify.util.*;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -179,22 +176,24 @@ public class NaiveMeshStitcher
 
     public static File stitch(List<File> files) throws IOException
     {
-        File last = files.get(0);
-        int num = files.size();
-        for (int i = 1; i < num; i++)
+        try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("stitching"))
         {
-            File temp = TempFileManager.provide("phf", ".ply");
-            File current = files.get(i);
-            Outputter.info2f("Stitching %s and %s into %s%n", last, current, temp);
-            NaiveMeshStitcher.stitch(last, current, temp);
+            File last = files.get(0);
+            int num = files.size();
+            for (int i = 1; i < num; i++)
+            {
+                File temp = TempFileManager.provide("phf", ".ply");
+                File current = files.get(i);
+                Outputter.info2f("Stitching %s and %s into %s%n", last, current, temp);
+                NaiveMeshStitcher.stitch(last, current, temp);
 
-            // if 'last' is a tempfile, and not the final one.. delete it
-            if (i > 1 && i < (num - 1)) TempFileManager.release(last);
+                // if 'last' is a tempfile, and not the final one.. delete it
+                if (i > 1 && i < (num - 1)) TempFileManager.release(last);
 
-            last = temp;
+                last = temp;
+            }
+            return last;
         }
-
-        return last;
     }
 
     private static class VertexStitchResult extends Pair<Integer, int[]>
