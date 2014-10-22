@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class PercentileFinder
 {
-    public static final int MAX_ITERATIONS = 10;
+    public static final int MAX_ITERATIONS = 20;
     private final PLYReader modelReader;
     private final IAxisReader axisReader;
 
@@ -24,7 +24,7 @@ public class PercentileFinder
     {
         long numVertices = modelReader.getHeader().getElement("vertex").getCount();
 
-        long nth = (numVertices / 100_000_000) + 1;
+        long nth = (numVertices / 50_000_000) + 1;
 
         double min = lowerBound;
         double max = upperBound;
