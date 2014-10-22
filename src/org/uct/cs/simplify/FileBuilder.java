@@ -172,7 +172,7 @@ public class FileBuilder
 
             if (cmd.hasOption("dumpjson"))
             {
-                File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".json");
+                File headerFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
                 {
                     fw.write(jsonHeader);
@@ -181,7 +181,7 @@ public class FileBuilder
 
             if (cmd.hasOption("dumpmem"))
             {
-                File memFile = new File(outputDir, Useful.getFilenameWithoutExt(inputFile.getName()) + ".memdump");
+                File memFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".memdump");
                 sr.dump(memFile);
             }
         }
