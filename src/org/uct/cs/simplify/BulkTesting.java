@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class BulkTesting
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws InterruptedException
     {
         CommandLine cmd = getCmd(args);
 
@@ -31,10 +31,9 @@ public class BulkTesting
             File o = new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".phf");
             IMembershipBuilder mb = IMembershipBuilder.get(hierarchy);
 
+            StatRecorder sr = new StatRecorder(500);
             try
             {
-                StatRecorder sr = new StatRecorder(500);
-
                 String json = FileBuilder.run(fi, o, false, true, true, mb, new StdOutProgressReporter("process"));
                 File headerFile = new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
@@ -45,8 +44,9 @@ public class BulkTesting
                 sr.close();
                 sr.dump(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".memdump"));
             }
-            catch (IOException | InterruptedException e)
+            catch (IOException | InterruptedException | RuntimeException e)
             {
+                sr.close();
                 e.printStackTrace();
             }
 
