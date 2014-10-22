@@ -59,6 +59,8 @@ public class BulkTesting
             {
                 e.printStackTrace();
             }
+
+            o.delete();
         }
     }
 

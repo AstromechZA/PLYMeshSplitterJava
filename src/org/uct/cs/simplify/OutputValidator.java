@@ -141,6 +141,7 @@ public class OutputValidator
             }
 
             Outputter.info1ln("Tree Analysis:");
+            Outputter.info1f("Leaf nodes: %d%n", leafDepth.count);
             Outputter.info1f("Leaf Depth: Min: %f %n", leafDepth.min);
             Outputter.info1f("Leaf Depth: P50: %f %n", leafDepth.p50);
             Outputter.info1f("Leaf Depth: Max: %f %n", leafDepth.max);

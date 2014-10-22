@@ -115,6 +115,9 @@ public class FileBuilder
         String jsonHeader = PHFBuilder.compile(tree, outputFile, additionalJSON, progressReporter);
         Outputter.info3f("Processing complete. Final file: %s%n", outputFile);
 
+        Outputter.info1f("Input File Size: %d (%s)%n", inputFile.length(), Useful.formatBytes(inputFile.length()));
+        Outputter.info1f("Output File Size: %d (%s)%n", outputFile.length(), Useful.formatBytes(outputFile.length()));
+
         try
         {
             OutputValidator.run(outputFile);
