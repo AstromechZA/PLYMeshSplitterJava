@@ -1,10 +1,13 @@
 package org.uct.cs.simplify.util;
 
 import java.io.*;
-import java.lang.reflect.Array;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  Class for managing temporary files generated during processing
@@ -188,19 +191,35 @@ public class TempFileManager
         }
     }
 
-    public static void resetStatsAndLists()
+    public static void resetAndForceClear()
     {
         tempFileRegistry.clear();
+
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(workingDirectory))
+        {
+            for (Path path : directoryStream)
+            {
+                try
+                {
+                    Outputter.debugf("Force Clearing: %s%n", path);
+                    Files.delete(path);
+                }
+                catch (IOException ex)
+                {
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+        }
     }
 
     private static class TempFileRegistration
     {
-        private boolean isReleased = false;
-
         // attributes set on create
         private final File file;
         private final long timeProvided;
-
+        private boolean isReleased = false;
         // attributes set on delete
         private long finalByteSize;
         private long timeReleased;

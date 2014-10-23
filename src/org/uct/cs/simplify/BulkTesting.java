@@ -63,7 +63,7 @@ public class BulkTesting
             try
             {
                 TempFileManager.clear();
-                TempFileManager.resetStatsAndLists();
+                TempFileManager.resetAndForceClear();
             }
             catch (InterruptedException e)
             {

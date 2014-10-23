@@ -140,7 +140,7 @@ public class FileBuilder
         File outputFile = new File(cmd.getOptionValue("output"));
         File outputDir = outputFile.getParentFile();
 
-        if (cmd.hasOption("d")) Outputter.setCurrentLevel(Outputter.DEBUG);
+        if (cmd.hasOption("debug")) Outputter.setCurrentLevel(Outputter.DEBUG);
 
         IMembershipBuilder mb = Constants.MEMBERSHIP_BUILDER;
         if (cmd.hasOption("hierarchy"))
