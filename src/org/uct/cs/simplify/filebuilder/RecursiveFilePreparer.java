@@ -92,6 +92,7 @@ public class RecursiveFilePreparer
             long targetFaces = (long) (totalFaces * ratio);
 
             // simplify file
+            Outputter.info3f("Simplify from %d to %d faces.", totalFaces, targetFaces);
             File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces, inputNode.getBoundingBox());
 
             // delete stitched model

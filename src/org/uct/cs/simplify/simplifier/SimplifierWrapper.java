@@ -29,7 +29,7 @@ public class SimplifierWrapper
         try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("simplify"))
         {
             File tt = TempFileManager.provide("simp", ".ply");
-            Outputter.info2f("Simplifying %s to %s...%n", input.getPath(), tt.getPath());
+            Outputter.info2f("Simplifying %s to %s (faces: %d)...%n", input.getPath(), tt.getPath(), numFaces);
             Runtime r = Runtime.getRuntime();
 
             List<String> argsList = new ArrayList<>();

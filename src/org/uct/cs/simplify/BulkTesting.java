@@ -61,6 +61,10 @@ public class BulkTesting
             }
 
             o.delete();
+
+            System.gc();
+            Thread.sleep(1000);
+            System.gc();
         }
     }
 
