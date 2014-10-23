@@ -118,16 +118,6 @@ public class FileBuilder
         Outputter.info1f("Input File Size: %d (%s)%n", inputFile.length(), Useful.formatBytes(inputFile.length()));
         Outputter.info1f("Output File Size: %d (%s)%n", outputFile.length(), Useful.formatBytes(outputFile.length()));
 
-        try
-        {
-            OutputValidator.run(outputFile);
-        }
-        catch (RuntimeException e)
-        {
-            System.err.println("Validation Failed!");
-            e.printStackTrace();
-        }
-
         if (!keepNodes)
         {
             try
@@ -184,6 +174,16 @@ public class FileBuilder
                 File memFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".memdump");
                 sr.dump(memFile);
             }
+        }
+
+        try
+        {
+            OutputValidator.run(outputFile, cmd.hasOption("debug"));
+        }
+        catch (RuntimeException e)
+        {
+            System.err.println("Validation Failed!");
+            e.printStackTrace();
         }
     }
 

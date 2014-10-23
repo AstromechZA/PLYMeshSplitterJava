@@ -43,6 +43,16 @@ public class BulkTesting
 
                 sr.close();
                 sr.dump(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".memdump"));
+
+                try
+                {
+                    OutputValidator.run(o, false);
+                }
+                catch (RuntimeException e)
+                {
+                    System.err.println("Validation Failed!");
+                    e.printStackTrace();
+                }
             }
             catch (IOException | InterruptedException | RuntimeException e)
             {
