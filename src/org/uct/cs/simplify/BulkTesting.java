@@ -46,7 +46,7 @@ public class BulkTesting
 
                 try
                 {
-                    OutputValidator.run(o, false);
+                    OutputValidator.run(o, true);
                 }
                 catch (RuntimeException e)
                 {
