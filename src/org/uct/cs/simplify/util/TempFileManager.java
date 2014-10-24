@@ -99,12 +99,12 @@ public class TempFileManager
         { /**/ }
     }
 
-    public static void clear() throws InterruptedException
+    public static void clear()
     {
         clear(null);
     }
 
-    public static void clear(File dumpFile) throws InterruptedException
+    public static void clear(File dumpFile)
     {
         System.gc();
 
@@ -206,11 +206,13 @@ public class TempFileManager
                 }
                 catch (IOException ex)
                 {
+                    Outputter.debugf("Could not delete %s : %s%n", path, ex.getMessage());
                 }
             }
         }
         catch (IOException ex)
         {
+            Outputter.debugf("Error : %s%n", ex.getMessage());
         }
     }
 

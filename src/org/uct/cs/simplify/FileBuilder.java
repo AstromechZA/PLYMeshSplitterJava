@@ -120,14 +120,7 @@ public class FileBuilder
 
         if (!keepNodes)
         {
-            try
-            {
-                TempFileManager.clear();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            TempFileManager.clear();
         }
 
         return jsonHeader;

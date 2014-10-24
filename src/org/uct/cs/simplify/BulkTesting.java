@@ -60,15 +60,8 @@ public class BulkTesting
                 e.printStackTrace();
             }
 
-            try
-            {
-                TempFileManager.clear();
-                TempFileManager.resetAndForceClear();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            TempFileManager.clear();
+            TempFileManager.resetAndForceClear();
 
             o.delete();
 

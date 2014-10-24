@@ -178,14 +178,8 @@ public class CroppingRunnable implements Runnable
             e.printStackTrace();
         }
 
-        try
-        {
-            TempFileManager.clear();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+        TempFileManager.clear();
+
         if (this.listener != null) this.listener.callback(success);
     }
 }
