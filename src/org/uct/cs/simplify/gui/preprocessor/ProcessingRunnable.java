@@ -4,6 +4,7 @@ import org.uct.cs.simplify.FileBuilder;
 import org.uct.cs.simplify.gui.util.ProgressBarProgressReporter;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.util.ICompletionListener;
+import org.uct.cs.simplify.util.StatRecorder;
 
 import javax.swing.*;
 import java.io.File;
@@ -29,7 +30,7 @@ public class ProcessingRunnable implements Runnable
     public void run()
     {
         boolean success = false;
-        try
+        try (StatRecorder ignored = new StatRecorder(500))
         {
             FileBuilder.run(
                 this.inputFile,
