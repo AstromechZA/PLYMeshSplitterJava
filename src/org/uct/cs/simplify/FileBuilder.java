@@ -215,7 +215,7 @@ public class FileBuilder
         options.addOption(treeimage);
 
         Option hierarchy = new Option("h", "hierarchy", true, "Pick the hierarchical level of detail structure to be used." +
-            " Choose one of: [octree, kdtree, vkdtree, mkdtreeN] where N is a number from 2 -> 8.");
+            " Choose one of: [octree, kdtree, vkdtree, mkdtreeN] where N is a number from 2 -> 8. Default: 'mkdtree4'.");
         options.addOption(hierarchy);
 
         CommandLine cmd;
