@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("CollectionWithoutInitialCapacity")
 public class PLYHeader
 {
-    private static final String HEADER_REGEXP = "[\\s\\S]*?end_header.*?\n";
+    private static final String HEADER_REGEXP = "^[\\s\\S]*?end_header[\\s\\S]*?\n";
     private static final int EXPECTED_HEADER_LENGTH = 1024;
     private final File file;
     private PLYFormat format;
@@ -39,6 +39,8 @@ public class PLYHeader
                 this.constructFromString(headerContent);
             }
         }
+        if (this.format != PLYFormat.LITTLE_ENDIAN)
+            throw new RuntimeException("Input file must be in binary Little-Endian format!");
     }
 
     public PLYHeader(Iterable<PLYElement> elements)
