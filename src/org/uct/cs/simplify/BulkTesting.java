@@ -60,10 +60,8 @@ public class BulkTesting
                 e.printStackTrace();
             }
 
-            TempFileManager.clear();
+            TempFileManager.clear(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".diskdump"));
             TempFileManager.resetAndForceClear();
-
-            o.delete();
 
             System.gc();
             Thread.sleep(1000);

@@ -16,12 +16,8 @@ public abstract class ProgressReporter
         long elapsed = now - startTime;
         if (percent > 0 && percent < 1)
         {
-            if ((now - lastUpdated) > Useful.NANOSECONDS_PER_SECOND)
-            {
-                long remaining = (long) ((elapsed * (1 - percent)) / percent);
-                this.lastStatus = String.format("%s : %.2f%% : ( Remaining Time: %s )", this.taskName, percent * 100, Useful.formatTimeNoDecimal(remaining));
-                lastUpdated = now;
-            }
+            long remaining = (long) ((elapsed * (1 - percent)) / percent);
+            this.lastStatus = String.format("%s : %.2f%% : ( Remaining Time: %s )", this.taskName, percent * 100, Useful.formatTimeNoDecimal(remaining));
         }
         else if (percent <= 0)
         {
@@ -32,7 +28,11 @@ public abstract class ProgressReporter
             this.lastStatus = String.format("%s : 100%% : ( Remaining Time: 0 )", this.taskName);
         }
 
-        this.output();
+        if ((now - lastUpdated) > Useful.NANOSECONDS_PER_MILLISECONDS || (percent <= 0 || percent >= 1))
+        {
+            this.output();
+            lastUpdated = now;
+        }
     }
 
     public abstract void output();

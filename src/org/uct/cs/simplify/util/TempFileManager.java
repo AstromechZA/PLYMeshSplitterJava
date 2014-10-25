@@ -142,30 +142,42 @@ public class TempFileManager
             if (creates.peekNext().compareTo(releases.peekNext()) <= 0)
             {
                 TFAction a = creates.next();
+                // data point before create
+                datapoints.add(new Pair<>(a.time, currentBytes));
                 currentBytes += a.bytes;
                 totalBytes += a.bytes;
                 maximumBytes = Math.max(maximumBytes, currentBytes);
+                // data point after create
                 datapoints.add(new Pair<>(a.time, currentBytes));
             }
             else
             {
                 TFAction a = releases.next();
+                // data point before delete
+                datapoints.add(new Pair<>(a.time, currentBytes));
                 currentBytes -= a.bytes;
+                // data point after delete
                 datapoints.add(new Pair<>(a.time, currentBytes));
             }
         }
         while(creates.hasNext())
         {
             TFAction a = creates.next();
+            // data point before create
+            datapoints.add(new Pair<>(a.time, currentBytes));
             currentBytes += a.bytes;
             totalBytes += a.bytes;
             maximumBytes = Math.max(maximumBytes, currentBytes);
+            // data point after create
             datapoints.add(new Pair<>(a.time, currentBytes));
         }
         while(releases.hasNext())
         {
             TFAction a = releases.next();
+            // data point before delete
+            datapoints.add(new Pair<>(a.time, currentBytes));
             currentBytes -= a.bytes;
+            // data point after delete
             datapoints.add(new Pair<>(a.time, currentBytes));
         }
 
