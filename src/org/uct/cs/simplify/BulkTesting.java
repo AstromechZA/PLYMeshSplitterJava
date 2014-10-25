@@ -63,10 +63,13 @@ public class BulkTesting
             TempFileManager.clear(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".diskdump"));
             TempFileManager.resetAndForceClear();
 
+            StateHolder.reset();
+
             System.gc();
             Thread.sleep(1000);
             System.gc();
         }
+        Outputter.info1ln(StateHolder.getPrintableIDMapping());
     }
 
     public static CommandLine getCmd(String[] args)

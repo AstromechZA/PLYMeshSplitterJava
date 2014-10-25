@@ -73,7 +73,7 @@ public class StatRecorder implements AutoCloseable
         {
             for (Recording recording : this.recordings)
             {
-                writer.printf("%d,%d,%s%n", recording.time, recording.usage, recording.state);
+                writer.printf("%d,%d,%d%n", recording.time, recording.usage, recording.state);
             }
         }
     }
@@ -112,13 +112,13 @@ public class StatRecorder implements AutoCloseable
     private static class Recording
     {
         final long time, usage;
-        final String state;
+        final int state;
 
         private Recording(long time, long usage)
         {
             this.time = time;
             this.usage = usage;
-            this.state = StateHolder.state;
+            this.state = StateHolder.getCurrentStateI();
         }
     }
 }

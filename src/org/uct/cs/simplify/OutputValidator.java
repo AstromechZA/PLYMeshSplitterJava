@@ -149,7 +149,9 @@ public class OutputValidator
                 Outputter.info1f("Leaf Depth: Max: %f %n", leafDepth.max);
                 Outputter.info1f("Leaf Depth: Mean: %f %n", leafDepth.mean);
                 Outputter.info1f("Leaf Size: Min: %f %n", leafSize.min);
+                Outputter.info1f("Leaf Size: P25: %f %n", leafSize.p25);
                 Outputter.info1f("Leaf Size: P50: %f %n", leafSize.p50);
+                Outputter.info1f("Leaf Size: P75: %f %n", leafSize.p75);
                 Outputter.info1f("Leaf Size: Max: %f %n", leafSize.max);
                 Outputter.info1f("Leaf Size: Mean: %f %n", leafSize.mean);
                 Outputter.info1f("Leaf Size: StdDev: %f %n%n", leafSize.calculateStdDev());

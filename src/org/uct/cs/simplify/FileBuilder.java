@@ -118,8 +118,10 @@ public class FileBuilder
         Outputter.info1f("Input File Size: %d (%s)%n", inputFile.length(), Useful.formatBytes(inputFile.length()));
         Outputter.info1f("Output File Size: %d (%s)%n", outputFile.length(), Useful.formatBytes(outputFile.length()));
 
+
         if (!keepNodes)
         {
+            StateHolder.setState("Cleanup");
             TempFileManager.clear();
         }
 
@@ -146,7 +148,7 @@ public class FileBuilder
             String jsonHeader = run(
                 inputFile,
                 outputFile,
-                cmd.hasOption("keeptemp"),
+                cmd.hasOption("keeptemp") || cmd.hasOption("dumpmem"),
                 cmd.hasOption("swapyz"),
                 cmd.hasOption("treeimage"),
                 mb,
@@ -166,9 +168,13 @@ public class FileBuilder
             {
                 File memFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".memdump");
                 sr.dump(memFile);
+
+                File diskFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".diskdump");
+                StateHolder.setState("Cleanup");
+                TempFileManager.clear(diskFile);
             }
         }
-
+        Outputter.info1ln(StateHolder.getPrintableIDMapping());
         try
         {
             OutputValidator.run(outputFile, cmd.hasOption("debug"));

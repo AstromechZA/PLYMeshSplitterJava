@@ -127,7 +127,8 @@ public class PHFNode
             String.format("\"min_z\":%f,", this.boundingBox.getMinZ()) +
             String.format("\"max_x\":%f,", this.boundingBox.getMaxX()) +
             String.format("\"max_y\":%f,", this.boundingBox.getMaxY()) +
-            String.format("\"max_z\":%f", this.boundingBox.getMaxZ()) +
+            String.format("\"max_z\":%f,", this.boundingBox.getMaxZ()) +
+            String.format("\"leaf\":%b", this.children.size() > 0) +
             '}';
     }
 
