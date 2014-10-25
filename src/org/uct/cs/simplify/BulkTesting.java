@@ -23,7 +23,7 @@ public class BulkTesting
         if (!fo.exists()) throw new RuntimeException("Output folder does not exist");
 
         String[] hierarchies = new String[]{
-            "octree", "kdtree", "vkdtree", "mkdtree3", "mkdtree4", "mkdtree5", "mkdtree6"
+            "octree", "kdtree", "vkdtree", "mkdtree3", "mkdtree4", "mkdtree5"
         };
 
         for (String hierarchy : hierarchies)
