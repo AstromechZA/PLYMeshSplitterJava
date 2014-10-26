@@ -26,6 +26,13 @@ public class BulkTesting
             "octree", "kdtree", "vkdtree", "mkdtree3", "mkdtree4", "mkdtree5"
         };
 
+        if (cmd.hasOption("hierarchies"))
+        {
+            hierarchies = cmd.getOptionValue("hierarchies").trim().toLowerCase().split(" ");
+        }
+
+        System.out.println("Testing: " + String.join(", ", hierarchies));
+
         for (String hierarchy : hierarchies)
         {
             File o = new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".phf");
@@ -85,6 +92,9 @@ public class BulkTesting
         Option outputDir = new Option("o", "output", true, "path to output directory");
         outputDir.setRequired(true);
         options.addOption(outputDir);
+
+        Option hierarchies = new Option("h", "hierarchies", true, "space seperated string of hierarchies");
+        options.addOption(hierarchies);
 
         CommandLine cmd;
         try
