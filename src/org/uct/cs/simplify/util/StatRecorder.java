@@ -94,7 +94,7 @@ public class StatRecorder implements AutoCloseable
             {
                 do
                 {
-                    long ms = System.currentTimeMillis();
+                    long ms = System.nanoTime();
                     Runtime r = Runtime.getRuntime();
                     long used = r.totalMemory() - r.freeMemory();
                     if (used > 0) this.parent.add(ms, used);
