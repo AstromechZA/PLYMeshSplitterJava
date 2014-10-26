@@ -1,6 +1,6 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 
 /**
@@ -9,7 +9,7 @@ import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembership
 public class Constants
 {
     // The method the FileBuilder uses to split up the mesh
-    public static final IMembershipBuilder MEMBERSHIP_BUILDER = new MultiwayVariableKDTreeMembershipBuilder(4);
+    public static final MembershipBuilder MEMBERSHIP_BUILDER = new MultiwayVariableKDTreeMembershipBuilder(4);
 
     // desired number of faces in root node of output
     public static final long FACES_IN_ROOT = 400_000;

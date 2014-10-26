@@ -5,15 +5,15 @@ import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
 
-public interface IMembershipBuilder
+public abstract class MembershipBuilder
 {
-    MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException;
+    public abstract MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException;
 
-    int getSplitRatio();
+    public abstract int getSplitRatio();
 
-    boolean isBalanced();
+    public abstract boolean isBalanced();
 
-    public static IMembershipBuilder get(String s)
+    public static MembershipBuilder get(String s)
     {
         s = s.toLowerCase();
         if (s.equals("octree"))

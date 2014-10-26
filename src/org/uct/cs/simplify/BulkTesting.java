@@ -1,7 +1,7 @@
 package org.uct.cs.simplify;
 
 import org.apache.commons.cli.*;
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
 import org.uct.cs.simplify.util.*;
 
 import java.io.File;
@@ -36,7 +36,7 @@ public class BulkTesting
         for (String hierarchy : hierarchies)
         {
             File o = new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".phf");
-            IMembershipBuilder mb = IMembershipBuilder.get(hierarchy);
+            MembershipBuilder mb = MembershipBuilder.get(hierarchy);
 
             StatRecorder sr = new StatRecorder(500);
             try

@@ -13,7 +13,7 @@ import org.uct.cs.simplify.util.axis.IAxisReader;
 
 import java.io.IOException;
 
-public class VariableKDTreeMembershipBuilder implements IMembershipBuilder
+public class VariableKDTreeMembershipBuilder extends MembershipBuilder
 {
     private static final float MEDIAN_TARGET = 0.5f;
 

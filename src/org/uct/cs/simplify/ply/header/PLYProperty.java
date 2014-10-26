@@ -13,7 +13,7 @@ public class PLYProperty extends PLYPropertyBase
     {
         super(name);
         this.type = type;
-        this.typeReader = IDataTypeReader.getReaderForType(this.type);
+        this.typeReader = DataType.getReaderForType(this.type);
     }
 
     public DataType getType()

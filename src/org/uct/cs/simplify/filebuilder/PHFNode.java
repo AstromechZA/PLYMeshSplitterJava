@@ -149,7 +149,10 @@ public class PHFNode
 
     public void addChildren(List<PHFNode> children)
     {
-        children.forEach(this::addChild);
+        for (PHFNode child : children)
+        {
+            this.addChild(child);
+        }
     }
 
     public List<PHFNode> collectAllNodes()

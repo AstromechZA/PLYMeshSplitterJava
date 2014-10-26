@@ -6,7 +6,7 @@ import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
@@ -29,7 +29,7 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         boolean treeImage,
-        IMembershipBuilder membershipBuilder,
+        MembershipBuilder membershipBuilder,
         ProgressReporter reporter
     )
         throws IOException, InterruptedException
@@ -77,7 +77,7 @@ public class FileBuilder
         boolean keepNodes,
         boolean swapYZ,
         boolean treeImage,
-        IMembershipBuilder membershipBuilder,
+        MembershipBuilder membershipBuilder,
         SimplificationFactory simplificationFactory,
         IStoppingCondition stopCondition,
         ProgressReporter progressReporter
@@ -137,10 +137,10 @@ public class FileBuilder
 
         if (cmd.hasOption("debug")) Outputter.setCurrentLevel(Outputter.DEBUG);
 
-        IMembershipBuilder mb = Constants.MEMBERSHIP_BUILDER;
+        MembershipBuilder mb = Constants.MEMBERSHIP_BUILDER;
         if (cmd.hasOption("hierarchy"))
         {
-            mb = IMembershipBuilder.get(cmd.getOptionValue("hierarchy"));
+            mb = MembershipBuilder.get(cmd.getOptionValue("hierarchy"));
         }
 
         try (StatRecorder sr = new StatRecorder())

@@ -48,7 +48,10 @@ public class PLYHeader
         this.file = null;
         this.format = PLYFormat.LITTLE_ENDIAN;
         this.elements = new LinkedHashMap<>();
-        elements.forEach(e -> this.elements.put(e.getName(), e));
+        for (PLYElement e : elements)
+        {
+            this.elements.put(e.getName(), e);
+        }
         this.dataOffset = this.toString().length();
     }
 
@@ -144,7 +147,10 @@ public class PLYHeader
         StringBuilder sb = new StringBuilder(EXPECTED_HEADER_LENGTH);
         sb.append(String.format("ply%n"));
         sb.append(String.format("format binary_little_endian 1.0%n"));
-        this.elements.values().forEach(sb::append);
+        for (PLYElement element : elements.values())
+        {
+            sb.append(element);
+        }
         sb.append("end_header");
         return sb.toString();
     }

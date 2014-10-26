@@ -4,7 +4,7 @@ import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
 import org.uct.cs.simplify.simplifier.SimplifierWrapper;
 import org.uct.cs.simplify.splitter.NodeSplitter;
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.stitcher.NaiveMeshStitcher;
 import org.uct.cs.simplify.util.Outputter;
@@ -21,7 +21,7 @@ public class RecursiveFilePreparer
     public static PHFNode prepare(
         PHFNode inputNode,
         IStoppingCondition stopCondition,
-        IMembershipBuilder splitType,
+        MembershipBuilder splitType,
         SimplificationFactory simplificationFactory,
         ProgressReporter progressReporter
     )
@@ -34,7 +34,7 @@ public class RecursiveFilePreparer
         PHFNode inputNode,
         int depth,
         IStoppingCondition stopCondition,
-        IMembershipBuilder splitType,
+        MembershipBuilder splitType,
         SimplificationFactory simplificationFactory,
         ProgressSegment progress,
         ProgressReporter progressReporter

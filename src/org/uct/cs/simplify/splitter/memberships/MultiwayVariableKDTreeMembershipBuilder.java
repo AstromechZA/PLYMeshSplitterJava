@@ -14,7 +14,7 @@ import org.uct.cs.simplify.util.axis.IAxisReader;
 
 import java.io.IOException;
 
-public class MultiwayVariableKDTreeMembershipBuilder implements IMembershipBuilder
+public class MultiwayVariableKDTreeMembershipBuilder extends MembershipBuilder
 {
     private final int order;
 

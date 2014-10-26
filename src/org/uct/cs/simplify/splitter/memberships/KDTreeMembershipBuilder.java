@@ -13,7 +13,7 @@ import org.uct.cs.simplify.util.axis.IAxisReader;
 
 import java.io.IOException;
 
-public class KDTreeMembershipBuilder implements IMembershipBuilder
+public class KDTreeMembershipBuilder extends MembershipBuilder
 {
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException

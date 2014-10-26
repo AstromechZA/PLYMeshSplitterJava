@@ -12,7 +12,7 @@ public class PLYListProperty extends PLYProperty
     {
         super(name, innerType);
         this.lengthType = lengthType;
-        this.lengthTypeReader = IDataTypeReader.getReaderForType(this.lengthType);
+        this.lengthTypeReader = DataType.getReaderForType(this.lengthType);
     }
 
     public DataType getLengthType()

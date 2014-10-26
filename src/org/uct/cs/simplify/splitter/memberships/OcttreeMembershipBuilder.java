@@ -11,7 +11,7 @@ import org.uct.cs.simplify.util.XBoundingBox;
 
 import java.io.IOException;
 
-public class OcttreeMembershipBuilder implements IMembershipBuilder
+public class OcttreeMembershipBuilder extends MembershipBuilder
 {
     @Override
     public MembershipBuilderResult build(PLYReader reader, XBoundingBox boundingBox) throws IOException

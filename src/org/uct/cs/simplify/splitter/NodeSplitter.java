@@ -5,7 +5,7 @@ import org.uct.cs.simplify.filebuilder.PHFNode;
 import org.uct.cs.simplify.model.*;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.splitter.memberships.IMembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilderResult;
 import org.uct.cs.simplify.util.*;
 
@@ -20,7 +20,7 @@ public class NodeSplitter
 
     public static ArrayList<PHFNode> split(
         PHFNode parent,
-        IMembershipBuilder membershipBuilder
+        MembershipBuilder membershipBuilder
     ) throws IOException
     {
         try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("splitting"))
