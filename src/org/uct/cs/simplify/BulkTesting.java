@@ -52,6 +52,8 @@ public class BulkTesting
 
                 sr.dump(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".memdump"));
 
+                TempFileManager.clear(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".diskdump"));
+
                 try
                 {
                     OutputValidator.run(o, true);
@@ -68,7 +70,6 @@ public class BulkTesting
                 e.printStackTrace();
             }
 
-            TempFileManager.clear(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".diskdump"));
             TempFileManager.resetAndForceClear();
 
             StateHolder.reset();
