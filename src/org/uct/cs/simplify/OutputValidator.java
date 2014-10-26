@@ -25,15 +25,15 @@ public class OutputValidator
             long streamLength = file.length();
             int headerLength = Useful.readIntLE(istream);
             String jsonHeader = Useful.readString(istream, headerLength);
-            Outputter.info2f("header length: %s%n", headerLength);
+            Outputter.info1f("header length: %s%n", headerLength);
 
             JSONObject o = new JSONObject(jsonHeader);
 
             boolean hasVertexColour = o.getBoolean("vertex_colour");
-            Outputter.info2f("vertex_colour: %b%n", hasVertexColour);
+            Outputter.info1f("vertex_colour: %b%n", hasVertexColour);
 
             JSONArray nodesJ = o.getJSONArray("nodes");
-            Outputter.info2f("number of nodes: %d%n", nodesJ.length());
+            Outputter.info1f("number of nodes: %d%n", nodesJ.length());
 
             SomeNode[] nodes = new SomeNode[ nodesJ.length() ];
             for (int i = 0; i < nodesJ.length(); i++)
@@ -155,6 +155,14 @@ public class OutputValidator
                 Outputter.info1f("Leaf Size: Max: %f %n", leafSize.max);
                 Outputter.info1f("Leaf Size: Mean: %f %n", leafSize.mean);
                 Outputter.info1f("Leaf Size: StdDev: %f %n%n", leafSize.calculateStdDev());
+
+                Outputter.info1f(
+                    "B: $%d$ & $%d$ & $%d$ & $%.2f$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$%n",
+                    nodesJ.length(),
+                    leafDepth.count,
+                    (int) leafDepth.min, leafDepth.mean, (int) leafDepth.max,
+                    (int) leafSize.min, (int) leafSize.mean, (int) leafSize.max, (int) leafSize.calculateStdDev()
+                );
 
                 Outputter.info1ln("Face Summaries per depth:");
                 for (Map.Entry<Integer, NumberSummary> entry : faceSummaries.entrySet())

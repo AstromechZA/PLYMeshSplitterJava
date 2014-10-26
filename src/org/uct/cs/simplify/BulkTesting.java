@@ -41,14 +41,15 @@ public class BulkTesting
             StatRecorder sr = new StatRecorder(500);
             try
             {
-                String json = FileBuilder.run(fi, o, false, true, true, mb, new StdOutProgressReporter("process"));
+                String json = FileBuilder.run(fi, o, false, true, false, mb, new StdOutProgressReporter("process"));
+                sr.close();
+
                 File headerFile = new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".json");
                 try (FileWriter fw = new FileWriter(headerFile))
                 {
                     fw.write(json);
                 }
 
-                sr.close();
                 sr.dump(new File(fo, Useful.getFilenameWithoutExt(fi.getName()) + "_" + hierarchy + ".memdump"));
 
                 try

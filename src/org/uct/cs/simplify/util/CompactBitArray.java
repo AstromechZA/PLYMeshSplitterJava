@@ -41,10 +41,10 @@ public class CompactBitArray
     public int get(long i)
     {
         // first identify which index we need
-        long blockIndex = i / this.blocksPerInt;
-        if (blockIndex >= this.data.length)
-            throw new IndexOutOfBoundsException("" + blockIndex + ">=" + data.length + ". (index: " + i + ")");
-        int block = this.data[ (int) blockIndex ];
+        int blockIndex = (int) (i / this.blocksPerInt);
+        if (blockIndex >= this.data.length || blockIndex < 0)
+            throw new IndexOutOfBoundsException("" + blockIndex + " not in " + data.length + ". (index: " + i + ")");
+        int block = this.data[ blockIndex ];
 
         // get positional index
         int positionIndex = (int) (i % this.blocksPerInt) * this.blockLength;

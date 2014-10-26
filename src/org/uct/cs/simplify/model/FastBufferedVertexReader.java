@@ -16,6 +16,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     protected final int blockSize;
     protected final byte[] blockBuffer;
     protected final long count;
+    protected final long itercount;
     protected final ReliableBufferedInputStream istream;
     protected final long nth;
     protected final long skip;
@@ -37,6 +38,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
         this.reader = reader;
         this.vertexElement = reader.getHeader().getElement("vertex");
         this.count = this.vertexElement.getCount();
+        this.itercount = this.getSampling();
         this.vam = new VertexAttrMap(this.vertexElement);
 
         this.start = reader.getElementDimension("vertex").getOffset();
@@ -51,7 +53,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     @Override
     public boolean hasNext()
     {
-        return this.index <= (this.count - 1);
+        return this.index < this.itercount;
     }
 
     @Override
@@ -73,8 +75,8 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
 
     public long getSampling()
     {
-        if (skip == 0) return this.getCount();
-        return (long) Math.ceil((double) (this.getCount()) / this.nth);
+        if (skip == 0) return this.count;
+        return (long) Math.ceil(this.count / (double) this.nth);
     }
 
     @Override
