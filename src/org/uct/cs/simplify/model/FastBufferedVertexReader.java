@@ -54,7 +54,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     @Override
     public boolean hasNext()
     {
-        return this.index < this.itercount;
+        return this.index < this.count;
     }
 
     @Override
