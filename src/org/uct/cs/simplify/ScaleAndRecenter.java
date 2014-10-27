@@ -105,6 +105,9 @@ public class ScaleAndRecenter
                         while (fr.hasNext())
                         {
                             fr.next(f);
+                            if (f.i < 0) throw new RuntimeException("Bad vertex index in face!");
+                            if (f.j < 0) throw new RuntimeException("Bad vertex index in face!");
+                            if (f.k < 0) throw new RuntimeException("Bad vertex index in face!");
                             if (f.i >= numVertices) throw new RuntimeException("Bad vertex index in face!");
                             if (f.j >= numVertices) throw new RuntimeException("Bad vertex index in face!");
                             if (f.k >= numVertices) throw new RuntimeException("Bad vertex index in face!");
