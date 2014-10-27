@@ -177,7 +177,7 @@ public class PLYHeader
         }
         elements.add(eVertex);
         PLYElement eFace = new PLYElement("face", numFaces);
-        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.INT, DataType.UCHAR));
+        eFace.addProperty(new PLYListProperty("vertex_indices", DataType.UINT, DataType.UCHAR));
         elements.add(eFace);
         return new PLYHeader(elements);
     }

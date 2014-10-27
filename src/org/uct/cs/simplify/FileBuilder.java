@@ -172,9 +172,9 @@ public class FileBuilder
                 File diskFile = new File(outputDir, Useful.getFilenameWithoutExt(outputFile.getName()) + ".diskdump");
                 StateHolder.setState("Cleanup");
                 TempFileManager.clear(diskFile);
+                Outputter.info1ln(StateHolder.getPrintableIDMapping());
             }
         }
-        Outputter.info1ln(StateHolder.getPrintableIDMapping());
         try
         {
             OutputValidator.run(outputFile, cmd.hasOption("debug"));

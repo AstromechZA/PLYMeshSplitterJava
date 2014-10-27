@@ -7,7 +7,6 @@ import org.uct.cs.simplify.model.FastBufferedVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.CompactBitArray;
-import org.uct.cs.simplify.util.ProgressBar;
 import org.uct.cs.simplify.util.XBoundingBox;
 import org.uct.cs.simplify.util.axis.Axis;
 import org.uct.cs.simplify.util.axis.IAxisReader;
@@ -73,22 +72,18 @@ public class MultiwayVariableKDTreeMembershipBuilder extends MembershipBuilder
             Vertex v = new Vertex(0, 0, 0);
             int numBits = (int) Math.ceil(Math.log(this.order) / Math.log(2));
             CompactBitArray memberships = new CompactBitArray(numBits, vr.getCount());
-            try (ProgressBar pb = new ProgressBar("Scanning", vr.getCount()))
+            long vertexIndex = 0;
+            while (vr.hasNext())
             {
-                long vertexIndex = 0;
-                while (vr.hasNext())
+                vr.next(v);
+                int membership = 0;
+                for (double point : splitPoints)
                 {
-                    vr.next(v);
-                    int membership = 0;
-                    for (double point : splitPoints)
-                    {
-                        if (axisReader.read(v) < point) break;
-                        membership++;
-                    }
-                    memberships.set(vertexIndex, membership);
-                    vertexIndex++;
-                    pb.tick();
+                    if (axisReader.read(v) < point) break;
+                    membership++;
                 }
+                memberships.set(vertexIndex, membership);
+                vertexIndex++;
             }
             return new MembershipBuilderResult(subNodes, memberships);
         }
