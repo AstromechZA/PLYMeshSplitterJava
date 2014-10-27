@@ -175,6 +175,14 @@ public class OutputValidator
                 Outputter.info1f("Leaf Size Vertices: Mean: %f %n", leafSizeVertices.mean);
                 Outputter.info1f("Leaf Size Vertices: StdDev: %f %n%n", leafSizeVertices.calculateStdDev());
 
+                Outputter.info1f(
+                    "\\textbf{} & $%d$ & $%d$ & $%d$ & $%.2f$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$ \\\\%n%n",
+                    nodesJ.length(), leafDepth.count,
+                    (int) leafDepth.min, leafDepth.mean, (int) leafDepth.max,
+                    (int) leafSizeFaces.min, (int) leafSizeFaces.mean, (int) leafSizeFaces.max, (int) leafSizeFaces.calculateStdDev(),
+                    (int) leafSizeVertices.min, (int) leafSizeVertices.mean, (int) leafSizeVertices.max, (int) leafSizeVertices.calculateStdDev()
+                );
+
                 Outputter.info1ln("Face Summaries per depth:");
                 for (Map.Entry<Integer, NumberSummary> entry : faceSummaries.entrySet())
                 {
