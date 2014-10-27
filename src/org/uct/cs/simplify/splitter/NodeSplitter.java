@@ -108,9 +108,8 @@ public class NodeSplitter
         int currentVertexIndex = 0;
         IntIntHashMapWithKeyList vertexIndexMap = new IntIntHashMapWithKeyList((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
-            StreamingFaceReader faceReader = new FastBufferedFaceReader(reader);
-            FileOutputStream fostream = new FileOutputStream(tempfile);
-            ByteArrayOutputStream bostream = new ByteArrayOutputStream(DEFAULT_BYTEOSBUF_SIZE)
+            StreamingFaceReader faceReader = new ReliableBufferedFaceReader(reader);
+            BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(tempfile))
         )
         {
             Face face = new Face(0, 0, 0);
@@ -128,40 +127,33 @@ public class NodeSplitter
                 if (numVerticesOfFaceInSubnode > 1)
                 {
                     numFacesInSubnode++;
-                    bostream.write((byte) 3);
+                    fostream.write((byte) 3);
 
                     if (!vertexIndexMap.containsKey(face.i))
                     {
                         vertexIndexMap.put(face.i, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.i));
+                    Useful.writeIntLE(fostream, vertexIndexMap.get(face.i));
 
                     if (!vertexIndexMap.containsKey(face.j))
                     {
                         vertexIndexMap.put(face.j, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.j));
+                    Useful.writeIntLE(fostream, vertexIndexMap.get(face.j));
 
                     if (!vertexIndexMap.containsKey(face.k))
                     {
                         vertexIndexMap.put(face.k, currentVertexIndex);
                         currentVertexIndex += 1;
                     }
-                    Useful.writeIntLE(bostream, vertexIndexMap.get(face.k));
-
-                }
-
-                if (bostream.size() > DEFAULT_BYTEOSBUF_SIZE - DEFAULT_BYTEOSBUF_TAIL)
-                {
-                    fostream.write(bostream.toByteArray());
-                    bostream.reset();
+                    Useful.writeIntLE(fostream, vertexIndexMap.get(face.k));
                 }
             }
-            if (bostream.size() > 0) fostream.write(bostream.toByteArray());
             return new GatheringResult(numFacesInSubnode, vertexIndexMap);
         }
+
     }
 
 
