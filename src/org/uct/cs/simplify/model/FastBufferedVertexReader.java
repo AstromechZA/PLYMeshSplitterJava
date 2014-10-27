@@ -38,7 +38,8 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
         this.reader = reader;
         this.vertexElement = reader.getHeader().getElement("vertex");
         this.count = this.vertexElement.getCount();
-        this.itercount = this.getSampling();
+        this.itercount = (nth == 1) ? this.count : (long) Math.ceil(this.count / (double) this.nth);
+
         this.vam = new VertexAttrMap(this.vertexElement);
 
         this.start = reader.getElementDimension("vertex").getOffset();
@@ -75,8 +76,7 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
 
     public long getSampling()
     {
-        if (skip == 0) return this.count;
-        return (long) Math.ceil(this.count / (double) this.nth);
+        return this.itercount;
     }
 
     @Override

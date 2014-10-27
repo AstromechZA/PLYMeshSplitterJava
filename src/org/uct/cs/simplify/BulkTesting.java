@@ -14,6 +14,8 @@ public class BulkTesting
     {
         CommandLine cmd = getCmd(args);
 
+        Outputter.setCurrentLevel(Outputter.DEBUG);
+
         File fi = new File(cmd.getOptionValue("input"));
         File fo = new File(cmd.getOptionValue("output"));
 
