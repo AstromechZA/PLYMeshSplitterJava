@@ -8,9 +8,9 @@ import org.uct.cs.simplify.util.Useful;
 
 import java.io.IOException;
 
-public class CleverFastBuffedFaceReader extends FastBufferedFaceReader
+public class CleverFaceReader extends SimpleFaceReader
 {
-    public CleverFastBuffedFaceReader(PLYReader reader) throws IOException
+    public CleverFaceReader(PLYReader reader) throws IOException
     {
         super(reader);
     }

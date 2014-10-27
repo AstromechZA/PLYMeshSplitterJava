@@ -97,7 +97,7 @@ public class ScaleAndRecenter
                     }
                 }
 
-                try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
+                try (StreamingFaceReader fr = new CleverFaceReader(reader))
                 {
                     try (ProgressBar progress = new ProgressBar("Filtering Face information", numFaces))
                     {

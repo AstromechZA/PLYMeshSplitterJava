@@ -103,8 +103,10 @@ public class OutputValidator
             if (verbose)
             {
                 HashMap<Integer, NumberSummary> faceSummaries = new HashMap<>();
+                HashMap<Integer, NumberSummary> vertexSummaries = new HashMap<>();
                 HashMap<Integer, NumberSummary> simpSummaries = new HashMap<>();
-                NumberSummary leafSize = new NumberSummary(nodes.length);
+                NumberSummary leafSizeFaces = new NumberSummary(nodes.length);
+                NumberSummary leafSizeVertices = new NumberSummary(nodes.length);
                 NumberSummary leafDepth = new NumberSummary(nodes.length);
 
                 for (SomeNode node : nodes)
@@ -129,7 +131,8 @@ public class OutputValidator
                     else
                     {
                         leafDepth.add(node.depth);
-                        leafSize.add(node.numFaces);
+                        leafSizeFaces.add(node.numFaces);
+                        leafSizeVertices.add(node.numVertices);
                     }
 
                     if (faceSummaries.containsKey(node.depth))
@@ -140,34 +143,42 @@ public class OutputValidator
                     {
                         faceSummaries.put(node.depth, new NumberSummary(10, node.numFaces));
                     }
+                    if (vertexSummaries.containsKey(node.depth))
+                    {
+                        vertexSummaries.get(node.depth).add(node.numFaces);
+                    }
+                    else
+                    {
+                        vertexSummaries.put(node.depth, new NumberSummary(10, node.numVertices));
+                    }
                 }
 
                 Outputter.info1ln("Tree Analysis:");
+                Outputter.info1f("Nodes: %d%n", nodesJ.length());
                 Outputter.info1f("Leaf nodes: %d%n", leafDepth.count);
                 Outputter.info1f("Leaf Depth: Min: %f %n", leafDepth.min);
                 Outputter.info1f("Leaf Depth: P50: %f %n", leafDepth.p50);
                 Outputter.info1f("Leaf Depth: Max: %f %n", leafDepth.max);
                 Outputter.info1f("Leaf Depth: Mean: %f %n", leafDepth.mean);
-                Outputter.info1f("Leaf Size: Min: %f %n", leafSize.min);
-                Outputter.info1f("Leaf Size: P25: %f %n", leafSize.p25);
-                Outputter.info1f("Leaf Size: P50: %f %n", leafSize.p50);
-                Outputter.info1f("Leaf Size: P75: %f %n", leafSize.p75);
-                Outputter.info1f("Leaf Size: Max: %f %n", leafSize.max);
-                Outputter.info1f("Leaf Size: Mean: %f %n", leafSize.mean);
-                Outputter.info1f("Leaf Size: StdDev: %f %n%n", leafSize.calculateStdDev());
-
-                Outputter.info1f(
-                    "B: $%d$ & $%d$ & $%d$ & $%.2f$ & $%d$ & $%d$ & $%d$ & $%d$ & $%d$%n",
-                    nodesJ.length(),
-                    leafDepth.count,
-                    (int) leafDepth.min, leafDepth.mean, (int) leafDepth.max,
-                    (int) leafSize.min, (int) leafSize.mean, (int) leafSize.max, (int) leafSize.calculateStdDev()
-                );
+                Outputter.info1f("Leaf Size Faces: Min: %f %n", leafSizeFaces.min);
+                Outputter.info1f("Leaf Size Faces: P25: %f %n", leafSizeFaces.p25);
+                Outputter.info1f("Leaf Size Faces: P50: %f %n", leafSizeFaces.p50);
+                Outputter.info1f("Leaf Size Faces: P75: %f %n", leafSizeFaces.p75);
+                Outputter.info1f("Leaf Size Faces: Max: %f %n", leafSizeFaces.max);
+                Outputter.info1f("Leaf Size Faces: Mean: %f %n", leafSizeFaces.mean);
+                Outputter.info1f("Leaf Size Faces: StdDev: %f %n%n", leafSizeFaces.calculateStdDev());
+                Outputter.info1f("Leaf Size Vertices: Min: %f %n", leafSizeVertices.min);
+                Outputter.info1f("Leaf Size Vertices: P25: %f %n", leafSizeVertices.p25);
+                Outputter.info1f("Leaf Size Vertices: P50: %f %n", leafSizeVertices.p50);
+                Outputter.info1f("Leaf Size Vertices: P75: %f %n", leafSizeVertices.p75);
+                Outputter.info1f("Leaf Size Vertices: Max: %f %n", leafSizeVertices.max);
+                Outputter.info1f("Leaf Size Vertices: Mean: %f %n", leafSizeVertices.mean);
+                Outputter.info1f("Leaf Size Vertices: StdDev: %f %n%n", leafSizeVertices.calculateStdDev());
 
                 Outputter.info1ln("Face Summaries per depth:");
                 for (Map.Entry<Integer, NumberSummary> entry : faceSummaries.entrySet())
                 {
-                    Outputter.info1f("%2d | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | total: %.0f %n",
+                    Outputter.info1f("%2d Faces | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | total: %.0f %n",
                         entry.getKey(),
                         entry.getValue().count,
                         entry.getValue().min,
@@ -176,16 +187,29 @@ public class OutputValidator
                         entry.getValue().mean,
                         entry.getValue().total
                     );
-                    if (simpSummaries.containsKey(entry.getKey()))
-                    {
-                        NumberSummary ss = simpSummaries.get(entry.getKey());
-                        Outputter.info1f("   | simplification ratios: | min: %5.5f | max: %5.5f | median: %5.5f | mean: %5.5f %n",
-                            ss.min,
-                            ss.max,
-                            ss.p50,
-                            ss.mean
-                        );
-                    }
+                }
+                for (Map.Entry<Integer, NumberSummary> entry : vertexSummaries.entrySet())
+                {
+                    Outputter.info1f("%2d Vertices | nodes: %4d | min: %8.0f | max: %8.0f | median: %11.2f | mean: %11.2f | total: %.0f %n",
+                        entry.getKey(),
+                        entry.getValue().count,
+                        entry.getValue().min,
+                        entry.getValue().max,
+                        entry.getValue().p50,
+                        entry.getValue().mean,
+                        entry.getValue().total
+                    );
+                }
+
+                for (Map.Entry<Integer, NumberSummary> entry : simpSummaries.entrySet())
+                {
+                    Outputter.info1f(" Simp %d | simplification ratios: | min: %5.5f | max: %5.5f | median: %5.5f | mean: %5.5f %n",
+                        entry.getKey(),
+                        entry.getValue().min,
+                        entry.getValue().max,
+                        entry.getValue().p50,
+                        entry.getValue().mean
+                    );
                 }
             }
         }

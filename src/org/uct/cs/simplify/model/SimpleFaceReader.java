@@ -8,7 +8,7 @@ import org.uct.cs.simplify.util.Useful;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class FastBufferedFaceReader extends StreamingFaceReader implements AutoCloseable
+public class SimpleFaceReader extends StreamingFaceReader implements AutoCloseable
 {
     protected final PLYReader reader;
     protected final PLYElement faceElement;
@@ -16,7 +16,7 @@ public class FastBufferedFaceReader extends StreamingFaceReader implements AutoC
     protected long count;
     protected ReliableBufferedInputStream istream;
 
-    public FastBufferedFaceReader(PLYReader reader) throws IOException
+    public SimpleFaceReader(PLYReader reader) throws IOException
     {
         this.reader = reader;
         this.faceElement = reader.getHeader().getElement("face");

@@ -11,14 +11,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-public class ReliableBufferedFaceReader extends StreamingFaceReader
+public class UltraFaceReader extends StreamingFaceReader
 {
-    private static final int FACES_PER_BUCKET = 4096;
+    private static final int FACES_PER_BUCKET = 512;
 
     protected final PLYReader reader;
     protected final PLYElement faceElement;
     protected final long start;
-    protected final int blockSize;
     protected ByteBuffer blockBuffer;
     protected long index;
     protected long count;
@@ -31,7 +30,7 @@ public class ReliableBufferedFaceReader extends StreamingFaceReader
     protected int maxcursor;
     protected int cursor;
 
-    public ReliableBufferedFaceReader(PLYReader reader) throws IOException
+    public UltraFaceReader(PLYReader reader) throws IOException
     {
         this.reader = reader;
         this.faceElement = reader.getHeader().getElement("face");
@@ -40,8 +39,7 @@ public class ReliableBufferedFaceReader extends StreamingFaceReader
         this.istream = new FileInputStream(reader.getFile());
         this.inputChannel = this.istream.getChannel();
         this.inputChannel.position(this.start);
-        this.blockSize = 13 * FACES_PER_BUCKET;
-        this.blockBuffer = ByteBuffer.allocateDirect(this.blockSize);
+        this.blockBuffer = ByteBuffer.allocateDirect(13 * FACES_PER_BUCKET);
         this.blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
         this.facesInLastBucket = (int) (this.count % FACES_PER_BUCKET);
@@ -50,7 +48,6 @@ public class ReliableBufferedFaceReader extends StreamingFaceReader
         this.cursor = 0;
         this.maxcursor = -1;
     }
-
 
     @Override
     public boolean hasNext()
@@ -69,38 +66,34 @@ public class ReliableBufferedFaceReader extends StreamingFaceReader
     @Override
     public void next(Face f) throws IOException
     {
-        if (cursor <= maxcursor)
-        {
-            f.i = Useful.readIntLE(blockBuffer, cursor * 13 + 1);
-            f.j = Useful.readIntLE(blockBuffer, cursor * 13 + 5);
-            f.k = Useful.readIntLE(blockBuffer, cursor * 13 + 9);
-            index++;
-            cursor++;
-        }
-        else
+        if (cursor > maxcursor)
         {
             bucketIndex++;
             if (bucketIndex < maxBucketIndex)
             {
                 blockBuffer.clear();
-                blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                inputChannel.read(blockBuffer);
-                cursor = 0;
                 maxcursor = FACES_PER_BUCKET - 1;
             }
             else if (bucketIndex == maxBucketIndex)
             {
-                blockBuffer = ByteBuffer.allocateDirect(this.facesInLastBucket * 13);
-                blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                inputChannel.read(blockBuffer);
-                cursor = 0;
+                blockBuffer = ByteBuffer.allocateDirect(facesInLastBucket * 13);
                 maxcursor = facesInLastBucket - 1;
             }
             else
             {
                 throw new BufferUnderflowException();
             }
+            inputChannel.read(blockBuffer);
+            blockBuffer.flip();
+            blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+            cursor = 0;
         }
+        int pos = cursor * 13 + 1;
+        f.i = Useful.readIntLE(blockBuffer, pos);
+        f.j = Useful.readIntLE(blockBuffer, pos + 4);
+        f.k = Useful.readIntLE(blockBuffer, pos + 8);
+        index++;
+        cursor++;
 
     }
 

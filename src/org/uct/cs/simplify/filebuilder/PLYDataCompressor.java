@@ -78,7 +78,7 @@ public class PLYDataCompressor
                 ostream.write(v.b);
             }
 
-            try (StreamingFaceReader fr = new FastBufferedFaceReader(reader))
+            try (UltraFaceReader fr = new UltraFaceReader(reader))
             {
                 Face f = new Face(0, 0, 0);
                 while (fr.hasNext())

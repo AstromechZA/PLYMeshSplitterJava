@@ -108,7 +108,7 @@ public class NodeSplitter
         int currentVertexIndex = 0;
         IntIntHashMapWithKeyList vertexIndexMap = new IntIntHashMapWithKeyList((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
-            StreamingFaceReader faceReader = new ReliableBufferedFaceReader(reader);
+            StreamingFaceReader faceReader = new UltraFaceReader(reader);
             BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(tempfile))
         )
         {

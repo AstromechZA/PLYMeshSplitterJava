@@ -107,7 +107,7 @@ public class CroppingRunnable implements Runnable
 
                 this.progress.changeTask("Cropping Faces", false);
 
-                try (StreamingFaceReader fr = new CleverFastBuffedFaceReader(reader))
+                try (StreamingFaceReader fr = new CleverFaceReader(reader))
                 {
                     Face f = new Face(0, 0, 0);
                     long i = 0;
