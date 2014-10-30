@@ -77,9 +77,7 @@ public class NodeSplitter
                 TIntIterator iter = result.vertexIndexMap.getKeyList().iterator();
                 while (iter.hasNext())
                 {
-                    int i = iter.next();
-                    if (i < vr.getIndex()) vr.reset();
-                    vr.skipForwardTo(i);
+                    vr.skipTo(iter.next());
                     vr.next(v);
                     v.writeToStream(fostream, vam);
                 }

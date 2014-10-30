@@ -23,27 +23,27 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
     protected FileChannel inputChannel;
 
 
-    public ReliableBufferedVertexReader(PLYReader reader) throws IOException
+    public ReliableBufferedVertexReader(PLYReader r) throws IOException
     {
-        this.reader = reader;
-        this.vertexElement = reader.getHeader().getElement("vertex");
-        this.count = this.vertexElement.getCount();
-        this.vam = new VertexAttrMap(this.vertexElement);
+        reader = r;
+        vertexElement = reader.getHeader().getElement("vertex");
+        count = vertexElement.getCount();
+        vam = new VertexAttrMap(this.vertexElement);
 
-        this.start = reader.getElementDimension("vertex").getOffset();
+        start = reader.getElementDimension("vertex").getOffset();
 
-        this.istream = new FileInputStream(reader.getFile());
-        this.inputChannel = this.istream.getChannel();
-        this.inputChannel.position(this.start);
-        this.blockSize = this.vertexElement.getItemSize();
-        this.blockBuffer = ByteBuffer.allocateDirect(this.blockSize);
-        this.blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        istream = new FileInputStream(reader.getFile());
+        inputChannel = istream.getChannel();
+        inputChannel.position(start);
+        blockSize = vertexElement.getItemSize();
+        blockBuffer = ByteBuffer.allocateDirect(blockSize);
+        blockBuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
     @Override
     public boolean hasNext()
     {
-        return this.index <= (this.count - 1);
+        return index <= (count - 1);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
         inputChannel.read(blockBuffer);
         blockBuffer.flip();
         v.read(blockBuffer, vam);
-        this.index++;
+        index++;
         blockBuffer.clear();
     }
 
@@ -76,32 +76,17 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
         this.istream.close();
     }
 
-    public void reset() throws IOException
-    {
-        this.index = 0;
-        this.inputChannel.position(this.start);
-    }
-
     @Override
     public VertexAttrMap getVam()
     {
         return vam;
     }
 
-    public void skipForwardTo(long i) throws IOException
+    public void skipTo(long i) throws IOException
     {
-        if (index == i)
-        {
-            return;
-        }
-        if (index <= i)
-        {
-            this.inputChannel.position(this.start + i * this.blockSize);
-        }
-        else
-        {
-            throw new RuntimeException("Cannot skip backwards! (" + index + " -> " + i);
-        }
+        if (index == i) return;
+        this.index = i;
+        this.inputChannel.position(start + i * blockSize);
     }
 
     public long getIndex()

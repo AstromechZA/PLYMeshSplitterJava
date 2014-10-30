@@ -76,6 +76,25 @@ public class Vertex
         }
     }
 
+    public void read(ByteBuffer input, VertexAttrMap vam, int pos)
+    {
+        this.x = Useful.readFloatLE(input, pos + vam.xOffset);
+        this.y = Useful.readFloatLE(input, pos + vam.yOffset);
+        this.z = Useful.readFloatLE(input, pos + vam.zOffset);
+
+        if (vam.hasColour)
+        {
+            this.r = input.get(pos + vam.redOffset);
+            this.g = input.get(pos + vam.greenOffset);
+            this.b = input.get(pos + vam.blueOffset);
+        }
+
+        if (vam.hasAlpha)
+        {
+            this.a = input.get(pos + vam.alphaOffset);
+        }
+    }
+
     public void transform(Point3D translate, float scale)
     {
         this.x = (float) ((this.x + translate.getX()) * scale);
