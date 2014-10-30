@@ -24,6 +24,8 @@ public class CroppingWindow extends JFrame implements ICompletionListener
     public static final String WINDOW_TITLE = "Geometry Cropper";
     public static final Color PROGRESSBAR_COLOR = new Color(0, 200, 0);
     public static final String[] AXIS_STRINGS = new String[]{ "TOP", "FRONT", "SIDE" };
+    public static final String EDITMODE_BTN_TEXT = "Stop Editting";
+    public static final String NOTEDITMODE_BTN_TEXT = "Edit Area";
 
     private CroppingDisplay cropDisplay;
     private JProgressBar progressBar;
@@ -74,7 +76,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         this.loadButton = new JButton("Load input");
         this.loadButton.setEnabled(false);
 
-        this.modeButton = new JButton("Edit area");
+        this.modeButton = new JButton(NOTEDITMODE_BTN_TEXT);
         this.modeButton.setEnabled(false);
 
         this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
@@ -203,6 +205,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     samplingBox.setEnabled(true);
                     loadButton.setEnabled(true);
                     goButton.setEnabled(cropDisplay.getHull().size() > 2);
+                    modeButton.setText(NOTEDITMODE_BTN_TEXT);
                 }
                 else
                 {
@@ -214,7 +217,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     samplingBox.setEnabled(false);
                     loadButton.setEnabled(false);
                     goButton.setEnabled(false);
-
+                    modeButton.setText(EDITMODE_BTN_TEXT);
                 }
             }
         });
@@ -279,7 +282,6 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     axisBox.setEnabled(true);
                     samplingBox.setEnabled(true);
                     loadButton.setEnabled(true);
-
                 }
             }
         });
@@ -318,7 +320,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     PLYReader reader = new PLYReader(selectedInputFile);
 
                     long numVertices = reader.getHeader().getElement("vertex").getCount();
-                    float alpha = (numVertices < 100_000) ? 1 : 0.1f;
+                    float alpha = (numVertices < 100_000) ? 1 : 0.2f;
 
                     BluePrintGenerator.CoordinateSpace c;
                     CoordinateSpace v = CoordinateSpace.values()[ axisBox.getSelectedIndex() ];

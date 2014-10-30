@@ -12,8 +12,13 @@ import java.util.ArrayList;
 
 public class CroppingDisplay extends JPanel
 {
+    public static final Color CRITICAL_POINT_COLOUR = Color.magenta;
+    public static final int CRITICAL_POINT_SIZE = 2;
+    public static final Color HULL_POINT_COLOUR = Color.yellow;
+    public static final int HULL_POINT_SIZE = 3;
+    public static final Color INTERIOR_COLOUR = new Color(50, 50, 50, 100);
+    public static final Color HULL_LINE_COLOUR = Color.black;
     private static final int NEARNESS_DISTANCE = 10;
-
     private final int size;
     private final ArrayList<Point2D> criticalPoints = new ArrayList<>();
     private ArrayList<Point2D> actualHullPoints = new ArrayList<>();
@@ -57,12 +62,6 @@ public class CroppingDisplay extends JPanel
 
         if (!this.criticalPoints.isEmpty())
         {
-            g2.setColor(Color.magenta);
-            for (Point2D point : criticalPoints)
-            {
-                drawCross(g2, point, 2);
-            }
-
             if (!actualHullPoints.isEmpty())
             {
                 // first join with lines
@@ -70,6 +69,7 @@ public class CroppingDisplay extends JPanel
                 int[] xpoints = new int[ actualHullPoints.size() ];
                 int[] ypoints = new int[ actualHullPoints.size() ];
                 int index = 0;
+                g2.setColor(HULL_LINE_COLOUR);
                 for (Point2D point : actualHullPoints)
                 {
                     g2.drawLine((int) last.getX(), (int) last.getY(), (int) point.getX(), (int) point.getY());
@@ -79,12 +79,20 @@ public class CroppingDisplay extends JPanel
                     index++;
                 }
 
-                g2.setColor(new Color(50, 50, 50, 100));
+                g2.setColor(INTERIOR_COLOUR);
                 g2.fillPolygon(xpoints, ypoints, xpoints.length);
-
-                g2.setColor(Color.yellow);
-                for (Point2D point : actualHullPoints) drawCross(g2, point, 2);
             }
+
+            g2.setColor(CRITICAL_POINT_COLOUR);
+            for (Point2D point : criticalPoints) drawCross(g2, point, CRITICAL_POINT_SIZE);
+
+            if (!actualHullPoints.isEmpty())
+            {
+                g2.setColor(HULL_POINT_COLOUR);
+                for (Point2D point : actualHullPoints) drawCross(g2, point, HULL_POINT_SIZE);
+            }
+
+
         }
 
         // draw colour border indicating mode
