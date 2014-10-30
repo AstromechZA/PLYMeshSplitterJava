@@ -14,6 +14,6 @@ public class Timer implements AutoCloseable
     public void close()
     {
         long elapsed = System.nanoTime() - this.startTime;
-        System.out.printf("⏰ %s : Elapsed Time: %s%n", this.task, Useful.formatTime(elapsed));
+        System.out.printf("%s : Elapsed Time: %s%n", this.task, Useful.formatTime(elapsed));
     }
 }

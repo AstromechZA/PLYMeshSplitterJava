@@ -4,6 +4,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 
 public class Useful
@@ -150,6 +152,19 @@ public class Useful
         }
 
         return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255));
+    }
+
+    public static String getCodePath()
+    {
+        String path = Useful.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        try
+        {
+            return URLDecoder.decode(path.substring(0, path.lastIndexOf('/')), "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Critical : " + path);
+        }
     }
 }
 

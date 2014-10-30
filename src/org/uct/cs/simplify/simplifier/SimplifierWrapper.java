@@ -1,12 +1,8 @@
 package org.uct.cs.simplify.simplifier;
 
-import org.uct.cs.simplify.util.OSDetect;
-import org.uct.cs.simplify.util.Outputter;
-import org.uct.cs.simplify.util.TempFileManager;
-import org.uct.cs.simplify.util.XBoundingBox;
+import org.uct.cs.simplify.util.*;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +31,7 @@ public class SimplifierWrapper
 
         List<String> argsList = new ArrayList<>();
 
-        String path = SimplifierWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = URLDecoder.decode(path.substring(0, path.lastIndexOf('/')), "UTF-8") + '/';
-
-        argsList.add(decodedPath + PATH_TO_EXECUTABLE);
+        argsList.add(Useful.getCodePath() + '/' + PATH_TO_EXECUTABLE);
         argsList.add("" + 0);
         argsList.add(input.getAbsolutePath());
         argsList.add(tt.getAbsolutePath());
