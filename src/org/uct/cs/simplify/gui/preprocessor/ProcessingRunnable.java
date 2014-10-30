@@ -1,10 +1,9 @@
 package org.uct.cs.simplify.gui.preprocessor;
 
-import org.uct.cs.simplify.FileBuilder;
+import org.uct.cs.simplify.Preprocessor;
 import org.uct.cs.simplify.gui.util.ProgressBarProgressReporter;
 import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.util.ICompletionListener;
-import org.uct.cs.simplify.util.StatRecorder;
 
 import javax.swing.*;
 import java.io.File;
@@ -30,9 +29,9 @@ public class ProcessingRunnable implements Runnable
     public void run()
     {
         boolean success = false;
-        try (StatRecorder ignored = new StatRecorder(500))
+        try
         {
-            FileBuilder.run(
+            Preprocessor.process(
                 this.inputFile,
                 this.outputFile,
                 false,

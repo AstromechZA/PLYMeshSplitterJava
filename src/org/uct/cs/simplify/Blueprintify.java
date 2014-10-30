@@ -3,7 +3,7 @@ package org.uct.cs.simplify;
 import org.apache.commons.cli.*;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.ply.reader.PLYReader;
-import org.uct.cs.simplify.util.StatRecorder;
+import org.uct.cs.simplify.util.Timer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -42,7 +42,7 @@ public class Blueprintify
     {
         CommandLine cmd = parseArgs(args);
 
-        try (StatRecorder ignored = new StatRecorder())
+        try (Timer ignored = new Timer("Blueprintifying"))
         {
             int resolution = cmd.hasOption("resolution") ? Integer.parseInt(cmd.getOptionValue("resolution")) : DEFAULT_RESOLUTION;
             float alphamod = cmd.hasOption("alphamod") ? Float.parseFloat(cmd.getOptionValue("alphamod")) : DEFAULT_ALPHA_MOD;
@@ -59,7 +59,7 @@ public class Blueprintify
 
             run(inputFile, outputDir, resolution, alphamod, skipsize);
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }

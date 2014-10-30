@@ -1,11 +1,11 @@
 package org.uct.cs.simplify;
 
-import org.uct.cs.simplify.gui.preprocessor.PreProcessorWindow;
+import org.uct.cs.simplify.gui.preprocessor.PreprocessorWindow;
 
-public class PreProcessorGuiDriver
+public class PreprocessorGuiDriver
 {
     public static void main(String[] args)
     {
-        new PreProcessorWindow();
+        new PreprocessorWindow();
     }
 }

@@ -2,34 +2,18 @@ package org.uct.cs.simplify.util;
 
 public class Timer implements AutoCloseable
 {
+    private final long startTime = System.nanoTime();
+    private final String task;
 
-    private final String text;
-    private final long starttime;
-
-    public Timer(String text)
+    public Timer(String task)
     {
-        this.text = text;
-        this.starttime = System.nanoTime();
+        this.task = task;
     }
-
-    public long getElapsed()
-    {
-        return System.nanoTime() - this.starttime;
-    }
-
-    public long stop()
-    {
-        long elapsed = this.getElapsed();
-        System.out.printf("Timer : %s : %s%n", this.text, Useful.formatTime(elapsed));
-        return elapsed;
-    }
-
 
     @Override
     public void close()
     {
-        this.stop();
+        long elapsed = System.nanoTime() - this.startTime;
+        System.out.printf("⏰ %s : Elapsed Time: %s%n", this.task, Useful.formatTime(elapsed));
     }
-
-
 }

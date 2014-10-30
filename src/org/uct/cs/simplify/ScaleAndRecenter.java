@@ -17,17 +17,14 @@ public class ScaleAndRecenter
 {
     private static final int DEFAULT_RESCALE_SIZE = 1024;
 
-    public static double run(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
+    public static double rescale(File inputFile, File outputFile, int size, boolean swapYZ) throws IOException
     {
-        // this scans the target file and works out start and end ranges
-        PLYReader reader = new PLYReader(inputFile);
-
-        return run(reader, outputFile, size, swapYZ);
+        return rescale(new PLYReader(inputFile), outputFile, size, swapYZ);
     }
 
-    public static double run(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
+    public static double rescale(PLYReader reader, File outputFile, int targetSize, boolean swapYZ) throws IOException
     {
-        try (StateHolder.StateWrap ignored = new StateHolder.StateWrap("rescaling"))
+        try (Timer ignored = new Timer("Rescaling"))
         {
             // first have to identify bounds in order to work out ranges and center
             Outputter.info1ln("Calculating bounding box");
@@ -122,37 +119,30 @@ public class ScaleAndRecenter
         }
     }
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        try (StatRecorder ignored = new StatRecorder())
-        {
-            CommandLine cmd = parseArgs(args);
-            int rescaleToSize = cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE;
-            String filename = cmd.getOptionValue("filename");
-            String outputDirectory = cmd.getOptionValue("output");
+        CommandLine cmd = parseArgs(args);
+        int rescaleToSize = cmd.hasOption("size") ? Integer.parseInt(cmd.getOptionValue("size")) : DEFAULT_RESCALE_SIZE;
+        String filename = cmd.getOptionValue("filename");
+        String outputDirectory = cmd.getOptionValue("output");
 
-            // checking
-            if (rescaleToSize < 2) throw new IllegalArgumentException("Rescale size must not be smaller than 2 units");
+        // checking
+        if (rescaleToSize < 2) throw new IllegalArgumentException("Rescale size must not be smaller than 2 units");
 
-            File inputFile = new File(filename);
+        File inputFile = new File(filename);
 
-            // output file stuff
-            File outputDir = new File(new File(outputDirectory).getCanonicalPath());
-            if (!outputDir.exists() && !outputDir.mkdirs())
-                throw new IOException("Could not create output directory " + outputDir);
-            File outputFile = new File(
-                outputDir,
-                String.format(
-                    "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize
-                )
-            );
+        // output file stuff
+        File outputDir = new File(new File(outputDirectory).getCanonicalPath());
+        if (!outputDir.exists() && !outputDir.mkdirs())
+            throw new IOException("Could not create output directory " + outputDir);
+        File outputFile = new File(
+            outputDir,
+            String.format(
+                "%s_rescaled_%d.ply", Useful.getFilenameWithoutExt(inputFile.getName()), rescaleToSize
+            )
+        );
 
-            run(inputFile, outputFile, rescaleToSize, cmd.hasOption("swapyz"));
-        }
-        catch (IOException | InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+        rescale(inputFile, outputFile, rescaleToSize, cmd.hasOption("swapyz"));
     }
 
     private static CommandLine parseArgs(String[] args)

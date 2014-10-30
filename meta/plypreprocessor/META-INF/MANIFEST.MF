@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Class-Path: libs/commons-cli-1.2.jar libs/trove-3.0.3.jar
-Main-Class: org.uct.cs.simplify.FileBuilder
+Main-Class: org.uct.cs.simplify.Preprocessor
 
