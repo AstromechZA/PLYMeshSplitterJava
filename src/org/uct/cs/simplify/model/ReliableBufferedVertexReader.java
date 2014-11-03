@@ -43,7 +43,7 @@ public class ReliableBufferedVertexReader extends StreamingVertexReader implemen
     @Override
     public boolean hasNext()
     {
-        return index <= (count - 1);
+        return index < count;
     }
 
     @Override
