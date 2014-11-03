@@ -2,7 +2,7 @@ package org.uct.cs.simplify.blueprint;
 
 import javafx.geometry.Point2D;
 import org.uct.cs.simplify.Constants;
-import org.uct.cs.simplify.model.FastBufferedVertexReader;
+import org.uct.cs.simplify.model.SimpleVertexReader;
 import org.uct.cs.simplify.model.StreamingVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
@@ -75,7 +75,7 @@ public class BluePrintGenerator
         int border = 20;
         double ratio = (resolution - border) / bigdim;
 
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader, skipSize))
+        try (StreamingVertexReader vr = new SimpleVertexReader(reader, skipSize))
         {
             Vertex v = new Vertex(0, 0, 0);
             while (vr.hasNext())
@@ -105,7 +105,7 @@ public class BluePrintGenerator
 
     private static Rectangle2D calculateBounds(PLYReader reader, IAxisValueGetter avg, int skipSize) throws IOException
     {
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader, skipSize))
+        try (StreamingVertexReader vr = new SimpleVertexReader(reader, skipSize))
         {
             float minx = Float.MAX_VALUE,
                 maxx = -Float.MAX_VALUE,

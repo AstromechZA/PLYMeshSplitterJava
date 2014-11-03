@@ -7,7 +7,7 @@ import org.uct.cs.simplify.util.ReliableBufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class FastBufferedVertexReader extends StreamingVertexReader implements AutoCloseable
+public class SimpleVertexReader extends StreamingVertexReader implements AutoCloseable
 {
     protected final PLYReader reader;
     protected final PLYElement vertexElement;
@@ -23,13 +23,12 @@ public class FastBufferedVertexReader extends StreamingVertexReader implements A
     protected final long skipBytes;
     protected long index;
 
-
-    public FastBufferedVertexReader(PLYReader reader) throws IOException
+    public SimpleVertexReader(PLYReader reader) throws IOException
     {
         this(reader, 1);
     }
 
-    public FastBufferedVertexReader(PLYReader reader, long nth) throws IOException
+    public SimpleVertexReader(PLYReader reader, long nth) throws IOException
     {
         if (nth < 1) throw new IllegalArgumentException("nth must be at least 1");
 

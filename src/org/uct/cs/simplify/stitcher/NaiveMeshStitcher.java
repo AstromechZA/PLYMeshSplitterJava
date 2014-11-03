@@ -66,7 +66,7 @@ public class NaiveMeshStitcher
         int stitched = 0;
         try (
             BufferedOutputStream ostream = new BufferedOutputStream(new FileOutputStream(vertexFile, true));
-            StreamingVertexReader vr = new FastBufferedVertexReader(reader2)
+            StreamingVertexReader vr = new SimpleVertexReader(reader2)
         )
         {
             Vertex v = new Vertex(0, 0, 0);
@@ -93,7 +93,7 @@ public class NaiveMeshStitcher
     private static void writeMesh2FacesStitched(File faceFile, PLYReader reader, int[] indexTransform) throws IOException
     {
         try (
-            UltraFaceReader fr = new UltraFaceReader(reader);
+            BufferedFaceReader fr = new BufferedFaceReader(reader);
             BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(faceFile, true))
         )
         {
@@ -132,7 +132,7 @@ public class NaiveMeshStitcher
     private static TObjectIntHashMap buildMesh1VertexMap(PLYReader reader1, long mesh1NumVertices) throws IOException
     {
         TObjectIntHashMap mesh1Vertices = new TObjectIntHashMap((int) mesh1NumVertices);
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader1))
+        try (StreamingVertexReader vr = new SimpleVertexReader(reader1))
         {
             Vertex v = new Vertex(0, 0, 0);
             int vertexIndex = 0;

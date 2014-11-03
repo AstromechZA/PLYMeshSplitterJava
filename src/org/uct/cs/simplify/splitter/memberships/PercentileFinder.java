@@ -1,6 +1,6 @@
 package org.uct.cs.simplify.splitter.memberships;
 
-import org.uct.cs.simplify.model.FastBufferedVertexReader;
+import org.uct.cs.simplify.model.SimpleVertexReader;
 import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 import org.uct.cs.simplify.util.Outputter;
@@ -34,7 +34,7 @@ public class PercentileFinder
 
         for (int i = 0; i < MAX_ITERATIONS; i++)
         {
-            try (FastBufferedVertexReader vr = new FastBufferedVertexReader(this.modelReader, nth))
+            try (SimpleVertexReader vr = new SimpleVertexReader(this.modelReader, nth))
             {
                 int swing = testPercentile(vr, approximate, (long) Math.ceil(vr.getSampling() * percentile));
                 if (swing < 0)
@@ -56,7 +56,7 @@ public class PercentileFinder
         return approximate;
     }
 
-    private int testPercentile(FastBufferedVertexReader vr, double approximate, long targetCount) throws IOException
+    private int testPercentile(SimpleVertexReader vr, double approximate, long targetCount) throws IOException
     {
         long count = 0;
         Vertex v = new Vertex(0, 0, 0);

@@ -67,7 +67,7 @@ public class NodeSplitter
     {
         try (BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(subNodeFile)))
         {
-            try (ReliableBufferedVertexReader vr = new ReliableBufferedVertexReader(reader))
+            try (SkippableVertexReader vr = new SkippableVertexReader(reader))
             {
                 Vertex v = new Vertex(0, 0, 0);
                 VertexAttrMap vam = vr.getVam();
@@ -103,7 +103,7 @@ public class NodeSplitter
         int currentVertexIndex = 0;
         IntIntHashMapWithKeyList vertexIndexMap = new IntIntHashMapWithKeyList((int) (memberships.size() / Math.pow(2, memberships.getBits())));
         try (
-            StreamingFaceReader faceReader = new UltraFaceReader(reader);
+            StreamingFaceReader faceReader = new BufferedFaceReader(reader);
             BufferedOutputStream fostream = new BufferedOutputStream(new FileOutputStream(tempfile))
         )
         {

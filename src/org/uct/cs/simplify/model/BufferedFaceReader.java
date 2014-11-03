@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
-public class UltraFaceReader extends StreamingFaceReader
+public class BufferedFaceReader extends StreamingFaceReader
 {
     private static final int FACES_PER_BUCKET = 512;
 
@@ -30,7 +30,7 @@ public class UltraFaceReader extends StreamingFaceReader
     protected int maxcursor;
     protected int cursor;
 
-    public UltraFaceReader(PLYReader reader) throws IOException
+    public BufferedFaceReader(PLYReader reader) throws IOException
     {
         this.reader = reader;
         this.faceElement = reader.getHeader().getElement("face");

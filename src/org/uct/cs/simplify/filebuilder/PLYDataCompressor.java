@@ -12,15 +12,15 @@ import java.io.*;
  * This class is designed to convert the given model from PLY format to a terser binary form. The resulting file
  * contains 2
  * binary regions, one encoding the Vertices and the other encoding the Faces.
- * <p>
+ * <p/>
  * Vertices are of the form: X (float), Y (float), Z (float), nX (float), nY (float), nZ (float), colour (int)
- * <p>
+ * <p/>
  * Edges are of the form: I (integer), J (integer), K (integer) where I, J, and K are vertex indices.
- * <p>
+ * <p/>
  * A Vertex is 4*3 + 4*3 + 4 == 28 bytes ( 10_000_000 vertices is 267 MB )
- * <p>
+ * <p/>
  * All binary data is LITTLE ENDIAN.
- * <p>
+ * <p/>
  * No header containing lengths or offsets is supplied.
  */
 public class PLYDataCompressor
@@ -57,7 +57,7 @@ public class PLYDataCompressor
         long fbuffersize = faceE.getCount() * BYTES_PER_FACE;
 
         Vertex v = new Vertex(0, 0, 0);
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+        try (StreamingVertexReader vr = new SimpleVertexReader(reader))
         {
             while (vr.hasNext())
             {
@@ -68,7 +68,7 @@ public class PLYDataCompressor
             }
         }
 
-        try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+        try (StreamingVertexReader vr = new SimpleVertexReader(reader))
         {
             while (vr.hasNext())
             {
@@ -78,7 +78,7 @@ public class PLYDataCompressor
                 ostream.write(v.b);
             }
 
-            try (UltraFaceReader fr = new UltraFaceReader(reader))
+            try (BufferedFaceReader fr = new BufferedFaceReader(reader))
             {
                 Face f = new Face(0, 0, 0);
                 while (fr.hasNext())

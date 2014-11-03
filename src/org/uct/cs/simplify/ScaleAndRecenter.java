@@ -78,7 +78,7 @@ public class ScaleAndRecenter
 
                 ostream.write((header + "\n").getBytes());
 
-                try (StreamingVertexReader vr = new FastBufferedVertexReader(reader))
+                try (StreamingVertexReader vr = new SimpleVertexReader(reader))
                 {
                     try (ProgressBar progress = new ProgressBar("Rescaling Vertices", numVertices))
                     {
