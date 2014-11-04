@@ -7,6 +7,7 @@ import org.uct.cs.simplify.filebuilder.RecursiveFilePreparer;
 import org.uct.cs.simplify.ply.header.PLYHeader;
 import org.uct.cs.simplify.simplifier.SimplificationFactory;
 import org.uct.cs.simplify.splitter.memberships.MembershipBuilder;
+import org.uct.cs.simplify.splitter.memberships.MultiwayVariableKDTreeMembershipBuilder;
 import org.uct.cs.simplify.splitter.stopcondition.DepthStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.IStoppingCondition;
 import org.uct.cs.simplify.splitter.stopcondition.LowerFaceBoundStoppingCondition;
@@ -36,23 +37,23 @@ public class Preprocessor
     {
         try (Timer sr = new Timer("Preprocessing"))
         {
-
-            IStoppingCondition stopCondition;
-
-            if (outputFile.isDirectory())
-            {
-                throw new RuntimeException("The output file you specified is a directory! Please specify a file with the extension '.phf'");
-            }
-            if (!outputFile.getName().endsWith(".phf"))
-            {
-                throw new RuntimeException("Please specify a file with the extension '.phf'");
-            }
-
-            Outputter.info1f("Using membership builder: %s%n", membershipBuilder.getClass().getName());
-
             long numFaces = new PLYHeader(inputFile).getElement("face").getCount();
+
+            if (numFaces < Constants.FACES_IN_ROOT)
+            {
+                throw new RuntimeException("The input model is too small and does not need to be processed! Please supply a model containing at least " + Constants.FACES_IN_ROOT + " faces.");
+            }
+
             SimplificationFactory simplificationFactory = new SimplificationFactory(numFaces, Constants.FACES_IN_ROOT);
 
+            if (membershipBuilder == null)
+            {
+                int splitRatio = determineBestSplitRatio(numFaces, 3, 5);
+                membershipBuilder = new MultiwayVariableKDTreeMembershipBuilder(splitRatio);
+            }
+            Outputter.info1f("Using membership builder: %s with ratio %d%n", membershipBuilder.getClass().getName(), membershipBuilder.getSplitRatio());
+
+            IStoppingCondition stopCondition;
             if (membershipBuilder.isBalanced())
             {
                 float numLeaves = (numFaces / (float) Constants.MAX_FACES_PER_LEAF);
@@ -114,6 +115,27 @@ public class Preprocessor
         }
     }
 
+    private static int determineBestSplitRatio(long numFaces, int lower, int upper)
+    {
+        float numLeaves = (numFaces / (float) Constants.MAX_FACES_PER_LEAF);
+        long bestdiff = Integer.MAX_VALUE;
+        int best = lower;
+        for (int i = lower; i <= upper; i++)
+        {
+            int numLevels = (int) Math.round(Math.log(numLeaves) / Math.log(i));
+            int actualNumLeaves = (int) Math.pow(i, numLevels);
+            long actualFacesPerLeaf = (long) (numFaces / (float) actualNumLeaves);
+            long diff = Math.abs(Constants.MAX_FACES_PER_LEAF - actualFacesPerLeaf);
+            if (diff < bestdiff)
+            {
+                best = i;
+                bestdiff = diff;
+            }
+        }
+        return best;
+    }
+
+
     public static void main(String[] args) throws IOException, InterruptedException
     {
         CommandLine cmd = getCommandLine(args);
@@ -123,7 +145,16 @@ public class Preprocessor
 
         if (cmd.hasOption("debug")) Outputter.setCurrentLevel(Outputter.DEBUG);
 
-        MembershipBuilder mb = cmd.hasOption("hierarchy") ? MembershipBuilder.get(cmd.getOptionValue("hierarchy")) : Constants.MEMBERSHIP_BUILDER;
+        MembershipBuilder mb = cmd.hasOption("hierarchy") ? MembershipBuilder.get(cmd.getOptionValue("hierarchy")) : null;
+
+        if (outputFile.isDirectory())
+        {
+            throw new RuntimeException("The output file you specified is a directory! Please specify a file with the extension '.phf'");
+        }
+        if (!outputFile.getName().endsWith(".phf"))
+        {
+            throw new RuntimeException("Please specify a file with the extension '.phf'");
+        }
 
         String jsonHeader = process(
             inputFile,
