@@ -11,7 +11,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.PrintStream;
 
-public class PreprocessorWindowFrame extends JFrame implements ICompletionListener
+public class PreprocessorWindow extends JFrame implements ICompletionListener
 {
     public static final int PROGRESSBAR_HEIGHT = 30;
     public static final int WINDOW_WIDTH = 800;
@@ -35,7 +35,7 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
 
     private Thread processingThread;
 
-    public PreprocessorWindowFrame()
+    public PreprocessorWindow()
     {
         this.constructForm();
 
@@ -166,24 +166,24 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
             {
                 public void mouseClicked()
                 {
-                    PreprocessorWindowFrame.this.goButton.setEnabled(false);
-                    PreprocessorWindowFrame.this.pickInputFileBtn.setEnabled(false);
-                    PreprocessorWindowFrame.this.pickOutputFileBtn.setEnabled(false);
-                    PreprocessorWindowFrame.this.swapYZCheckBox.setEnabled(false);
-                    PreprocessorWindowFrame.this.resetInputsBtn.setEnabled(false);
+                    PreprocessorWindow.this.goButton.setEnabled(false);
+                    PreprocessorWindow.this.pickInputFileBtn.setEnabled(false);
+                    PreprocessorWindow.this.pickOutputFileBtn.setEnabled(false);
+                    PreprocessorWindow.this.swapYZCheckBox.setEnabled(false);
+                    PreprocessorWindow.this.resetInputsBtn.setEnabled(false);
 
-                    PreprocessorWindowFrame.this.processingThread = new Thread(
+                    PreprocessorWindow.this.processingThread = new Thread(
                         new ProcessingRunnable(
-                            PreprocessorWindowFrame.this.selectedInputFile,
-                            PreprocessorWindowFrame.this.selectedOutputFile,
-                            PreprocessorWindowFrame.this.swapYZCheckBox.isSelected(),
-                            PreprocessorWindowFrame.this.progressBar,
-                            PreprocessorWindowFrame.this
+                            PreprocessorWindow.this.selectedInputFile,
+                            PreprocessorWindow.this.selectedOutputFile,
+                            PreprocessorWindow.this.swapYZCheckBox.isSelected(),
+                            PreprocessorWindow.this.progressBar,
+                            PreprocessorWindow.this
                         )
                     );
 
-                    PreprocessorWindowFrame.this.abortBtn.setEnabled(true);
-                    PreprocessorWindowFrame.this.processingThread.start();
+                    PreprocessorWindow.this.abortBtn.setEnabled(true);
+                    PreprocessorWindow.this.processingThread.start();
                 }
             }
         );
@@ -194,20 +194,20 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
             {
                 public void mouseClicked()
                 {
-                    PreprocessorWindowFrame.this.selectedInputFile = PreprocessorWindowFrame.this.getInputFile();
-                    if (PreprocessorWindowFrame.this.selectedInputFile == null)
+                    PreprocessorWindow.this.selectedInputFile = PreprocessorWindow.this.getInputFile();
+                    if (PreprocessorWindow.this.selectedInputFile == null)
                     {
-                        PreprocessorWindowFrame.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                        PreprocessorWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
                     }
                     else
                     {
-                        PreprocessorWindowFrame.this.pickOutputFileBtn.setEnabled(true);
-                        PreprocessorWindowFrame.this.pickedOutputFileDisplay.setEnabled(true);
-                        PreprocessorWindowFrame.this.pickedInputFileDisplay
-                            .setText(PreprocessorWindowFrame.this.selectedInputFile.getPath());
+                        PreprocessorWindow.this.pickOutputFileBtn.setEnabled(true);
+                        PreprocessorWindow.this.pickedOutputFileDisplay.setEnabled(true);
+                        PreprocessorWindow.this.pickedInputFileDisplay
+                            .setText(PreprocessorWindow.this.selectedInputFile.getPath());
                     }
-                    PreprocessorWindowFrame.this.goButton.setEnabled(
-                        (PreprocessorWindowFrame.this.selectedInputFile != null) && (PreprocessorWindowFrame.this.selectedOutputFile !=
+                    PreprocessorWindow.this.goButton.setEnabled(
+                        (PreprocessorWindow.this.selectedInputFile != null) && (PreprocessorWindow.this.selectedOutputFile !=
                             null)
                     );
                 }
@@ -220,24 +220,24 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
             {
                 public void mouseClicked()
                 {
-                    String baseFile = (PreprocessorWindowFrame.this.selectedInputFile == null)
+                    String baseFile = (PreprocessorWindow.this.selectedInputFile == null)
                         ? "output.phf"
                         : Useful
-                        .getFilenameWithoutExt(PreprocessorWindowFrame.this.selectedInputFile.getAbsolutePath()) + ".phf";
+                        .getFilenameWithoutExt(PreprocessorWindow.this.selectedInputFile.getAbsolutePath()) + ".phf";
 
-                    PreprocessorWindowFrame.this.selectedOutputFile = PreprocessorWindowFrame.this.getOutputFile(new File(baseFile));
-                    if (PreprocessorWindowFrame.this.selectedOutputFile == null)
+                    PreprocessorWindow.this.selectedOutputFile = PreprocessorWindow.this.getOutputFile(new File(baseFile));
+                    if (PreprocessorWindow.this.selectedOutputFile == null)
                     {
-                        PreprocessorWindowFrame.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
+                        PreprocessorWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
                     }
                     else
                     {
-                        PreprocessorWindowFrame.this.pickedOutputFileDisplay.setText(
-                            PreprocessorWindowFrame.this.selectedOutputFile.getPath()
+                        PreprocessorWindow.this.pickedOutputFileDisplay.setText(
+                            PreprocessorWindow.this.selectedOutputFile.getPath()
                         );
                     }
-                    PreprocessorWindowFrame.this.goButton.setEnabled(
-                        (PreprocessorWindowFrame.this.selectedInputFile != null) && (PreprocessorWindowFrame.this.selectedOutputFile !=
+                    PreprocessorWindow.this.goButton.setEnabled(
+                        (PreprocessorWindow.this.selectedInputFile != null) && (PreprocessorWindow.this.selectedOutputFile !=
                             null)
                     );
                 }
@@ -250,20 +250,20 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
                 @Override
                 public void mouseClicked()
                 {
-                    PreprocessorWindowFrame.this.selectedInputFile = null;
-                    PreprocessorWindowFrame.this.selectedOutputFile = null;
-                    PreprocessorWindowFrame.this.pickInputFileBtn.setEnabled(true);
-                    PreprocessorWindowFrame.this.pickOutputFileBtn.setEnabled(false);
-                    PreprocessorWindowFrame.this.swapYZCheckBox.setEnabled(true);
-                    PreprocessorWindowFrame.this.swapYZCheckBox.setSelected(false);
-                    PreprocessorWindowFrame.this.pickedInputFileDisplay.setEnabled(true);
-                    PreprocessorWindowFrame.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
-                    PreprocessorWindowFrame.this.pickedOutputFileDisplay.setEnabled(false);
-                    PreprocessorWindowFrame.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
-                    PreprocessorWindowFrame.this.progressBar.setValue(0);
-                    PreprocessorWindowFrame.this.progressBar.setString("");
+                    PreprocessorWindow.this.selectedInputFile = null;
+                    PreprocessorWindow.this.selectedOutputFile = null;
+                    PreprocessorWindow.this.pickInputFileBtn.setEnabled(true);
+                    PreprocessorWindow.this.pickOutputFileBtn.setEnabled(false);
+                    PreprocessorWindow.this.swapYZCheckBox.setEnabled(true);
+                    PreprocessorWindow.this.swapYZCheckBox.setSelected(false);
+                    PreprocessorWindow.this.pickedInputFileDisplay.setEnabled(true);
+                    PreprocessorWindow.this.pickedInputFileDisplay.setText(NO_INPUT_FILE_SELECTED);
+                    PreprocessorWindow.this.pickedOutputFileDisplay.setEnabled(false);
+                    PreprocessorWindow.this.pickedOutputFileDisplay.setText(NO_OUTPUT_FILE_SET);
+                    PreprocessorWindow.this.progressBar.setValue(0);
+                    PreprocessorWindow.this.progressBar.setString("");
 
-                    PreprocessorWindowFrame.this.consoleArea.setText("");
+                    PreprocessorWindow.this.consoleArea.setText("");
                 }
             }
         );
@@ -274,7 +274,7 @@ public class PreprocessorWindowFrame extends JFrame implements ICompletionListen
                 @Override
                 public void mouseClicked()
                 {
-                    PreprocessorWindowFrame.this.processingThread.interrupt();
+                    PreprocessorWindow.this.processingThread.interrupt();
                 }
             }
         );
