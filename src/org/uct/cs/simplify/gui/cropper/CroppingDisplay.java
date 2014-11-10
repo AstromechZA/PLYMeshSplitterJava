@@ -1,12 +1,15 @@
 package org.uct.cs.simplify.gui.cropper;
 
-import javafx.geometry.Point2D;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -18,18 +21,22 @@ public class CroppingDisplay extends JPanel
     public static final int HULL_POINT_SIZE = 3;
     public static final Color INTERIOR_COLOUR = new Color(50, 50, 50, 100);
     public static final Color HULL_LINE_COLOUR = Color.black;
+    public static final float ZOOM_INC = 1.1f;
     private static final int NEARNESS_DISTANCE = 10;
-    private final int size;
     private final ArrayList<Point2D> criticalPoints = new ArrayList<>();
+    // navigation stuff
+    double zoom = 1;
+    double currentX = 0;
+    double currentY = 0;
+    AffineTransform transform = new AffineTransform();
     private ArrayList<Point2D> actualHullPoints = new ArrayList<>();
     private WorkingMode currentMode = WorkingMode.NONE;
     private BufferedImage image;
     private BluePrintGenerator.BlueprintGeneratorResult blueprint;
 
-    public CroppingDisplay(int size)
+    public CroppingDisplay()
     {
-        this.size = size;
-        this.bindClick();
+        this.bindMouse();
     }
 
     public ArrayList<Point2D> getHull()
@@ -49,15 +56,47 @@ public class CroppingDisplay extends JPanel
     }
 
     @Override
+    public Dimension getMinimumSize()
+    {
+        return new Dimension(400, 400);
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(400, 400);
+    }
+
+    public AffineTransform getCurrentTransform()
+    {
+        AffineTransform o = new AffineTransform();
+        o.translate(getWidth() / 2.0f, getHeight() / 2.0f);
+        o.scale(zoom, zoom);
+        o.translate(currentX, currentY);
+        o.translate(-image.getWidth() / 2.0f, -image.getHeight() / 2.0f);
+        return o;
+    }
+
+    public void updateTransform()
+    {
+        transform = getCurrentTransform();
+    }
+
+
+    @Override
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
+        Dimension currentSize = this.getSize();
+
         Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(BluePrintGenerator.DEFAULT_BACKGROUND);
+        g2.fillRect(0, 0, currentSize.width, currentSize.height);
 
         if (this.image != null)
         {
-            g2.drawImage(this.image, 0, 0, null);
+            g2.drawImage(this.image, transform, null);
         }
 
         if (!this.criticalPoints.isEmpty())
@@ -65,17 +104,19 @@ public class CroppingDisplay extends JPanel
             if (!actualHullPoints.isEmpty())
             {
                 // first join with lines
-                Point2D last = actualHullPoints.get(actualHullPoints.size() - 1);
+                Point2D last = transform.transform(actualHullPoints.get(actualHullPoints.size() - 1), null);
+
                 int[] xpoints = new int[ actualHullPoints.size() ];
                 int[] ypoints = new int[ actualHullPoints.size() ];
                 int index = 0;
                 g2.setColor(HULL_LINE_COLOUR);
                 for (Point2D point : actualHullPoints)
                 {
-                    g2.drawLine((int) last.getX(), (int) last.getY(), (int) point.getX(), (int) point.getY());
-                    last = point;
-                    xpoints[ index ] = (int) point.getX();
-                    ypoints[ index ] = (int) point.getY();
+                    Point2D currentPoint = transform.transform(point, null);
+                    g2.drawLine((int) last.getX(), (int) last.getY(), (int) currentPoint.getX(), (int) currentPoint.getY());
+                    last = currentPoint;
+                    xpoints[ index ] = (int) currentPoint.getX();
+                    ypoints[ index ] = (int) currentPoint.getY();
                     index++;
                 }
 
@@ -84,20 +125,26 @@ public class CroppingDisplay extends JPanel
             }
 
             g2.setColor(CRITICAL_POINT_COLOUR);
-            for (Point2D point : criticalPoints) drawCross(g2, point, CRITICAL_POINT_SIZE);
+            for (Point2D point : criticalPoints)
+            {
+                Point2D tP = transform.transform(point, null);
+                drawCross(g2, tP, CRITICAL_POINT_SIZE);
+            }
 
             if (!actualHullPoints.isEmpty())
             {
                 g2.setColor(HULL_POINT_COLOUR);
-                for (Point2D point : actualHullPoints) drawCross(g2, point, HULL_POINT_SIZE);
+                for (Point2D point : actualHullPoints)
+                {
+                    Point2D tP = transform.transform(point, null);
+                    drawCross(g2, tP, HULL_POINT_SIZE);
+                }
             }
-
-
         }
 
         // draw colour border indicating mode
         g2.setColor(this.currentMode.colour);
-        g2.drawRect(0, 0, this.size - 1, this.size - 1);
+        g2.drawRect(0, 0, currentSize.width - 1, currentSize.height - 1);
         if (this.currentMode != WorkingMode.NONE)
         {
             g2.fillRect(0, 0, 120, 20);
@@ -106,38 +153,35 @@ public class CroppingDisplay extends JPanel
         }
     }
 
-    public void tryAddCriticalPoint(int x, int y)
+    public void tryAddCriticalPoint(Point2D p) throws NoninvertibleTransformException
     {
         if (!criticalPoints.isEmpty())
         {
-            Point2D a = new Point2D(x, y);
             for (Point2D point : criticalPoints)
             {
-                if (point.distance(a) < NEARNESS_DISTANCE)
+                if (transform.transform(point, null).distance(p) < NEARNESS_DISTANCE)
                 {
                     return;
                 }
             }
         }
-        addCriticalPoint(x, y);
+        addCriticalPoint(transform.inverseTransform(p, null));
     }
 
-    public void addCriticalPoint(int x, int y)
+    public void addCriticalPoint(Point2D p)
     {
-        if (x < 0 || y < 0 || x > this.size || y > this.size) throw new RuntimeException("point out of range");
-        this.criticalPoints.add(new Point2D(x, y));
+        this.criticalPoints.add(p);
         this.actualHullPoints = ConvexHullCalculator.quickHull(this.criticalPoints);
     }
 
-    public void tryRemoveCriticalPointNear(int x, int y)
+    public void tryRemoveCriticalPointNear(Point2D p)
     {
         if (!criticalPoints.isEmpty())
         {
-            Point2D a = new Point2D(x, y);
             Point2D pointToRemove = null;
             for (Point2D point : criticalPoints)
             {
-                if (point.distance(a) < NEARNESS_DISTANCE)
+                if (transform.transform(point, null).distance(p) < NEARNESS_DISTANCE)
                 {
                     pointToRemove = point;
                     break;
@@ -151,67 +195,91 @@ public class CroppingDisplay extends JPanel
         }
     }
 
-    @Override
-    public Dimension getPreferredSize()
+    private void bindMouse()
     {
-        return new Dimension(this.size, this.size);
-    }
-
-    @Override
-    public Dimension getMinimumSize()
-    {
-        return new Dimension(this.size, this.size);
-    }
-
-    private void bindClick()
-    {
-        this.addMouseListener(new MouseListener()
+        MouseAdapter handler = new MouseAdapter()
         {
+            private int panning_lastOffsetX;
+            private int panning_lastOffsetY;
+
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                if (e.getButton() == MouseEvent.BUTTON1)
+                try
                 {
                     if (currentMode == WorkingMode.EDIT_MODE)
                     {
-                        tryAddCriticalPoint(e.getX(), e.getY());
+                        Point2D m = new Point2D.Double(e.getX(), e.getY());
+                        if (e.getButton() == MouseEvent.BUTTON1)
+                        {
+                            tryAddCriticalPoint(m);
+                        }
+                        else if (e.getButton() == MouseEvent.BUTTON3)
+                        {
+                            tryRemoveCriticalPointNear(m);
+                        }
+                        CroppingDisplay.this.repaint();
                     }
                 }
-                else if (e.getButton() == MouseEvent.BUTTON3)
+                catch (NoninvertibleTransformException e1)
                 {
-                    if (currentMode == WorkingMode.EDIT_MODE)
-                    {
-                        tryRemoveCriticalPointNear(e.getX(), e.getY());
-                    }
+                    e1.printStackTrace();
                 }
-
-                CroppingDisplay.this.repaint();
             }
 
             @Override
             public void mousePressed(MouseEvent e)
             {
-
+                if (SwingUtilities.isMiddleMouseButton(e))
+                {
+                    System.out.println("tic1");
+                    panning_lastOffsetX = e.getX();
+                    panning_lastOffsetY = e.getY();
+                }
             }
 
             @Override
-            public void mouseReleased(MouseEvent e)
+            public void mouseDragged(MouseEvent e)
             {
+                if (SwingUtilities.isMiddleMouseButton(e))
+                {
+                    // new x and y are defined by current mouse location subtracted
+                    // by previously processed mouse location
+                    int newX = e.getX() - panning_lastOffsetX;
+                    int newY = e.getY() - panning_lastOffsetY;
 
+                    // increment last offset to last processed by drag event.
+                    panning_lastOffsetX += newX;
+                    panning_lastOffsetY += newY;
+
+                    currentX += newX / zoom;
+                    currentY += newY / zoom;
+                    updateTransform();
+                    CroppingDisplay.this.repaint();
+                }
             }
 
             @Override
-            public void mouseEntered(MouseEvent e)
+            public void mouseWheelMoved(MouseWheelEvent e)
             {
+                if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+                {
+                    double minzoom = getHeight() / (float) image.getHeight();
+                    if (getWidth() < getHeight()) minzoom = getWidth() / (float) image.getWidth();
 
+                    double v = (e.getWheelRotation() > 0) ? 1.1 : 1 / 1.1;
+                    zoom *= v;
+                    zoom = Math.max(minzoom, zoom);
+                    zoom = Math.min(5, zoom);
+                    updateTransform();
+                    CroppingDisplay.this.repaint();
+                }
             }
+        };
 
-            @Override
-            public void mouseExited(MouseEvent e)
-            {
-
-            }
-        });
+        this.addMouseListener(handler);
+        this.addMouseMotionListener(handler);
+        this.addMouseWheelListener(handler);
     }
 
     private void drawCross(Graphics2D g2, Point2D p, int size)
@@ -229,10 +297,11 @@ public class CroppingDisplay extends JPanel
     {
         this.image = r.output;
         this.blueprint = r;
+        updateTransform();
         this.repaint();
     }
 
-    public Point2D getWorldPointFromBlueprint(int x, int y)
+    public Point2D.Double getWorldPointFromBlueprint(int x, int y)
     {
         return this.blueprint.getWorldPointFromImage(x, y);
     }

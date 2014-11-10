@@ -26,14 +26,23 @@ public class CroppingRunnable implements Runnable
     private final File inputFile, outputFile;
     private final ICompletionListener listener;
     private final ArrayList<LineBase> hullLines;
+    private final boolean invertSelection;
     private final BlueprintGeneratorResult blueprint;
 
-    public CroppingRunnable(JProgressBar progressBar, File inputFile, File outputFile, ICompletionListener listener, ArrayList<LineBase> hullLines, BlueprintGeneratorResult blueprint)
+    public CroppingRunnable(
+        JProgressBar progressBar,
+        File inputFile,
+        File outputFile,
+        ICompletionListener listener,
+        ArrayList<LineBase> hullLines,
+        boolean invertSelection,
+        BlueprintGeneratorResult blueprint)
     {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.listener = listener;
         this.hullLines = hullLines;
+        this.invertSelection = invertSelection;
         this.blueprint = blueprint;
         this.progress = new ProgressBarProgressReporter(progressBar, "Cropping");
     }
@@ -71,6 +80,7 @@ public class CroppingRunnable implements Runnable
                         long vertexIndex = 0;
                         long currentIndex = 0;
                         Vertex v = new Vertex(0, 0, 0);
+                        float vertexProgress = numVertices * 2;
                         while (vr.hasNext())
                         {
                             vr.next(v);
@@ -83,14 +93,16 @@ public class CroppingRunnable implements Runnable
                             {
                                 if (line.doesExclude(x, y))
                                 {
-                                    isExcluded.set(vertexIndex, 1);
-                                    numExcludedVertices++;
                                     excluded = true;
                                     break;
                                 }
                             }
-                            if (excluded)
+
+                            if (excluded ^ invertSelection)
                             {
+                                isExcluded.set(vertexIndex, 1);
+                                numExcludedVertices++;
+
                                 int tx = (int) (this.blueprint.center + ((this.blueprint.av.getPrimaryAxisValue(v) - this.blueprint.centerPrimary) * this.blueprint.ratio));
                                 int ty = (int) (this.blueprint.center - ((this.blueprint.av.getSecondaryAxisValue(v) - this.blueprint.centerSecondary) * this.blueprint.ratio));
                                 int index = ty * w + tx;
@@ -102,8 +114,8 @@ public class CroppingRunnable implements Runnable
                                 v.writeToStream(ostream, vr.getVam());
                             }
 
-                            this.progress.report((vertexIndex / (float) numVertices) * 0.5f);
                             vertexIndex++;
+                            this.progress.report(vertexIndex / vertexProgress);
                         }
                     }
 
@@ -113,6 +125,7 @@ public class CroppingRunnable implements Runnable
                     {
                         Face f = new Face(0, 0, 0);
                         long i = 0;
+                        float faceProgress = numFaces * 2;
                         while (fr.hasNext())
                         {
                             fr.next(f);
@@ -130,7 +143,7 @@ public class CroppingRunnable implements Runnable
                                 f.writeToStream(ostream);
                             }
                             i++;
-                            this.progress.report(0.5f + (i / (float) numFaces) * 0.5f);
+                            this.progress.report(0.5f + i / faceProgress);
                         }
                     }
                 }

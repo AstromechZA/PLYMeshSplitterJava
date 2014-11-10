@@ -14,7 +14,7 @@ public class Useful
     public static final long NANOSECONDS_PER_HOUR = 3_600_000_000_000L;
     public static final long NANOSECONDS_PER_MINUTE = 60_000_000_000L;
     public static final long NANOSECONDS_PER_SECOND = 1_000_000_000L;
-    public static final long NANOSECONDS_PER_MILLISECONDS = 1_000_000L;
+    public static final long NANOSECONDS_PER_MILLISECOND = 1_000_000L;
     public static final long NANOSECONDS_PER_MICROSECOND = 1_000L;
     public static final long KILOBYTE = 1024;
     public static final long MEGABYTE = KILOBYTE * 1024;
@@ -32,8 +32,8 @@ public class Useful
         if (ns > NANOSECONDS_PER_HOUR) return String.format("%.2f hours", ns / (double) NANOSECONDS_PER_HOUR);
         if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.2f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
         if (ns > NANOSECONDS_PER_SECOND) return String.format("%.2f seconds", ns / (double) NANOSECONDS_PER_SECOND);
-        if (ns > NANOSECONDS_PER_MILLISECONDS)
-            return String.format("%.2f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);
+        if (ns > NANOSECONDS_PER_MILLISECOND)
+            return String.format("%.2f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECOND);
         if (ns > NANOSECONDS_PER_MICROSECOND)
             return String.format("%.2f microseconds", ns / (double) NANOSECONDS_PER_MICROSECOND);
         return String.format("%d nanoseconds", ns);
@@ -44,8 +44,8 @@ public class Useful
         if (ns > NANOSECONDS_PER_HOUR) return String.format("%.0f hours", ns / (double) NANOSECONDS_PER_HOUR);
         if (ns > NANOSECONDS_PER_MINUTE) return String.format("%.0f minutes", ns / (double) NANOSECONDS_PER_MINUTE);
         if (ns > NANOSECONDS_PER_SECOND) return String.format("%.0f seconds", ns / (double) NANOSECONDS_PER_SECOND);
-        if (ns > NANOSECONDS_PER_MILLISECONDS)
-            return String.format("%.0f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECONDS);
+        if (ns > NANOSECONDS_PER_MILLISECOND)
+            return String.format("%.0f milliseconds", ns / (double) NANOSECONDS_PER_MILLISECOND);
         if (ns > NANOSECONDS_PER_MICROSECOND)
             return String.format("%.0f microseconds", ns / (double) NANOSECONDS_PER_MICROSECOND);
         return String.format("%d nanoseconds", ns);

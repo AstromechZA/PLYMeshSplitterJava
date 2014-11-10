@@ -1,6 +1,5 @@
 package org.uct.cs.simplify.gui.cropper;
 
-import javafx.geometry.Point2D;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator;
 import org.uct.cs.simplify.blueprint.BluePrintGenerator.CoordinateSpace;
 import org.uct.cs.simplify.cropping.LineBase;
@@ -12,13 +11,14 @@ import org.uct.cs.simplify.util.Useful;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class CroppingWindow extends JFrame implements ICompletionListener
 {
-    public static final int IMAGE_RESOLUTION = 600;
+    public static final int IMAGE_RESOLUTION = 2048;
     public static final String NO_INPUT_FILE_SELECTED = "No input file selected!";
     public static final String NO_OUTPUT_FILE_SET = "No output file set!";
     public static final String WINDOW_TITLE = "Geometry Cropper";
@@ -42,6 +42,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
     private File selectedOutputFile;
     private Thread croppingThread;
     private JComboBox<Integer> samplingBox;
+    private JCheckBox invertCheckBox;
 
     public CroppingWindow()
     {
@@ -56,11 +57,10 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout(1, 1));
         this.setTitle("PLY Cropper");
-        this.setResizable(false);
         setFancyLookAndFeel();
 
         // build components
-        this.cropDisplay = new CroppingDisplay(IMAGE_RESOLUTION);
+        this.cropDisplay = new CroppingDisplay();
 
         this.pickedInputFileDisplay = new JTextField(NO_INPUT_FILE_SELECTED);
         this.pickedInputFileDisplay.setEditable(false);
@@ -79,9 +79,13 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         this.modeButton = new JButton(NOTEDITMODE_BTN_TEXT);
         this.modeButton.setEnabled(false);
 
+        this.invertCheckBox = new JCheckBox("Exclude Selected Area");
+        this.invertCheckBox.setEnabled(false);
+
         this.pickedOutputFileDisplay = new JTextField(NO_OUTPUT_FILE_SET);
         this.pickedOutputFileDisplay.setEditable(false);
         this.pickedOutputFileDisplay.setEnabled(false);
+
 
         this.pickOutputFileBtn = new JButton("Pick output file");
         this.pickOutputFileBtn.setEnabled(false);
@@ -105,30 +109,35 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(5, 5, 0, 5);
-        c.weightx = 0.5;
+        c.weightx = 0;
         c.gridy = 0;
         c.gridx = 0;
         c.gridwidth = 2;
         otherPanel.add(this.pickedInputFileDisplay, c);
 
+        c.weightx = 0.5;
         c.gridx = 2;
         c.gridwidth = 1;
         otherPanel.add(this.pickInputFileBtn, c);
 
         c.gridy = 1;
         c.gridx = 0;
+        c.weightx = 0.5;
         otherPanel.add(new JLabel("View:"), c);
 
         c.gridx = 1;
         c.gridwidth = 2;
+        c.weightx = 0.5;
         otherPanel.add(this.axisBox, c);
 
         c.gridy = 2;
         c.gridx = 0;
+        c.weightx = 0.5;
         otherPanel.add(new JLabel("Sampling:"), c);
 
         c.gridx = 1;
         c.gridwidth = 2;
+        c.weightx = 0.5;
         otherPanel.add(samplingBox, c);
 
         c.gridy = 3;
@@ -145,15 +154,20 @@ public class CroppingWindow extends JFrame implements ICompletionListener
         otherPanel.add(modeButton, c);
 
         c.gridy = 6;
+        otherPanel.add(invertCheckBox, c);
+
+        c.gridy = 7;
         c.gridx = 0;
         c.gridwidth = 2;
+        c.weightx = 0;
         otherPanel.add(this.pickedOutputFileDisplay, c);
 
         c.gridx = 2;
         c.gridwidth = 1;
+        c.weightx = 0.5;
         otherPanel.add(this.pickOutputFileBtn, c);
 
-        c.gridy = 7;
+        c.gridy = 8;
         c.gridx = 0;
         c.gridwidth = 3;
         otherPanel.add(goButton, c);
@@ -204,7 +218,8 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     axisBox.setEnabled(true);
                     samplingBox.setEnabled(true);
                     loadButton.setEnabled(true);
-                    goButton.setEnabled(cropDisplay.getHull().size() > 2);
+                    invertCheckBox.setEnabled(true);
+                    goButton.setEnabled(cropDisplay.getHull().size() > 2 && selectedOutputFile != null);
                     modeButton.setText(NOTEDITMODE_BTN_TEXT);
                 }
                 else
@@ -216,6 +231,7 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     axisBox.setEnabled(false);
                     samplingBox.setEnabled(false);
                     loadButton.setEnabled(false);
+                    invertCheckBox.setEnabled(false);
                     goButton.setEnabled(false);
                     modeButton.setText(EDITMODE_BTN_TEXT);
                 }
@@ -228,38 +244,62 @@ public class CroppingWindow extends JFrame implements ICompletionListener
             public void mouseClicked()
             {
                 // check hull points
-                if (cropDisplay.getHull().size() < 3) throw new RuntimeException("Not enough hull points!");
-
-                // other wise
-                // all good
-                modeButton.setEnabled(false);
-                goButton.setEnabled(false);
-                pickInputFileBtn.setEnabled(false);
-                pickOutputFileBtn.setEnabled(false);
-                progressBar.grabFocus();
-
-                // start thread thing here
-                // build lines
-                ArrayList<LineBase> hullLines = new ArrayList<>();
-                Point2D last = cropDisplay.getHull().get(cropDisplay.getHull().size() - 1);
-                for (Point2D p : cropDisplay.getHull())
+                if (cropDisplay.getHull().size() < 3)
                 {
-                    Point2D tl = cropDisplay.getBluePrint().getWorldPointFromImage((int) last.getX(), (int) last.getY());
-                    Point2D tp = cropDisplay.getBluePrint().getWorldPointFromImage((int) p.getX(), (int) p.getY());
-
-                    LineBase line = LineBase.makeLine(tl, tp);
-                    hullLines.add(line);
-                    System.out.printf("%s : %f,%f %f,%f%n", line.getClass().getName(), line.first.getX(), line.first.getY(), line.second.getX(), line.second.getY());
-                    last = p;
+                    JOptionPane.showMessageDialog(
+                        CroppingWindow.this,
+                        "You do not have a valid area defined! Please use the " + modeButton.getText() + " button to add more critical points.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
-                croppingThread = new Thread(
-                    new CroppingRunnable(progressBar, selectedInputFile, selectedOutputFile, CroppingWindow.this, hullLines, cropDisplay.getBluePrint())
-                );
+                if (JOptionPane.showConfirmDialog(
+                    CroppingWindow.this,
+                    ((invertCheckBox.isSelected()) ? "The selected area will be deleted from the model. " : "All unselected area will be deleted from the model. ") + "\n\nAre you sure you wish to continue?",
+                    "Confirm Action",
+                    JOptionPane.YES_NO_OPTION
+                ) == JOptionPane.YES_OPTION
+                    )
+                {
+                    // other wise
+                    // all good
+                    modeButton.setEnabled(false);
+                    invertCheckBox.setEnabled(false);
+                    goButton.setEnabled(false);
+                    pickInputFileBtn.setEnabled(false);
+                    pickOutputFileBtn.setEnabled(false);
+                    progressBar.grabFocus();
 
-                croppingThread.start();
+                    // start thread thing here
+                    // build lines
+                    ArrayList<LineBase> hullLines = new ArrayList<>();
+                    Point2D last = cropDisplay.getHull().get(cropDisplay.getHull().size() - 1);
+                    for (Point2D p : cropDisplay.getHull())
+                    {
+                        Point2D tl = cropDisplay.getBluePrint().getWorldPointFromImage((int) last.getX(), (int) last.getY());
+                        Point2D tp = cropDisplay.getBluePrint().getWorldPointFromImage((int) p.getX(), (int) p.getY());
+
+                        LineBase line = LineBase.makeLine(tl, tp);
+                        hullLines.add(line);
+                        System.out.printf("%s : %f,%f %f,%f%n", line.getClass().getName(), line.first.getX(), line.first.getY(), line.second.getX(), line.second.getY());
+                        last = p;
+                    }
 
 
+                    croppingThread = new Thread(
+                        new CroppingRunnable(
+                            progressBar,
+                            selectedInputFile,
+                            selectedOutputFile,
+                            CroppingWindow.this,
+                            hullLines,
+                            invertCheckBox.isSelected(),
+                            cropDisplay.getBluePrint())
+                    );
+
+                    croppingThread.start();
+                }
             }
         });
 
@@ -320,7 +360,6 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     PLYReader reader = new PLYReader(selectedInputFile);
 
                     long numVertices = reader.getHeader().getElement("vertex").getCount();
-                    float alpha = (numVertices < 100_000) ? 1 : 0.2f;
 
                     BluePrintGenerator.CoordinateSpace c;
                     CoordinateSpace v = CoordinateSpace.values()[ axisBox.getSelectedIndex() ];
@@ -328,13 +367,14 @@ public class CroppingWindow extends JFrame implements ICompletionListener
                     BluePrintGenerator.BlueprintGeneratorResult b = BluePrintGenerator.createImage(
                         reader,
                         CroppingWindow.IMAGE_RESOLUTION,
-                        alpha,
+                        0.5f,
                         v,
                         samplingBox.getItemAt(samplingBox.getSelectedIndex())
                     );
                     cropDisplay.reset();
                     cropDisplay.setBlueprint(b);
 
+                    invertCheckBox.setEnabled(true);
                     modeButton.setEnabled(true);
                     pickedOutputFileDisplay.setEnabled(true);
                     pickOutputFileBtn.setEnabled(true);

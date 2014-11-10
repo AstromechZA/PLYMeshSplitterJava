@@ -28,7 +28,7 @@ public abstract class ProgressReporter
             this.lastStatus = String.format("%s : 100%% : ( Remaining Time: 0 )", this.taskName);
         }
 
-        if ((now - lastUpdated) > Useful.NANOSECONDS_PER_MILLISECONDS || (percent <= 0 || percent >= 1))
+        if ((now - lastUpdated) > Useful.NANOSECONDS_PER_MILLISECOND || (percent <= 0 || percent >= 1))
         {
             this.output();
             lastUpdated = now;

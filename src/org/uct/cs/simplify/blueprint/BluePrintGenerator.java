@@ -1,6 +1,5 @@
 package org.uct.cs.simplify.blueprint;
 
-import javafx.geometry.Point2D;
 import org.uct.cs.simplify.Constants;
 import org.uct.cs.simplify.model.SimpleVertexReader;
 import org.uct.cs.simplify.model.StreamingVertexReader;
@@ -8,6 +7,7 @@ import org.uct.cs.simplify.model.Vertex;
 import org.uct.cs.simplify.ply.reader.PLYReader;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -17,8 +17,8 @@ import java.util.Arrays;
 /** Class providing methods to build interesting blueprint-like images from a PLY model. * */
 public class BluePrintGenerator
 {
-    private static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2 * 100);
-    private static final Color DEFAULT_FOREGROUND = Color.white;
+    public static final Color DEFAULT_BACKGROUND = new Color(100, 100, 2 * 100);
+    public static final Color DEFAULT_FOREGROUND = Color.white;
 
     public static BlueprintGeneratorResult createImage(PLYReader reader, int resolution, float alphaAdjustment, CoordinateSpace type, int skipSize)
         throws IOException
@@ -224,11 +224,11 @@ public class BluePrintGenerator
             this.centerSecondary = centerSecondary;
         }
 
-        public Point2D getWorldPointFromImage(int x, int y)
+        public Point2D.Double getWorldPointFromImage(int x, int y)
         {
             double tx = ((x - center) / ratio) + centerPrimary;
             double ty = ((center - y) / ratio) + centerSecondary;
-            return new Point2D(tx, ty);
+            return new Point2D.Double(tx, ty);
         }
     }
 }
