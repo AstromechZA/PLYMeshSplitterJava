@@ -111,6 +111,8 @@ public class Preprocessor
                 TempFileManager.clear();
             }
 
+            TempFileManager.removeWorkingFolder();
+
             return jsonHeader;
         }
     }

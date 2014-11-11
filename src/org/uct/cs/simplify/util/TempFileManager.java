@@ -136,4 +136,16 @@ public class TempFileManager
         bytesUsed = 0;
         filesToDelete.clear();
     }
+
+    public static void removeWorkingFolder()
+    {
+        try
+        {
+            Files.delete(TempFileManager.workingDirectory);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
