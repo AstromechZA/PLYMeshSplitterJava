@@ -231,7 +231,7 @@ public class Preprocessor
         {
             Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("--input <path> --output <path>", options);
+            formatter.printHelp("--input <path> --output <path> [-s -j -d] [-h <hierachy>]", options);
             System.exit(1);
             return null;
         }

@@ -226,7 +226,7 @@ public class OutputValidator
     public static void main(String[] args) throws IOException
     {
         CommandLine cmd = getCommandLine(args);
-        run(new File(cmd.getOptionValue("input")), true);
+        run(new File(cmd.getOptionValue("input")), cmd.hasOption("verbose"));
     }
 
     private static void check(byte a, byte b)
@@ -259,6 +259,9 @@ public class OutputValidator
         inputFile.setRequired(true);
         options.addOption(inputFile);
 
+        Option verbose = new Option("v", "verbose", false, "more output");
+        options.addOption(verbose);
+
         CommandLine cmd;
         try
         {
@@ -269,7 +272,7 @@ public class OutputValidator
         {
             Outputter.errorf("%s : %s%n%n", e.getClass().getName(), e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("--input <path>", options);
+            formatter.printHelp("--input <path> [-v]", options);
             System.exit(1);
             return null;
         }
