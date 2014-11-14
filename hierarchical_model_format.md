@@ -12,6 +12,7 @@ The file is comprised of 3 major parts:
 JSON string with the following format:
 ```
 {
+    "scale_ratio": how the model was rescaled to fit the 1024x1024x1024 box.
     "vertex_colour": true/false, (do the vertices have colour information following them) 
     "nodes": [
         {
@@ -21,12 +22,14 @@ JSON string with the following format:
             "num_vertices": <number of vertices in node>,
             "block_offset": <offset from the beginning of the data section>,
             "block_length": <length of the data block>,
+            "depth": <depth of the node in the tree>,
             "min_x": <min x value of a vertex in the node>,
             "max_x": <max x value of a vertex in the node>,
             "min_y": <min y value of a vertex in the node>,
             "max_y": <max y value of a vertex in the node>,
             "min_z": <min z value of a vertex in the node>,
-            "max_z": <max z value of a vertex in the node>
+            "max_z": <max z value of a vertex in the node>,
+            "leaf": <true/false is this a leaf node?>
         },
         {
             ...
@@ -44,4 +47,4 @@ Array of bytes, each group of 4 bytes containing Red, Green, Blue, Alpha
 Array of integers, each group of 3 being the vertex indices of a triangular face
 
 ## Facts
-- node.block_length == node.num_vertices * 12 + node.num_faces * 12 (+ node.num_vertices * 4 if vertex_colour was true)
+- node.block_length == node.num_vertices * 12 + node.num_faces * 12 (+ node.num_vertices * 3 if vertex_colour was true)
