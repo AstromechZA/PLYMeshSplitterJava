@@ -36,14 +36,30 @@ public class VertexAttrMap
             // only scan the PLYProperty types
             if (base instanceof PLYProperty)
             {
-                if (base.getName().equals("x")) this.xOffset = position;
-                else if (base.getName().equals("y")) this.yOffset = position;
-                else if (base.getName().equals("z")) this.zOffset = position;
-
-                else if (base.getName().equals("red")) this.redOffset = position;
-                else if (base.getName().equals("green")) this.greenOffset = position;
-                else if (base.getName().equals("blue")) this.blueOffset = position;
-                else if (base.getName().equals("alpha")) this.alphaOffset = position;
+                switch (base.getName())
+                {
+                    case "x":
+                        this.xOffset = position;
+                        break;
+                    case "y":
+                        this.yOffset = position;
+                        break;
+                    case "z":
+                        this.zOffset = position;
+                        break;
+                    case "red":
+                        this.redOffset = position;
+                        break;
+                    case "green":
+                        this.greenOffset = position;
+                        break;
+                    case "blue":
+                        this.blueOffset = position;
+                        break;
+                    case "alpha":
+                        this.alphaOffset = position;
+                        break;
+                }
 
                 // move position forward by the correct number of bytes
                 position += ((PLYProperty) base).getType().getByteSize();

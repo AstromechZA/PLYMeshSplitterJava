@@ -2,6 +2,7 @@ package org.uct.cs.simplify.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -142,6 +143,10 @@ public class TempFileManager
         try
         {
             Files.delete(TempFileManager.workingDirectory);
+        }
+        catch (DirectoryNotEmptyException e)
+        {
+            Outputter.errorln("WARNING: Temporary directory still contains files! May have to manually delete these.");
         }
         catch (IOException e)
         {

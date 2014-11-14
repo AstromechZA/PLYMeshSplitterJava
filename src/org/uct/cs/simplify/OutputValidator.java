@@ -22,6 +22,8 @@ public class OutputValidator
     {
         try (ReliableBufferedInputStream istream = new ReliableBufferedInputStream(new FileInputStream(file)))
         {
+            System.out.printf("%nValidating file: %s%n", file);
+
             long streamLength = file.length();
             int headerLength = Useful.readIntLE(istream);
             String jsonHeader = Useful.readString(istream, headerLength);

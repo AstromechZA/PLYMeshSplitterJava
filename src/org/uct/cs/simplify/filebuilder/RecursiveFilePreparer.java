@@ -81,10 +81,7 @@ public class RecursiveFilePreparer
             }
 
             Outputter.debugf("Stitching %d files%n", processedFiles.size());
-            File stitchedModel = NaiveMeshStitcher.stitch(processedFiles);
-
-            // load details of stitched model
-            PLYHeader stitchedHeader = new PLYHeader(stitchedModel);
+            PLYHeader stitchedHeader = NaiveMeshStitcher.stitch(processedFiles);
 
             // calculate target number of faces based on target simplification ratio
             long totalFaces = stitchedHeader.getElement("face").getCount();
@@ -93,10 +90,10 @@ public class RecursiveFilePreparer
 
             // simplify file
             Outputter.info3f("Simplify from %d to %d faces.%n", totalFaces, targetFaces);
-            File simplifiedFile = SimplifierWrapper.simplify(stitchedModel, targetFaces);
+            File simplifiedFile = SimplifierWrapper.simplify(stitchedHeader.getFile(), targetFaces);
 
             // delete stitched model
-            if (processedFiles.size() > 1) TempFileManager.release(stitchedModel);
+            if (processedFiles.size() > 1) TempFileManager.release(stitchedHeader.getFile());
 
             // build output file
             PHFNode outputNode = new PHFNode(simplifiedFile);

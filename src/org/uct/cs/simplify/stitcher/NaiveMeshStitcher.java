@@ -177,23 +177,26 @@ public class NaiveMeshStitcher
         return new PLYHeader(outputFile);
     }
 
-    public static File stitch(List<File> files) throws IOException
+    public static PLYHeader stitch(List<File> files) throws IOException
     {
-        File last = files.get(0);
         int num = files.size();
+        if (num == 1) return new PLYHeader(files.get(0));
+
+        PLYHeader h = null;
+        File last = files.get(0);
         for (int i = 1; i < num; i++)
         {
             File temp = TempFileManager.provide("phf", ".ply");
             File current = files.get(i);
             Outputter.info2f("Stitching %s and %s into %s%n", last, current, temp);
-            NaiveMeshStitcher.stitch(last, current, temp);
+            h = NaiveMeshStitcher.stitch(last, current, temp);
 
             // if 'last' is a tempfile, and not the final one.. delete it
             if (i > 1 && i < (num - 1)) TempFileManager.release(last);
 
             last = temp;
         }
-        return last;
+        return h;
     }
 
     private static class VertexStitchResult extends Pair<Integer, int[]>
